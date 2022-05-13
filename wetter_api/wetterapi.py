@@ -1,12 +1,12 @@
 #stand 17.06.2021 live
-import time
-import mysql.connector
-import pyowm
+import mysql.connector # V8.0.28
+import time # bereits implementiert
+import pyowm # V2.10.0
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import variables as v
-from SQL_Daten import zugang as anbin
+import variables as v # eigene
+from SQL_Daten import zugang as anbin # eigene
 x = 1
 schutzsleep = 60
 zeit_idle = 10
