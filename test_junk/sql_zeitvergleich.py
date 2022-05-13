@@ -1,3 +1,4 @@
+import sys
 from datetime import datetime # bereits implementiert
 
 import mysql.connector
@@ -6,7 +7,7 @@ import time
 ort = 'lap'
 database = 'Wetter'
 
-def zeitabstand():
+def zeitabstand(target):
         mydb = mysql.connector.connect(
                 host=anbin.host(ort),
                 user=anbin.user(ort),
@@ -41,6 +42,18 @@ def zeitabstand():
         now = datetime(jahr_aktuell, monat_aktuell, tag_aktuell, stunde_aktuell, minute_aktuell, sekunde_akutell)
         delta = now - then
         mydb.close()
-        return delta
-
-print(zeitabstand())
+        print(type(delta))
+        print(delta)
+        delta= str(delta).split(":")
+        #del delta[0:2]
+        print(delta)
+        delta = float(delta[1])
+        if target < delta:
+                zeitdifferenz = True
+        elif target > delta:
+                zeitdifferenz = False
+        else:
+                print("Fehler in  Zeitvergleich")
+                sys.exit()
+        return zeitdifferenz
+print(zeitabstand(5))
