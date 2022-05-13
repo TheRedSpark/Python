@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime # bereits implementiert
 
 import mysql.connector
 from SQL_Daten import zugang as anbin

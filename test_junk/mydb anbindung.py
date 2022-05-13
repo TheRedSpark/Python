@@ -1,5 +1,5 @@
-import mysql.connector
-import time
+import mysql.connector # V8.0.28
+import time # bereits implementiert
 
 from SQL_Daten import zugang as anbin
 ort = 'lap'

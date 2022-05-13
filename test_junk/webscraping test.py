@@ -1,5 +1,9 @@
-from bs4 import BeautifulSoup
-import requests
+"""""""""
+Kleines Skript welches automatisch die Einzelwerte von der Seite Numbeo abruft und diese anschließend automatisch 
+in einen SQL Server speichert.Dies ist nur ein kleiner Test um mit der Libary Bs4 vertraut zu werden.
+"""
+from bs4 import BeautifulSoup # V4.10.0
+import requests # V2.27.1
 
 
 city_1 = 'Hanover'

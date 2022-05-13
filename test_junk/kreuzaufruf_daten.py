@@ -1,4 +1,4 @@
-
+#gehört zu kreuzaufruf.py
 
 string = "Das ist ein Test"
 zahl = 2

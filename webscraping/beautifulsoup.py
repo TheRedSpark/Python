@@ -1,9 +1,13 @@
 #Stand 23.04.2022
-from bs4 import BeautifulSoup
-import requests
+"""""""""
+Kleines Skript welches automatisch die Einzelwerte von der Seite Numbeo abruft und diese anschließend automatisch 
+in einen SQL Server speichert. Dabei iterirt das Program durch eine Liste mit Städten um effizienter zu arbeiten.
+"""
+from bs4 import BeautifulSoup # V4.10.0
+import requests # V2.27.1
 import time
-import mysql.connector
-from SQL_Daten import zugang as anbin
+import mysql.connector # V8.0.28
+from SQL_Daten import zugang as anbin #Own Library
 ort = 'lap'
 database = 'numbeo'
 mydb = mysql.connector.connect(
