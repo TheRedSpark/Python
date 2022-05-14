@@ -7,7 +7,12 @@ import time
 ort = 'lap'
 database = 'Wetter'
 
-def zeitabstand(target):
+
+def zeitabstand(zeitabstand_taget,rückgabe_zeitabstand):
+        if rückgabe_zeitabstand == None:
+                rückgabe_zeitabstand = False
+        else:
+                pass
         mydb = mysql.connector.connect(
                 host=anbin.host(ort),
                 user=anbin.user(ort),
@@ -41,19 +46,27 @@ def zeitabstand(target):
         then = datetime(jahr_alt, monat_alt, tag_alt, stunde_alt, minute_alt, sekunde_alt)
         now = datetime(jahr_aktuell, monat_aktuell, tag_aktuell, stunde_aktuell, minute_aktuell, sekunde_akutell)
         delta = now - then
+        if rückgabe_zeitabstand == True:
+                print(delta)
+        elif rückgabe_zeitabstand == False:
+                print("is False")
+        else:
+                print("Fehler in  Zeitvergleich")
+                sys.exit()
+
         mydb.close()
-        print(type(delta))
-        print(delta)
+        #print(type(delta))
+        #print(delta)
         delta= str(delta).split(":")
         #del delta[0:2]
-        print(delta)
+        #print(delta)
         delta = float(delta[1])
-        if target < delta:
+        if zeitabstand_taget < delta:
                 zeitdifferenz = True
-        elif target > delta:
+        elif zeitabstand_taget > delta:
                 zeitdifferenz = False
         else:
                 print("Fehler in  Zeitvergleich")
                 sys.exit()
         return zeitdifferenz
-print(zeitabstand(5))
+#print(zeitabstand(5))
