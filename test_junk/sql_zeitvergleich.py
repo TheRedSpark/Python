@@ -51,7 +51,7 @@ def zeitabstand(zeitabstand_taget,rückgabe_zeitabstand):
         elif rückgabe_zeitabstand == False:
                 print("is False")
         else:
-                print("Fehler in  Zeitvergleich")
+                print("Fehler in  Zeitvergleich bei rückgabe")
                 sys.exit()
 
         mydb.close()
@@ -63,7 +63,7 @@ def zeitabstand(zeitabstand_taget,rückgabe_zeitabstand):
         delta = float(delta[1])
         if zeitabstand_taget < delta:
                 zeitdifferenz = True
-        elif zeitabstand_taget > delta:
+        elif zeitabstand_taget >= delta:
                 zeitdifferenz = False
         else:
                 print("Fehler in  Zeitvergleich")
