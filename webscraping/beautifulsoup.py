@@ -20,6 +20,7 @@ mydb = mysql.connector.connect(
 my_cursor = mydb.cursor()
 schutzsleep = 120
 zeit_idle = 20
+intervall = 5
 selection = ['Dresden', 'Frankfurt', 'Berlin', 'Hamburg', 'Nuremberg', 'Munich', 'Aachen', 'Cologne', 'Karlsruhe',
              'Hanover',
              'Stuttgart', 'Dusseldorf', 'Heidelberg', 'Prague', 'Warsaw', 'Luxembourg']
@@ -27,7 +28,7 @@ selection = ['Dresden', 'Frankfurt', 'Berlin', 'Hamburg', 'Nuremberg', 'Munich',
 x = 1
 
 
-def feching():
+def fetching():
     for city in selection:
         print(f'{city} is fetcing')
         url = f'https://www.numbeo.com/cost-of-living/in/{city}'
@@ -2284,23 +2285,23 @@ while x == 1:
     zeit = time.strftime("%Y-%m-%d %H:%M:%S")
     trigger = time.gmtime()
     print(f'{trigger.tm_hour}:{trigger.tm_min} Uhr')
-    if trigger.tm_min % 15 == 0:
-        feching()
+    if trigger.tm_min % intervall == 0:
+        fetching()
         if trigger.tm_min <= 15:
-            print("Erstes Virtel")
-        elif trigger.tm_min <= 30 and trigger.tm >= 15:
-            print("2 Virtel")
-        elif trigger.tm_min <= 45 and trigger.tm >= 30:
-            print("3 Virtel")
-        elif trigger.tm_min <= 59 and trigger.tm >= 45:
-            print("Letztes Virtel")
+            print("Erste Virtelstunde")
+        elif trigger.tm_min <= 30 and trigger.tm_min >= 15:
+            print("Zweite Virtelstunde")
+        elif trigger.tm_min <= 45 and trigger.tm_min >= 30:
+            print("Dritte Virtelstunde")
+        elif trigger.tm_min <= 59 and trigger.tm_min >= 45:
+            print("Letzte Virtelstunde")
         else:
-            print("Fehler")
+            print("Fehler bei der Zeitbestimmung")
             break
-        print(f'Jetzt in der Schutzsleepphase von {schutzsleep}s')
+        print(f'Jetzt in der Schutzsleepphase von {schutzsleep} s')
         time.sleep(schutzsleep)
     else:
-        print(f'Warten auf nächtes Viertel')
+        print(f'Warten auf nächtes Zeitintervall von {intervall} min')
 
     time.sleep(zeit_idle)
 """""""""
