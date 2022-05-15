@@ -1,12 +1,13 @@
-#stand 15.05.2022 live
-import mysql.connector # V8.0.28
-import time # bereits implementiert
-import pyowm # V2.10.0
+# stand 15.05.2022 live
+import mysql.connector  # V8.0.28
+import time  # bereits implementiert
+import pyowm  # V2.10.0
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import variables as v # eigene
-import zugang as anbin # eigene
+import variables as v  # eigene
+import zugang as integration  # eigene
+
 x = 1
 schutzsleep = 60
 zeit_idle = 10
@@ -24,21 +25,23 @@ ort = 'home'
 database = 'Wetter'
 
 mydb = mysql.connector.connect(
-    host=anbin.host(ort),
-    user=anbin.user(ort),
-    passwd=anbin.passwd(ort),
-    database=anbin.database(database),
+    host=integration.host(ort),
+    user=integration.user(ort),
+    passwd=integration.passwd(ort),
+    database=integration.database(database),
     auth_plugin='mysql_native_password')
 
 my_cursor = mydb.cursor()
 
-städte = v.städte # hier kannst du eine einfache Liste einfügen wo die in str Type die
-                  # Städte angiebst im Format "'Berlin, DE'"
+städte = v.städte  # hier kannst du eine einfache Liste einfügen, wo die in str Type die
+# Städte angibst im Format "'Berlin, DE'"
 owm = pyowm.OWM(v.api_id)
 
 """""""""
 Main Functions Definition
 """""
+
+
 def fetching():
     for city in städte:
         sf = owm.weather_at_place(city)
@@ -60,12 +63,11 @@ def fetching():
         temp_min = weather.get_temperature('celsius')['temp_min']
         time_sql = time.strftime("%Y-%m-%d %H:%M:%S")
         general = weather.get_detailed_status()  # Get general status of weather
-        record1 = (temp, time_sql, humidity, wind_speed, clouds, rain, snow, pressure, wind, general)#SQL insert
+        record1 = (temp, time_sql, humidity, wind_speed, clouds, rain, snow, pressure, wind, general)  # SQL insert
         # time_mail = time.strftime("%d %m %H:%M")
         # sunrise = weather.get_sunrise_time() #Sunrise time (GMT UNIXtime or ISO 8601)
         # sunset = weather.get_sunset_time() #Sunset time (GMT UNIXtime or ISO 8601)
         # visibility = weather.get_lastupdate()
-
 
         if city == 'Berlin, DE':
             wetterid = 1
@@ -213,7 +215,7 @@ def fetching():
 
         elif city == v.städte[0]:
             wetterid = 10
-            sqlStuff = v.sqlStuff #nichts besonderes nur meine Heimat
+            sqlStuff = v.sqlStuff  # nichts besonderes nur meine Heimat
             my_cursor.execute(sqlStuff, record1)
             mydb.commit()
             sqlMain = "INSERT INTO `Wetter`.`Gesammt` (`Temperatur`,`Zeit`,`Luftfeuchtigkeit`," \
@@ -232,6 +234,7 @@ def fetching():
         else:
             break
 
+
 def email_rain():
     mimemsg = MIMEMultipart()
     mimemsg['From'] = mail_from
@@ -245,8 +248,9 @@ def email_rain():
     connection.quit()
     print('Emain regen erfolg')
 
+
 def email_wind():
-    mimemsg = MIMEMultipart() 
+    mimemsg = MIMEMultipart()
     mimemsg['From'] = mail_from
     mimemsg['To'] = mail_to
     mimemsg['Subject'] = mail_subject_wind
@@ -257,6 +261,7 @@ def email_wind():
     connection.send_message(mimemsg)
     connection.quit()
     print('Email wind erfolg')
+
 
 def emailservice():
     if wind_speed > 40:
@@ -284,13 +289,13 @@ while x == 1:
     print(f'{trigger.tm_hour}:{trigger.tm_min} Uhr')
     if trigger.tm_min % intervall == 0:
         fetching()
-        if trigger.tm_min <= 15:
+        if trigger.tm_min <= 15:         # vereinfachung der Ausdrücke ;-)
             print("Erste Virtelstunde")
-        elif trigger.tm_min <= 30 and trigger.tm_min >= 15:
+        elif 30 >= trigger.tm_min >= 15: # elif trigger.tm_min <= 30 and trigger.tm_min >= 15:
             print("Zweite Virtelstunde")
-        elif trigger.tm_min <= 45 and trigger.tm_min >= 30:
+        elif 45 >= trigger.tm_min >= 30: # elif trigger.tm_min <= 45 and trigger.tm_min >= 30:
             print("Dritte Virtelstunde")
-        elif trigger.tm_min <= 59 and trigger.tm_min >= 45:
+        elif 59 >= trigger.tm_min >= 45: # elif trigger.tm_min <= 59 and trigger.tm_min >= 45:
             print("Letzte Virtelstunde")
         else:
             print("Fehler bei der Zeitbestimmung")
@@ -302,5 +307,3 @@ while x == 1:
 
     time.sleep(zeit_idle)
 
-#fetching()
-#emailservice()
