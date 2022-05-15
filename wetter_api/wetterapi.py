@@ -1,4 +1,4 @@
-#stand 17.06.2021 live
+#stand 15.05.2022 live
 import mysql.connector # V8.0.28
 import time # bereits implementiert
 import pyowm # V2.10.0
@@ -6,7 +6,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import variables as v # eigene
-from SQL_Daten import zugang as anbin # eigene
+import zugang as anbin # eigene
 x = 1
 schutzsleep = 60
 zeit_idle = 10
@@ -20,7 +20,7 @@ mail_to = v.mail_to
 mail_subject_rain = v.mail_subject_rain
 mail_subject_wind = v.mail_subject_wind
 
-ort = 'lap'
+ort = 'home'
 database = 'Wetter'
 
 mydb = mysql.connector.connect(
@@ -80,6 +80,7 @@ def fetching():
                       " `Zusammenfassung`, `Wetter_Orte_Id`) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s, %s); "
             record2 = (temp, time_sql, humidity, wind_speed, clouds, rain, snow, pressure, wind, general, wetterid)
             my_cursor.execute(sqlMain, record2)
+            mydb.commit()
             print(f'Erfolg in der SQL Eingabe für {city}')
 
         elif city == 'London, GB':
@@ -95,6 +96,7 @@ def fetching():
                       " `Zusammenfassung`, `Wetter_Orte_Id`) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s, %s); "
             record2 = (temp, time_sql, humidity, wind_speed, clouds, rain, snow, pressure, wind, general, wetterid)
             my_cursor.execute(sqlMain, record2)
+            mydb.commit()
             print(f'Erfolg in der SQL Eingabe für {city}')
 
         elif city == 'Hamburg, DE':
@@ -110,6 +112,7 @@ def fetching():
                       " `Zusammenfassung`, `Wetter_Orte_Id`) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s, %s); "
             record2 = (temp, time_sql, humidity, wind_speed, clouds, rain, snow, pressure, wind, general, wetterid)
             my_cursor.execute(sqlMain, record2)
+            mydb.commit()
             print(f'Erfolg in der SQL Eingabe für {city}')
 
         elif city == 'Kiel, DE':
@@ -125,6 +128,7 @@ def fetching():
                       " `Zusammenfassung`, `Wetter_Orte_Id`) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s, %s); "
             record2 = (temp, time_sql, humidity, wind_speed, clouds, rain, snow, pressure, wind, general, wetterid)
             my_cursor.execute(sqlMain, record2)
+            mydb.commit()
             print(f'Erfolg in der SQL Eingabe für {city}')
 
         elif city == 'Stuttgart, DE':
@@ -140,6 +144,7 @@ def fetching():
                       " `Zusammenfassung`, `Wetter_Orte_Id`) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s, %s); "
             record2 = (temp, time_sql, humidity, wind_speed, clouds, rain, snow, pressure, wind, general, wetterid)
             my_cursor.execute(sqlMain, record2)
+            mydb.commit()
             print(f'Erfolg in der SQL Eingabe für {city}')
 
         elif city == 'Paris, FR':
@@ -155,6 +160,7 @@ def fetching():
                       " `Zusammenfassung`, `Wetter_Orte_Id`) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s, %s); "
             record2 = (temp, time_sql, humidity, wind_speed, clouds, rain, snow, pressure, wind, general, wetterid)
             my_cursor.execute(sqlMain, record2)
+            mydb.commit()
             print(f'Erfolg in der SQL Eingabe für {city}')
 
         elif city == 'Prag, CZ':
@@ -170,6 +176,7 @@ def fetching():
                       " `Zusammenfassung`, `Wetter_Orte_Id`) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s, %s); "
             record2 = (temp, time_sql, humidity, wind_speed, clouds, rain, snow, pressure, wind, general, wetterid)
             my_cursor.execute(sqlMain, record2)
+            mydb.commit()
             print(f'Erfolg in der SQL Eingabe für {city}')
 
         elif city == 'Amsterdam, NLD':
@@ -185,6 +192,7 @@ def fetching():
                       " `Zusammenfassung`, `Wetter_Orte_Id`) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s, %s); "
             record2 = (temp, time_sql, humidity, wind_speed, clouds, rain, snow, pressure, wind, general, wetterid)
             my_cursor.execute(sqlMain, record2)
+            mydb.commit()
             print(f'Erfolg in der SQL Eingabe für {city}')
 
         elif city == 'Gent, BEL':
@@ -200,6 +208,7 @@ def fetching():
                       " `Zusammenfassung`, `Wetter_Orte_Id`) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s, %s); "
             record2 = (temp, time_sql, humidity, wind_speed, clouds, rain, snow, pressure, wind, general, wetterid)
             my_cursor.execute(sqlMain, record2)
+            mydb.commit()
             print(f'Erfolg in der SQL Eingabe für {city}')
 
         elif city == v.städte[0]:
@@ -212,14 +221,14 @@ def fetching():
                       " `Zusammenfassung`, `Wetter_Orte_Id`) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s, %s); "
             record2 = (temp, time_sql, humidity, wind_speed, clouds, rain, snow, pressure, wind, general, wetterid)
             my_cursor.execute(sqlMain, record2)
+            mydb.commit()
+            print(record1)
+            print(record2)
             print(f'Erfolg in der SQL Eingabe für {city}')
             mail_body_wind = "Der wind beträgt: " + str(wind_speed) + "km/h " + "es ist " + time.strftime(
                 "%H:%M") + "Uhr am " + time.strftime("%d:%m")
             mail_body_rain = "Der Regen beträgt: " + str(rain) + "mm/h " + "es ist " + time.strftime(
                 "%H:%M") + "Uhr am " + time.strftime("%d:%m")
-
-
-
         else:
             break
 
