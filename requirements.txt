@@ -6,4 +6,4 @@ pandas==1.4.2
 pyowm==2.10.0
 python-telegram-bot==13.11
 requests==2.27.1
-
+ 
