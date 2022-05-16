@@ -21,7 +21,7 @@ mail_to = v.mail_to
 mail_subject_rain = v.mail_subject_rain
 mail_subject_wind = v.mail_subject_wind
 
-ort = 'home'
+ort = 'lap'
 database = 'Wetter'
 
 mydb = mysql.connector.connect(
