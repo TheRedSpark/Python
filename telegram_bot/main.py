@@ -6,8 +6,8 @@ import time
 from datetime import datetime
 import os
 import mysql.connector
-from SQL_Daten import zugang as anbin #Own Library
-from SQL_Daten import sql_zeitvergleich as zeitv
+import zugang as anbin #Own Library
+import sql_zeitvergleich as zeitv
 import wetterbot as wetter
 now = datetime.now()
 date_time = now.strftime("%d/%m/%y, %H:%M:%S")
@@ -41,7 +41,18 @@ def handle_message(update, context):
         update.message.reply_text(f'Der Zeitabstand beträgt:\n hh:mm:ss \n {message}')
 
     elif user_message in ("tschau", "2"):
-        update.message.reply_text(str(wetter.wetter()))
+        #weather = [temp, temp_max, temp_min, clouds, general, wind_speed, sunset, rain]
+        #            0        1        2        3       4          5          6     7
+        weather = wetter.wetter()
+        #print(weather)
+        update.message.reply_text(f'Die Temperatur beträgt:                   {weather[0]} °C \n'
+                                  f'mit einer Höchsttemperatur von: {weather[1]} °C \n'
+                                  f'und einer Tiefstemperatur:              {weather[2]} °C. \n'
+                                  f'Die Windgeschwindigkeit ist:           {weather[5]} km/h \n'
+                                  f'Die Regenmenge beträgt:         {weather[7]} \n'
+                                  f'Die Wolkenbedeckung beträgt:        {weather[3]}%\n'
+                                  f'General kann man sagen:            {weather[4]}\n'
+                                  f'Sonnenuntergang ist:                  {weather[6]}\n')
 
     elif user_message in ("time", "3"):
         update.message.reply_text( str(date_time))

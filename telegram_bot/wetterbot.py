@@ -30,17 +30,16 @@ def wetter():
       # SQL insert
     # time_mail = time.strftime("%d %m %H:%M")
     # sunrise = weather.get_sunrise_time() #Sunrise time (GMT UNIXtime or ISO 8601)
-    # sunset = weather.get_sunset_time() #Sunset time (GMT UNIXtime or ISO 8601)
+    sunset = weather.get_sunset_time() #Sunset time (GMT UNIXtime or ISO 8601)
     #visibility = weather.get_lastupdate()
 
     """""""""
     Hier wird die Liste für die returnable gebaut
     """
-    weather = []
-    weather.pop(temp)
+    weather = [temp,temp_max,temp_min,clouds,general,wind_speed,sunset,rain]
     return weather
 
 """""""""
 Zeit Abruf 
 """
-print(wetter())
+#print(wetter())
