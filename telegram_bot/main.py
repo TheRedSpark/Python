@@ -85,6 +85,7 @@ def main():
     dp.add_error_handler(error)
 
     updater.start_polling(0)
+    print("Bot ist gestartet")
     updater.idle()
 
 main()
