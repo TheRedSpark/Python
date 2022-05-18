@@ -1,7 +1,7 @@
 import time  # bereits implementiert
 import pyowm  # V2.10.0
 import variables as v  # eigene
-
+import datetime
 owm = pyowm.OWM(v.api_id)
 
 """""""""
@@ -32,11 +32,12 @@ def wetter():
     # sunrise = weather.get_sunrise_time() #Sunrise time (GMT UNIXtime or ISO 8601)
     sunset = weather.get_sunset_time() #Sunset time (GMT UNIXtime or ISO 8601)
     #visibility = weather.get_lastupdate()
-
+    date_time = str(datetime.datetime.fromtimestamp(sunset))
+    zeit = date_time.split(" ")
     """""""""
     Hier wird die Liste für die returnable gebaut
     """
-    weather = [temp,temp_max,temp_min,clouds,general,wind_speed,sunset,rain]
+    weather = [temp,temp_max,temp_min,clouds,general,wind_speed,zeit[1],rain]
     return weather
 
 """""""""
