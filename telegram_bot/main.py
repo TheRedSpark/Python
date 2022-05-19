@@ -27,7 +27,7 @@ def start_command(update, context):
 
 def help_command(update, context):
     update.message.reply_text('1 Für das Alter des letzten Datensatzes der SQL-Datenbank Wetter\n'
-                              '2 Für die Wetterdaten von Heute von Dresden \n'
+                               '2 Für die Wetterdaten von Heute von Dresden \n'
                               '3 Für Test \n')
 
 def handle_message(update, context):
