@@ -1,4 +1,4 @@
-#V2.0 LIVE 27.03.2022
+#V2.1 LIVE 19.05.2022
 import konstants as keys
 from telegram.ext import *
 import responses as R
@@ -27,8 +27,7 @@ def start_command(update, context):
 
 def help_command(update, context):
     update.message.reply_text('1 Für das Alter des letzten Datensatzes der SQL-Datenbank Wetter\n'
-                               '2 Für die Wetterdaten von Heute von Dresden \n'
-                              '3 Für Test \n')
+                               '2 Für die Wetterdaten von Heute von Dresden \n')
 
 def handle_message(update, context):
     input_text = str(update.message.text).lower()
@@ -40,7 +39,7 @@ def handle_message(update, context):
         message = zeitv.getZeitabstand()
         update.message.reply_text(f'Der Zeitabstand beträgt:\n hh:mm:ss \n {message}')
 
-    elif user_message in ("tschau", "2"):
+    elif user_message in ("Wetter", "2"):
         #weather = [temp, temp_max, temp_min, clouds, general, wind_speed, sunset, rain]
         #            0        1        2        3       4          5          6     7
         weather = wetter.wetter()
@@ -53,18 +52,6 @@ def handle_message(update, context):
                                   f'Die Wolkenbedeckung beträgt:        {weather[3]}%\n'
                                   f'General kann man sagen:            {weather[4]}\n'
                                   f'Sonnenuntergang ist:                  {weather[6]}\n')
-
-    elif user_message in ("time", "3"):
-        update.message.reply_text( str(date_time))
-
-    elif user_message in ("reboot", "4"):
-        update.message.reply_text( "reboot")
-
-    elif user_message in ("5"):
-        update.message.reply_text("g")
-
-    elif user_message in ("6"):
-        update.message.reply_text("Eingabe folgt:")
 
     else:
      update.message.reply_text( "Der Befehl wurde falsch eingegeben")
