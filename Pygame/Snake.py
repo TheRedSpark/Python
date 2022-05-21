@@ -1,3 +1,4 @@
+#https://www.geeksforgeeks.org/snake-game-in-python-using-pygame-module/
 # importing libraries
 import pygame
 import time
@@ -90,7 +91,7 @@ def game_over():
     pygame.display.flip()
 
     # after 2 seconds we will quit the program
-    time.sleep(2)
+    time.sleep(0.5)
 
     # deactivating pygame library
     pygame.quit()
@@ -105,13 +106,13 @@ while True:
     # handling key events
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
+            if event.key == pygame.K_UP or event.key == pygame.K_w:
                 change_to = 'UP'
-            if event.key == pygame.K_DOWN:
+            if event.key == pygame.K_DOWN or event.key == pygame.K_s:
                 change_to = 'DOWN'
-            if event.key == pygame.K_LEFT:
+            if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                 change_to = 'LEFT'
-            if event.key == pygame.K_RIGHT:
+            if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                 change_to = 'RIGHT'
 
     # If two keys pressed simultaneously
