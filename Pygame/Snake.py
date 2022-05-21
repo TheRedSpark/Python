@@ -4,7 +4,8 @@ import time
 import random
 
 snake_speed = 5
-
+futterstärkeneu = 3
+lange = 0
 # Window size
 window_x = 720
 window_y = 480
@@ -142,6 +143,10 @@ while True:
     if snake_position[0] == fruit_position[0] and snake_position[1] == fruit_position[1]:
         score += 10
         fruit_spawn = False
+        lange += futterstärkeneu
+    elif lange != 0:
+        lange += -1
+        pass
     else:
         snake_body.pop()
 
