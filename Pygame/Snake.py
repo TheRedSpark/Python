@@ -4,7 +4,7 @@ import time
 import random
 
 snake_speed = 5
-futterstärkeneu = 3
+Pause = 3  # kann die Lange der Schlange beim Futter fressen bestimmen
 lange = 0
 # Window size
 window_x = 720
@@ -143,7 +143,7 @@ while True:
     if snake_position[0] == fruit_position[0] and snake_position[1] == fruit_position[1]:
         score += 10
         fruit_spawn = False
-        lange += futterstärkeneu
+        lange += Pause
     elif lange != 0:
         lange += -1
         pass
