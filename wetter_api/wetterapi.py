@@ -5,7 +5,7 @@ import pyowm  # V2.10.0
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import variables as v  # eigene
+import variables as v
 import zugang as integration  # eigene
 
 x = 1
