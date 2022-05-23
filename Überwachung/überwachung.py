@@ -4,6 +4,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
 import variables as v
+import os
 
 username = v.username
 password = v.password
@@ -46,12 +47,15 @@ def email_server():
 #email_sql()
 while True:
     if sql.zeitabstand(30,False) == True:
+        mail_body_sql = f'Der letzte Datensatz ist {sql.getZeitabstand()} her irgendein Problem muss bestehen'
         email_sql()
     elif sql.zeitabstand(30,False) == False:
         pass
     else:
         print("Fehler")
         sys.exit()
+
+
     #print(sql.zeitabstand(5,False))
 
 
