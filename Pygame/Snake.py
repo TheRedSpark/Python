@@ -5,6 +5,7 @@ import time
 import random
 
 snake_speed = 5
+maxspeed = 100
 Pause = 3  # kann die Lange der Schlange beim Futter fressen bestimmen
 lange = 0
 # Window size
@@ -59,7 +60,7 @@ def show_score(choice, color, font, size):
 
     # create the display surface object
     # score_surface
-    score_surface = score_font.render('Score : ' + str(score), True, color)
+    score_surface = score_font.render('Score : ' + str(score) + '   Your Speed is :  ' + str(snake_speed), True, color)
 
     # create a rectangular object for the text
     # surface object
@@ -142,9 +143,17 @@ while True:
     # will be incremented by 10
     snake_body.insert(0, list(snake_position))
     if snake_position[0] == fruit_position[0] and snake_position[1] == fruit_position[1]:
-        score += 10
+        if score == 0:
+            score += 1
+        else:
+            score += snake_speed
+
         fruit_spawn = False
         lange += Pause
+        if snake_speed < maxspeed:
+            snake_speed = snake_speed * 1.2
+        else:
+            pass
     elif lange != 0:
         lange += -1
         pass
