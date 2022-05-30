@@ -44,7 +44,7 @@ else:
 """""""""
 --------------------------------------------Schleifen-------------------------------------------------------------------
 """
-
+# Funfact eine For-Schleife ist aufgrund des Compilers ungefähr 2x schneller als eine While-Schleife ;-)
 """""""""
 Einfachste for-Schleife
 """
@@ -83,3 +83,20 @@ for i in liste:  # jedes einzelne Element in der Liste liste wird in der Variabl
     else:  # falls Bedingung fehlschlägt
         print("Fehler")
         sys.exit(0)
+
+"""""""""
+Einfachste While-Schleife
+"""
+
+durchgang = 1
+while durchgang < 11:
+    print(durchgang)
+    durchgang = durchgang + 1
+print("nach der Schleife")
+
+"""""""""
+Endlos While-Schleife
+"""
+
+while True:  # vorsicht mit Endlosschleifen! Du solltest wenigstens eine Abbruchbedingung oder ein sleep einbauen
+    print("Wiederholung")
