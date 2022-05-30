@@ -1,7 +1,10 @@
 import sys
+
 liste = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 x = 1
 y = 2
+
+
 def Funktion():
     return 4
 
@@ -13,7 +16,7 @@ Einfachste If-Bedingung
 if x == 1:
     print("1")
 else:
-    pass # pass, kann als nichtstun betrachtet werden
+    pass  # pass, kann als nichtstun betrachtet werden
 
 """""""""""
 Elif-Beispiel
@@ -36,9 +39,7 @@ if x == 1 or x >= 2 or Funktion() == 1:
 elif x == 1 and y == 2:
     pass
 else:
-    pass # pass, kann als nichtstun betrachtet werden
-
-
+    pass  # pass, kann als nichtstun betrachtet werden
 
 """""""""
 --------------------------------------------Schleifen-------------------------------------------------------------------
@@ -51,9 +52,24 @@ Einfachste for-Schleife
 for i in liste:
     print(i)
 
+"""""""""
+Break und Continue 
+"""
 
+for i in liste:
+    if i == 5:
+        break
+    else:
+        pass
+    print(i)  # Output: 1, 2, 3, 4
+print("Ich werde ausgegeben wenn die 5 erreicht ist")
 
-
+for i in liste:
+    if i == 5:
+        continue  # wenn die 5 erreicht ist, wird wieder von vorne angefangen
+    else:
+        pass
+    print(i)  # Output: 1, 2, 3, 4, 6, 7, 8, 9
 
 """""""""
 Beispiel für eine Kombination einer for-Schleife und einer if-Bedingung um zu überprüfen ob eine Zahl durch 2 Teilbar ist 
