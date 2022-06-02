@@ -51,7 +51,7 @@ Einfachste for-Schleife
 
 for i in liste:
     print(i)
-
+#
 """""""""
 Break und Continue 
 """
