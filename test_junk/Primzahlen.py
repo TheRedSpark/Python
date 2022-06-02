@@ -19,6 +19,7 @@ def isPrime(n):
     return True
 
 #test
+#erfolg?
 
 for i in range(1, 1000000000):
     if isPrime(i) == True:
