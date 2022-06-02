@@ -18,7 +18,7 @@ def isPrime(n):
 
     return True
 
-#test 2
+#test 222
 
 for i in range(1, 1000000000):
     if isPrime(i) == True:
