@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt # V3.5.2
 import pandas as pd # V1.4.2
 import mysql.connector # V8.0.28
-from SQL_Daten import zugang as anbin #Own Library
+import zugang as anbin #Own Library
 ort = 'lap'
 database = 'Wetter'
 mydb = mysql.connector.connect(

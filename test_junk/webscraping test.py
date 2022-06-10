@@ -14,7 +14,7 @@ soup = BeautifulSoup(page.content, 'html.parser')
 table = soup.find('table',attrs={'class':'data_wide_table new_bar_table'})
 rows = table.find_all('tr')
 #test= "fun ist ?"
-data = rows[60].text.split()
+data = rows[3].text.split()
 milk_price_raw = data[3].replace(",","")
 price_range = data[5].replace(",","")
 price_3 = price_range.split("-")
