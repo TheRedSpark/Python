@@ -12,10 +12,10 @@ mail_from = v.mail_from
 mail_to = v.mail_to
 mail_subject_server = v.mail_subject_server
 mail_subject_sql = v.mail_subject_sql
-mail_subject_offline = v.mail_subject_offline
 mail_body_sql = "Test überwachung"
 mail_body_server = "TTTT"
-mail_body_offline = "Offline"
+mail_body_offline = "Der Sql-Server ist Offline "
+mail_subject_offline = "Offline !"
 
 
 def ping(host):
@@ -83,6 +83,7 @@ while True:
             sys.exit()
     else:
         email_offline()
+        time.sleep(120)
 
     print(sql.getZeitabstand())
     print("Durchlauf")
