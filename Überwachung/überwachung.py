@@ -1,3 +1,4 @@
+#V1.0 live 11.06.2022
 import sys
 import time
 import sql_zeitvergleich as sql
@@ -38,7 +39,7 @@ def email_sql():
     connection.login(username, password)
     connection.send_message(mimemsg)
     connection.quit()
-    print('Email für SQL erfolg')
+    #print('Email für SQL erfolg')
 
 
 def email_server():
@@ -52,7 +53,7 @@ def email_server():
     connection.login(username, password)
     connection.send_message(mimemsg)
     connection.quit()
-    print('Email für Server erfolg')
+    #print('Email für Server erfolg')
 
 
 def email_offline():
@@ -66,26 +67,24 @@ def email_offline():
     connection.login(username, password)
     connection.send_message(mimemsg)
     connection.quit()
-    print('Email für Offline erfolg')
+    #print('Email für Offline erfolg')
 
 
-# email_sql()
+
 while True:
     if ping(v.sqladdr):
-        if sql.zeitabstand(30, False) == True:
+        if sql.zeitabstand(30, False):
             mail_body_sql = f'Der letzte Datensatz ist {sql.getZeitabstand()} her irgendein Problem muss bestehen'
             email_sql()
-            print("Hi")
-            time.sleep(30)
-        elif sql.zeitabstand(30, False) == False:
+            time.sleep(1200)
+        elif not sql.zeitabstand(30, False):
             pass
         else:
             print("Fehler")
             sys.exit()
     else:
         email_offline()
-        time.sleep(120)
+        time.sleep(1200)
 
-    print(sql.getZeitabstand())
-    print("Durchlauf")
+    #print(sql.getZeitabstand())
     time.sleep(60)
