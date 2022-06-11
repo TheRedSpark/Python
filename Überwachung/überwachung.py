@@ -18,6 +18,7 @@ mail_body_sql = "Test überwachung"
 mail_body_server = "TTTT"
 mail_body_offline = "Der Sql-Server ist Offline "
 mail_subject_offline = "Offline !"
+mimemsg = MIMEMultipart()
 
 
 def ping(host):
