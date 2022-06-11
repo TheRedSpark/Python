@@ -1,3 +1,4 @@
+import sys
 import time
 import sql_zeitvergleich as sql
 from email.mime.multipart import MIMEMultipart
@@ -37,7 +38,7 @@ def email_sql():
     connection.login(username, password)
     connection.send_message(mimemsg)
     connection.quit()
-    print('Emain regen erfolg')
+    print('Email für SQL erfolg')
 
 
 def email_server():
@@ -51,7 +52,7 @@ def email_server():
     connection.login(username, password)
     connection.send_message(mimemsg)
     connection.quit()
-    print('Email wind erfolg')
+    print('Email für Server erfolg')
 
 
 def email_offline():
@@ -65,7 +66,7 @@ def email_offline():
     connection.login(username, password)
     connection.send_message(mimemsg)
     connection.quit()
-    print('Email wind erfolg')
+    print('Email für Offline erfolg')
 
 
 # email_sql()
@@ -87,4 +88,4 @@ while True:
 
     print(sql.getZeitabstand())
     print("Durchlauf")
-    time.sleep(3)
+    time.sleep(60)
