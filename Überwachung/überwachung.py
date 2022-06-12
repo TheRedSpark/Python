@@ -1,4 +1,4 @@
-#V1.0 live 11.06.2022
+# V1.0 live 11.06.2022
 import sys
 import time
 import sql_zeitvergleich as sql
@@ -40,7 +40,7 @@ def email_sql():
     connection.login(username, password)
     connection.send_message(mimemsg)
     connection.quit()
-    #print('Email für SQL erfolg')
+    # print('Email für SQL erfolg')
 
 
 def email_server():
@@ -54,7 +54,7 @@ def email_server():
     connection.login(username, password)
     connection.send_message(mimemsg)
     connection.quit()
-    #print('Email für Server erfolg')
+    # print('Email für Server erfolg')
 
 
 def email_offline():
@@ -68,8 +68,7 @@ def email_offline():
     connection.login(username, password)
     connection.send_message(mimemsg)
     connection.quit()
-    #print('Email für Offline erfolg')
-
+    # print('Email für Offline erfolg')
 
 
 while True:
@@ -87,5 +86,5 @@ while True:
         email_offline()
         time.sleep(1200)
 
-    #print(sql.getZeitabstand())
+    # print(sql.getZeitabstand())
     time.sleep(60)
