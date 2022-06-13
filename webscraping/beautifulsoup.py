@@ -1,21 +1,22 @@
-#Stand 23.04.2022
+# Stand 23.04.2022
 """""""""
 Kleines Skript welches automatisch die Einzelwerte von der Seite Numbeo abruft und diese anschließend automatisch 
 in einen SQL Server speichert. Dabei iterirt das Program durch eine Liste mit Städten um effizienter zu arbeiten.
 """
-from bs4 import BeautifulSoup # V4.10.0
-import requests # V2.27.1
+from bs4 import BeautifulSoup  # V4.10.0
+import requests  # V2.27.1
 import time
-import mysql.connector # V8.0.28
-from SQL_Daten import zugang as anbin #Own Library
-ort = 'lap'
+import mysql.connector  # V8.0.28
+import zugang as anbin  # Own Library
+
+ort = 'home'
 database = 'numbeo'
 mydb = mysql.connector.connect(
-        host=anbin.host(ort),
-        user=anbin.user(ort),
-        passwd=anbin.passwd(ort),
-        database=anbin.database(database),
-        auth_plugin='mysql_native_password')
+    host=anbin.host(ort),
+    user=anbin.user(ort),
+    passwd=anbin.passwd(ort),
+    database=anbin.database(database),
+    auth_plugin='mysql_native_password')
 
 my_cursor = mydb.cursor()
 schutzsleep = 120
@@ -2280,6 +2281,7 @@ def fetching():
             print(f"Fehlschlag bei der Dateübertragung für {city}")
 
         print(f'Erfogreich Daten für {city} in Datenbank übertragen')
+
 
 while x == 1:
     zeit = time.strftime("%Y-%m-%d %H:%M:%S")
