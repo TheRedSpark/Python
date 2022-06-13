@@ -2,7 +2,7 @@ import sys
 from datetime import datetime # bereits implementiert
 
 import mysql.connector
-from SQL_Daten import zugang as anbin
+from package import zugang as anbin
 import time
 ort = 'lap'
 database = 'Wetter'
