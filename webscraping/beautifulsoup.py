@@ -1,4 +1,4 @@
-# Stand 23.04.2022
+# Live 13.06.2022
 """""""""
 Kleines Skript welches automatisch die Einzelwerte von der Seite Numbeo abruft und diese anschließend automatisch 
 in einen SQL Server speichert. Dabei iterirt das Program durch eine Liste mit Städten um effizienter zu arbeiten.
@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup  # V4.10.0
 import requests  # V2.27.1
 import time
 import mysql.connector  # V8.0.28
-import zugang as anbin  # Own Library
+from package import zugang as anbin
 
 ort = 'home'
 database = 'numbeo'
@@ -19,10 +19,7 @@ mydb = mysql.connector.connect(
     auth_plugin='mysql_native_password')
 
 my_cursor = mydb.cursor()
-schutzsleep = 120
-zeit_idle = 20
-day = 33
-intervall = 5
+zeit_idle = 120*60
 selection = ['Dresden', 'Frankfurt', 'Berlin', 'Hamburg', 'Nuremberg', 'Munich', 'Aachen', 'Cologne', 'Karlsruhe',
              'Hanover',
              'Stuttgart', 'Dusseldorf', 'Heidelberg', 'Prague', 'Warsaw', 'Luxembourg']
@@ -2282,28 +2279,28 @@ def fetching():
         print(f'Erfogreich Daten für {city} in Datenbank übertragen')
 
 
+def timesamp():
+    my_cursor.execute("SELECT Zeit FROM numbeo.dresden order by Zeit desc limit 1")
+    inhalt = my_cursor.fetchall()
+    timeserver = str(inhalt[0]).replace("datetime.datetime(", "").replace("),)", "").replace("(", "").replace(", ",
+                                                                                                              "-").split(
+        "-")
+    return int(timeserver[2])
+
+
+day = timesamp()
+
 while True:
     zeit = time.strftime("%Y-%m-%d %H:%M:%S")
     trigger = time.gmtime()
-    print(f'{trigger.tm_hour}:{trigger.tm_min} Uhr')
+    #print(f'{trigger.tm_hour}:{trigger.tm_min} Uhr')
     if trigger.tm_mday != day:
         day = trigger.tm_mday
         fetching()
-        if trigger.tm_min <= 15:
-            print("Erste Virtelstunde")
-        elif trigger.tm_min <= 30 and trigger.tm_min >= 15:
-            print("Zweite Virtelstunde")
-        elif trigger.tm_min <= 45 and trigger.tm_min >= 30:
-            print("Dritte Virtelstunde")
-        elif trigger.tm_min <= 59 and trigger.tm_min >= 45:
-            print("Letzte Virtelstunde")
-        else:
-            print("Fehler bei der Zeitbestimmung")
-            break
-        print(f'Jetzt in der Schutzsleepphase von {schutzsleep} s')
-        time.sleep(schutzsleep)
+        continue
     else:
-        print(f'Warten auf nächtes Zeitintervall von {intervall} min')
+        #print(f'Daten bereits für den heutigen Tag den {day} eingetragen!')
+        pass
 
     time.sleep(zeit_idle)
 """""""""
