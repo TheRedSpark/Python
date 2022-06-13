@@ -21,12 +21,11 @@ mydb = mysql.connector.connect(
 my_cursor = mydb.cursor()
 schutzsleep = 120
 zeit_idle = 20
+day = 33
 intervall = 5
 selection = ['Dresden', 'Frankfurt', 'Berlin', 'Hamburg', 'Nuremberg', 'Munich', 'Aachen', 'Cologne', 'Karlsruhe',
              'Hanover',
              'Stuttgart', 'Dusseldorf', 'Heidelberg', 'Prague', 'Warsaw', 'Luxembourg']
-
-x = 1
 
 
 def fetching():
@@ -2283,12 +2282,12 @@ def fetching():
         print(f'Erfogreich Daten für {city} in Datenbank übertragen')
 
 
-while x == 1:
+while True:
     zeit = time.strftime("%Y-%m-%d %H:%M:%S")
     trigger = time.gmtime()
-    trigger.tm_mday
     print(f'{trigger.tm_hour}:{trigger.tm_min} Uhr')
-    if trigger.tm_min % intervall == 0:
+    if trigger.tm_mday != day:
+        day = trigger.tm_mday
         fetching()
         if trigger.tm_min <= 15:
             print("Erste Virtelstunde")
