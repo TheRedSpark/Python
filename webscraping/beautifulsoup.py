@@ -2286,6 +2286,7 @@ def fetching():
 while x == 1:
     zeit = time.strftime("%Y-%m-%d %H:%M:%S")
     trigger = time.gmtime()
+    trigger.tm_mday
     print(f'{trigger.tm_hour}:{trigger.tm_min} Uhr')
     if trigger.tm_min % intervall == 0:
         fetching()
