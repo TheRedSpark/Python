@@ -4,7 +4,7 @@ from datetime import datetime # bereits implementiert
 import mysql.connector
 from package import zugang as anbin
 import time
-ort = 'lap'
+ort = 'home'
 database = 'Wetter'
 
 

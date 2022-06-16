@@ -1,6 +1,6 @@
 import time  # bereits implementiert
 import pyowm  # V2.10.0
-import variables as v  # eigene
+from package import variables as v  # eigene
 import datetime
 owm = pyowm.OWM(v.api_id)
 
