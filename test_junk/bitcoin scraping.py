@@ -18,5 +18,5 @@ url = f'https://www.coingecko.com/de'
 page = requests.get(url)
 soup = BeautifulSoup(page.content, 'html.parser')
 table = soup.find('table', attrs={'class': 'sort table mb-0 text-sm text-lg-normal table-scrollable'})
-rows = table.find_all('tr')
-print(rows)
+#rows = table.find_all('tr')
+print(table)
