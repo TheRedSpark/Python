@@ -1,11 +1,11 @@
 # V1.0 live 11.06.2022
 import sys
 import time
-import sql_zeitvergleich as sql
+from package import sql_zeitvergleich as sql
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
-import variables as v
+from package import variables as v
 import os
 
 username = v.username

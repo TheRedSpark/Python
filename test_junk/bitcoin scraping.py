@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup # V4.10.0
 import requests # V2.27.1
 import time
 import mysql.connector # V8.0.28
-from SQL_Daten import zugang as anbin #Own Library
+from package import zugang as anbin #Own Library
 ort = 'lap'
 #database = 'numbeo'
 # mydb = mysql.connector.connect(
