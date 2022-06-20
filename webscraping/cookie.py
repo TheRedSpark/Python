@@ -10,15 +10,18 @@ browser.find_element_by_xpath("/html/body/div[1]/div/a[1]").click()#cookies
 browser.find_element_by_id("langSelect-DE").click()#sprache
 time.sleep(10)
 bigcookie = browser.find_element_by_id("bigCookie")
-cursor = browser.find_element_by_id("productIcon0")
-oma = browser.find_element_by_id("productIcon1")
-for a in range(100):
+cursor = browser.find_element_by_xpath("/html/body/div/div[2]/div[19]/div[3]/div[6]/div[2]")
+oma = browser.find_element_by_xpath("/html/body/div/div[2]/div[19]/div[3]/div[6]/div[3]")
+farm = browser.find_element_by_xpath("/html/body/div/div[2]/div[19]/div[3]/div[6]/div[4]")
+for a in range(1000):
     bigcookie.click()
     time.sleep(0.01)
 #oma.click()
 cookies = int(browser.title.replace(" Kekse - Cookie Clicker", ""))
-if cookies >= 100:
+while True:
+    cursor.click()
     oma.click()
-else:
-    print("nicht genug cookies")
+    farm.click()
+    time.sleep(3)
 print(cookies)
+#browser.close()
