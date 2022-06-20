@@ -17,10 +17,10 @@ for a in range(1000):
 #oma.click()
 
 a = 2
-price = browser.find_element_by_id("productPrice1").text
-print(price)
+
 while True:
     cookies = int(str(browser.title.replace(" Kekse - Cookie Clicker", "")).replace(",",""))
+    print(cookies)
     if i < 10 and int(str(browser.find_element_by_id(f'productPrice{a-2}').text).replace(",","")) < cookies:
         browser.find_element_by_xpath(f'/html/body/div/div[2]/div[19]/div[3]/div[6]/div[{a}]').click()
         i += 1
@@ -29,7 +29,7 @@ while True:
         i = 0
         print("")
     else:
-        pass
+        browser.find_element_by_xpath("/html/body/div/div[2]/div[19]/div[3]/div[5]/div").click()
     time.sleep(0.5)
 print(cookies)
 #browser.close()
