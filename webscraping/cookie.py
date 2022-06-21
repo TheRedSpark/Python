@@ -6,7 +6,7 @@ from selenium.webdriver.chrome.options import Options
 import matplotlib.pyplot as plt # V3.5.2
 import pandas as pd # V1.4.2
 
-headless = True
+headless = False
 base_url = 'https://orteil.dashnet.org/cookieclicker/'
 anzahl_items = 0
 gernerale_items = 2
