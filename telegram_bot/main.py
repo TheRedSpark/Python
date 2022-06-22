@@ -10,7 +10,7 @@ from package import zugang as anbin  # Own Library
 from package import sql_zeitvergleich as zeitv
 import wetterbot as wetter
 from package import bitcoin_preis as btc
-
+a = 0
 now = datetime.now()
 date_time = now.strftime("%d/%m/%y, %H:%M:%S")
 ort = 'home'
@@ -36,7 +36,7 @@ def help_command(update, context):
                               '3 Für den Bitcoin Preis \n')
 
 
-def handle_message(update, context):
+def handle_message(update, context, ):
     input_text = str(update.message.text).lower()
     # response = R.sample_response(input_text)
     # update.message.reply_text(response)
@@ -61,7 +61,16 @@ def handle_message(update, context):
                                   f'Sonnenuntergang ist:                  {weather[6]}\n')
 
     elif user_message in ("Bitcoin", "3"):
-        update.message.reply_text(f'Bitcoin Preis beträgt {btc.btc()} Euro')
+        i = 0
+        btc_neu = btc.btc()
+        if i == 0:
+            btc_neu = btc.btc()
+            update.message.reply_text(f'Bitcoin Preis beträgt {btc_neu} Euro')
+        elif i != 0:
+            update.message.reply_text(f'Bitcoin Preis beträgt {btc.btc()} Euro mit einer Differenz von {btc.btc()-btc_neu} Euro')
+            btc_neu = btc.btc()
+        else:
+            pass
     else:
         update.message.reply_text("Der Befehl wurde falsch eingegeben")
 
