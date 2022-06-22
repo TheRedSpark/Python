@@ -96,47 +96,52 @@ async def set_timer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     except (IndexError, ValueError):
         await update.effective_message.reply_text("Usage: /set <seconds>")
 
-def handle_message(update, context, ):
-    input_text = str(update.message.text).lower()
-    # response = R.sample_response(input_text)
-    # update.message.reply_text(response)
-    user_message = str(input_text).lower()
 
-    if user_message in ("Zeitabstand", "1"):
+async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Echo the user message."""
+    #await update.message.reply_text(update.message.text)
+    user_message = str(update.message.text).lower()
+
+    if user_message in ("zeitabstand", "1"):
         message = zeitv.getZeitabstand()
-        update.message.reply_text(f'Der Zeitabstand beträgt:\n hh:mm:ss \n {message}')
+        # A f-string. It is a new way to format strings in Python.
+        await update.message.reply_text(f'Der Zeitabstand beträgt:\n hh:mm:ss \n {message}')
 
-    elif user_message in ("Wetter", "2"):
+    elif user_message in ("wetter", "2"):
         # weather = [temp, temp_max, temp_min, clouds, general, wind_speed, sunset, rain]
         #            0        1        2        3       4          5          6     7
         weather = wetter.wetter()
         # print(weather)
-        update.message.reply_text(f'Die Temperatur beträgt:                   {weather[0]} °C \n'
-                                  f'mit einer Höchsttemperatur von: {weather[1]} °C \n'
-                                  f'und einer Tiefstemperatur:              {weather[2]} °C. \n'
-                                  f'Die Windgeschwindigkeit ist:           {weather[5]} km/h \n'
-                                  f'Die Regenmenge beträgt:         {weather[7]} \n'
-                                  f'Die Wolkenbedeckung beträgt:        {weather[3]}%\n'
-                                  f'General kann man sagen:            {weather[4]}\n'
-                                  f'Sonnenuntergang ist:                  {weather[6]}\n')
+        await update.message.reply_text(f'Die Temperatur beträgt:                   {weather[0]} °C \n'
+                                        f'mit einer Höchsttemperatur von: {weather[1]} °C \n'
+                                        f'und einer Tiefstemperatur:              {weather[2]} °C. \n'
+                                        f'Die Windgeschwindigkeit ist:           {weather[5]} km/h \n'
+                                        f'Die Regenmenge beträgt:         {weather[7]} \n'
+                                        f'Die Wolkenbedeckung beträgt:        {weather[3]}%\n'
+                                        f'General kann man sagen:            {weather[4]}\n'
+                                        f'Sonnenuntergang ist:                  {weather[6]}\n')
 
     elif user_message in ("Bitcoin", "3"):
         i = 0
         btc_neu = btc.btc()
         if i == 0:
             btc_neu = btc.btc()
-            update.message.reply_text(f'Bitcoin Preis beträgt {btc_neu} Euro')
+            await update.message.reply_text(f'Bitcoin Preis beträgt {btc_neu} Euro')
         elif i != 0:
-            update.message.reply_text(f'Bitcoin Preis beträgt {btc.btc()} Euro mit einer Differenz von {btc.btc()-btc_neu} Euro')
+            await update.message.reply_text(f'Bitcoin Preis beträgt {btc.btc()} Euro mit einer Differenz von {btc.btc()-btc_neu} Euro')
             btc_neu = btc.btc()
         else:
             pass
     else:
-        update.message.reply_text("Der Befehl wurde falsch eingegeben")
+        await update.message.reply_text("Der Befehl wurde falsch eingegeben")
 
-async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Echo the user message."""
-    await update.message.reply_text(update.message.text)
+
+
+
+
+
+
+
 
 async def unset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Remove the job if the user changed their mind."""
