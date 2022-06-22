@@ -26,7 +26,8 @@ my_cursor = mydb.cursor()
 
 
 def start_command(update, context):
-    update.message.reply_text('Wähle einen Befehl')
+    update.message.reply_text('Wähle einen Befehl\n'
+                              'Du kannst auch /help eingeben um Weiterzukommen\n')
 
 
 def help_command(update, context):
