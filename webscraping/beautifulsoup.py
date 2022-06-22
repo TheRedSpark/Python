@@ -19,7 +19,7 @@ mydb = mysql.connector.connect(
     auth_plugin='mysql_native_password')
 
 my_cursor = mydb.cursor()
-zeit_idle = 120*60
+zeit_idle = 120 * 60
 selection = ['Dresden', 'Frankfurt', 'Berlin', 'Hamburg', 'Nuremberg', 'Munich', 'Aachen', 'Cologne', 'Karlsruhe',
              'Hanover',
              'Stuttgart', 'Dusseldorf', 'Heidelberg', 'Prague', 'Warsaw', 'Luxembourg']
@@ -2293,13 +2293,13 @@ day = timesamp()
 while True:
     zeit = time.strftime("%Y-%m-%d %H:%M:%S")
     trigger = time.gmtime()
-    #print(f'{trigger.tm_hour}:{trigger.tm_min} Uhr')
+    # print(f'{trigger.tm_hour}:{trigger.tm_min} Uhr')
     if trigger.tm_mday != day:
         day = trigger.tm_mday
         fetching()
         continue
     else:
-        #print(f'Daten bereits für den heutigen Tag den {day} eingetragen!')
+        # print(f'Daten bereits für den heutigen Tag den {day} eingetragen!')
         pass
 
     time.sleep(zeit_idle)
