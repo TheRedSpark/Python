@@ -1,6 +1,6 @@
 # V3 LIVE 17.06.2022
 from package import variables
-from telegram.ext import *
+from telegram.ext import * #v13
 import responses as R
 import time
 from datetime import datetime
