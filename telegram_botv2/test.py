@@ -126,7 +126,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         btc_neu = btc.btc()
         if i == 0:
             btc_neu = btc.btc()
-            await update.message.reply_text(f'Bitcoin Preis beträgt {btc_neu} Euro')
+            await update.message.reply_text(f'Bitcoin Preis beträgt {btc.btc()} Euro')
         elif i != 0:
             await update.message.reply_text(f'Bitcoin Preis beträgt {btc.btc()} Euro mit einer Differenz von {btc.btc()-btc_neu} Euro')
             btc_neu = btc.btc()

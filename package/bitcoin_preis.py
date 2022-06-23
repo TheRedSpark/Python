@@ -7,7 +7,7 @@ url = f'https://www.finanzen.net/devisen/bitcoin-euro-kurs'
 def btc():
     page = requests.get(url)
     soup = BeautifulSoup(page.content, 'html.parser')
-    table = soup.find('div', attrs={'class': 'col-xs-5 col-sm-4 text-sm-right text-nowrap'}).text.replace("Euro","").replace(".","").replace(",",".")
-    price = float
+    table = soup.find('div', attrs={'class': 'col-xs-5 col-sm-4 text-sm-right text-nowrap'}).text
+    price = float(str(table).replace("EUR","").replace(".","").replace(",","."))
 
     return price
