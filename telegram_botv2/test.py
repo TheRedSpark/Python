@@ -1,26 +1,6 @@
-#!/usr/bin/env python
-# pylint: disable=unused-argument, wrong-import-position
-# This program is dedicated to the public domain under the CC0 license.
-
-"""
-Simple Bot to send timed Telegram messages.
-
-This Bot uses the Application class to handle the bot and the JobQueue to send
-timed messages.
-
-First, a few handler functions are defined. Then, those functions are passed to
-the Application and registered at their respective places.
-Then, the bot is started and runs until we press Ctrl-C on the command line.
-
-Usage:
-Basic Alarm Bot example, sends a message after a set time.
-Press Ctrl-C on the command line or send a signal to the process to stop the
-bot.
-"""
-
 import logging
 from package import variables
-from telegram import __version__ as TG_VER #v20
+from telegram import __version__ as TG_VER  # v20
 
 import mysql.connector
 from package import zugang as anbin  # Own Library
@@ -42,21 +22,17 @@ if __version_info__ < (20, 0, 0, "alpha", 1):
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 
-# Enable logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 
 
-# Define a few command handlers. These usually take the two arguments update and
-# context.
-# Best practice would be to replace context with an underscore,
-# since context is an unused local variable.
-# This being an example and not having context present confusing beginners,
-# we decided to have it present as context.
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Sends explanation on how to use the bot."""
-    await update.message.reply_text("Hi! Use /set <seconds> to set a timer")
+    await update.message.reply_text("Hi! Use /set <seconds> to set a timer\n"
+                                    '1 Für das Alter des letzten Datensatzes der SQL-Datenbank Wetter\n'
+                                    '2 Für die Wetterdaten von Heute von Dresden \n'
+                                    '3 Für den Bitcoin Preis \n')
 
 
 async def alarm(context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -99,7 +75,7 @@ async def set_timer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Echo the user message."""
-    #await update.message.reply_text(update.message.text)
+    # await update.message.reply_text(update.message.text)
     user_message = str(update.message.text).lower()
 
     if user_message in ("zeitabstand", "1"):
@@ -114,7 +90,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         # print(weather)
         await update.message.reply_text(f'Die Temperatur beträgt:                   {weather[0]} °C \n'
                                         f'mit einer Höchsttemperatur von: {weather[1]} °C \n'
-                                        f'und einer Tiefstemperatur:              {weather[2]} °C. \n'
+                                        f'und einer Tiefsttemperatur:              {weather[2]} °C. \n'
                                         f'Die Windgeschwindigkeit ist:           {weather[5]} km/h \n'
                                         f'Die Regenmenge beträgt:         {weather[7]} \n'
                                         f'Die Wolkenbedeckung beträgt:        {weather[3]}%\n'
@@ -128,19 +104,13 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             btc_neu = btc.btc()
             await update.message.reply_text(f'Bitcoin Preis beträgt {btc.btc()} Euro')
         elif i != 0:
-            await update.message.reply_text(f'Bitcoin Preis beträgt {btc.btc()} Euro mit einer Differenz von {btc.btc()-btc_neu} Euro')
+            await update.message.reply_text(
+                f'Bitcoin Preis beträgt {btc.btc()} Euro mit einer Differenz von {btc.btc() - btc_neu} Euro')
             btc_neu = btc.btc()
         else:
             pass
     else:
         await update.message.reply_text("Der Befehl wurde falsch eingegeben")
-
-
-
-
-
-
-
 
 
 async def unset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -153,14 +123,13 @@ async def unset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 def main() -> None:
     """Run bot."""
-    # Create the Application and pass it your bot's token.
     application = Application.builder().token(variables.API).build()
 
     # on different commands - answer in Telegram
     application.add_handler(CommandHandler(["start", "help"], start))
     application.add_handler(CommandHandler("set", set_timer))
     application.add_handler(CommandHandler("unset", unset))
-
+    # massage handler
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
 
     # Run the bot until the user presses Ctrl-C
