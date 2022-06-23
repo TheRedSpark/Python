@@ -49,6 +49,9 @@ def userlogging(user_id, username, message_chat_id, message_txt, message_id, fir
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Sends explanation on how to use the bot."""
+    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                update.effective_user.last_name, update.effective_user.language_code)
     await update.message.reply_text("Hi! Use /set <seconds> to set a timer\n"
                                     '1 Für das Alter des letzten Datensatzes der SQL-Datenbank Wetter\n'
                                     '2 Für die Wetterdaten von Heute von Dresden \n'
@@ -101,6 +104,9 @@ async def set_timer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Echo the user message."""
     # await update.message.reply_text(update.message.text)
+    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                update.effective_user.last_name, update.effective_user.language_code)
     user_message = str(update.message.text).lower()
 
     if user_message in ("zeitabstand", "1"):
