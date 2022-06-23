@@ -4,7 +4,6 @@ mysql-connector-python==8.0.28
 numpy==1.22.3
 pandas==1.4.2
 pyowm==2.10.0
-python-telegram-bot==20.0a1
 requests==2.27.1
 pygame==2.1.2
 instabot==0.117.0
