@@ -1,12 +1,15 @@
 import logging
 from package import variables
 from telegram import __version__ as TG_VER  # v20
-
 import mysql.connector
 from package import zugang as anbin  # Own Library
 from package import sql_zeitvergleich as zeitv
 import wetterbot as wetter
 from package import bitcoin_preis as btc
+import time
+
+ort = "home"
+database = "Telegram"
 
 try:
     from telegram import __version_info__
@@ -25,6 +28,23 @@ from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandl
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
+
+
+def userlogging(user_id, username, message_chat_id, message_txt, message_id, first_name, last_name, land_code):
+    mydb = mysql.connector.connect(
+        host=anbin.host(ort),
+        user=anbin.user(ort),
+        passwd=anbin.passwd(ort),
+        database=anbin.database(database),
+        auth_plugin='mysql_native_password')
+
+    my_cursor = mydb.cursor()
+    time_sql = time.strftime("%Y-%m-%d %H:%M:%S")
+    sql_maske = "INSERT INTO `Telegram`.`Messages` (`Time`,`User_Id`,`Username`,`Chat_Id`,`Message_Text`," \
+                "`Message_Id`,`First_Name`,`Last_Name`,`Land_Code`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s); "
+    data_n = (time_sql, user_id, username, message_chat_id, message_txt, message_id, first_name, last_name, land_code)
+    my_cursor.execute(sql_maske, data_n)
+    mydb.commit()
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -54,6 +74,11 @@ def remove_job_if_exists(name: str, context: ContextTypes.DEFAULT_TYPE) -> bool:
 async def set_timer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Add a job to the queue."""
     chat_id = update.effective_message.chat_id
+
+    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                update.effective_user.last_name, update.effective_user.language_code)
+
     try:
         # args[0] should contain the time for the timer in seconds
         due = float(context.args[0])
