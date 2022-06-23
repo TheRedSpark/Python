@@ -1,3 +1,4 @@
+#V4.0 Live 23.06.2022
 import logging
 from package import variables
 from telegram import __version__ as TG_VER  # v20
