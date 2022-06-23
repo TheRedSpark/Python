@@ -1,4 +1,4 @@
-#V4.0 Live 23.06.2022
+# V4.0 Live 23.06.2022
 import logging
 from package import variables
 from telegram import __version__ as TG_VER  # v20
@@ -102,7 +102,7 @@ async def set_timer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.effective_message.reply_text("Usage: /set <seconds>")
 
 
-async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Echo the user message."""
     # await update.message.reply_text(update.message.text)
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
@@ -153,6 +153,14 @@ async def unset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(text)
 
 
+async def msg(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    chat_id = variables.telegram_user_id
+    await context.bot.send_message(chat_id,
+                                   text=f'User:({update.effective_user.username}) hat dir ({update.message.text.replace("/msg ","")}) '
+                                        f'geschickt!')
+    await update.message.reply_text(f'Deine Nachricht {update.message.text.replace("/msg ","")} wurde an den Developer geschickt!')
+
+
 def main() -> None:
     """Run bot."""
     application = Application.builder().token(variables.API).build()
@@ -161,8 +169,9 @@ def main() -> None:
     application.add_handler(CommandHandler(["start", "help"], start))
     application.add_handler(CommandHandler("set", set_timer))
     application.add_handler(CommandHandler("unset", unset))
+    application.add_handler(CommandHandler("msg", msg))
     # massage handler
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))
 
     # Run the bot until the user presses Ctrl-C
     application.run_polling()
