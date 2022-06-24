@@ -80,7 +80,7 @@ def error(update, context):
 
 
 def main():
-    updater = Updater(variables.API, use_context=True)
+    updater = Updater(variables.telegram_api, use_context=True)
     dp = updater.dispatcher
 
     dp.add_handler(CommandHandler("start", start_command))

@@ -1,9 +1,9 @@
 # V4.0 Live 23.06.2022
+# credits to https://github.com/python-telegram-bot/python-telegram-bot/blob/master/examples/echobot.py
 import logging
-from package import variables
+from package import variables as v
 from telegram import __version__ as TG_VER  # v20
 import mysql.connector
-from package import zugang as anbin  # Own Library
 from package import sql_zeitvergleich as zeitv
 import wetterbot as wetter
 from package import bitcoin_preis as btc
@@ -11,6 +11,7 @@ import time
 
 ort = "home"
 database = "Telegram"
+live = False
 
 try:
     from telegram import __version_info__
@@ -19,8 +20,8 @@ except ImportError:
 
 if __version_info__ < (20, 0, 0, "alpha", 1):
     raise RuntimeError(
-        f"This example is not compatible with your current PTB version {TG_VER}. To view the "
-        f"{TG_VER} version of this example, "
+        f"Dieses Beispiel ist nicht kompatibel mit deiner PTB version {TG_VER}."
+        f"{TG_VER} version von diesem Beispiel, "
         f"visit https://docs.python-telegram-bot.org/en/v{TG_VER}/examples.html"
     )
 from telegram import Update
@@ -32,41 +33,41 @@ logging.basicConfig(
 
 
 def userlogging(user_id, username, message_chat_id, message_txt, message_id, first_name, last_name, land_code):
-    mydb = mysql.connector.connect(
-        host=anbin.host(ort),
-        user=anbin.user(ort),
-        passwd=anbin.passwd(ort),
-        database=anbin.database(database),
-        auth_plugin='mysql_native_password')
+    if live:
+        mydb = mysql.connector.connect(
+            host=v.host(ort),
+            user=v.user(ort),
+            passwd=v.passwd(ort),
+            database=v.database(database),
+            auth_plugin='mysql_native_password')
 
-    my_cursor = mydb.cursor()
-    time_sql = time.strftime("%Y-%m-%d %H:%M:%S")
-    sql_maske = "INSERT INTO `Telegram`.`Messages` (`Time`,`User_Id`,`Username`,`Chat_Id`,`Message_Text`," \
-                "`Message_Id`,`First_Name`,`Last_Name`,`Land_Code`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s); "
-    data_n = (time_sql, user_id, username, message_chat_id, message_txt, message_id, first_name, last_name, land_code)
-    my_cursor.execute(sql_maske, data_n)
-    mydb.commit()
+        my_cursor = mydb.cursor()
+        time_sql = time.strftime("%Y-%m-%d %H:%M:%S")
+        sql_maske = "INSERT INTO `Telegram`.`Messages` (`Time`,`User_Id`,`Username`,`Chat_Id`,`Message_Text`," \
+                    "`Message_Id`,`First_Name`,`Last_Name`,`Land_Code`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s); "
+        data_n = (time_sql, user_id, username, message_chat_id, message_txt, message_id, first_name, last_name, land_code)
+        my_cursor.execute(sql_maske, data_n)
+        mydb.commit()
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Sends explanation on how to use the bot."""
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
-    await update.message.reply_text("Hi! Use /set <seconds> to set a timer\n"
-                                    '1 Für das Alter des letzten Datensatzes der SQL-Datenbank Wetter\n'
-                                    '2 Für die Wetterdaten von Heute von Dresden \n'
-                                    '3 Für den Bitcoin Preis \n')
+    await update.message.reply_text('Benutze /help um diese Nachricht anzuzeigen'
+                                    'Benutze /set <Sekunden> um einen Wecker zu stellen\n'
+                                    'Benutze /msg <Nachricht> um die Nachricht an den Developer zu schicken\n'
+                                    'Schreibe 1 Für das Alter des letzten Datensatzes der SQL-Datenbank Wetter\n'
+                                    'Schreibe 2 Für die Wetterdaten von Heute von Dresden \n'
+                                    'Schreibe 3 Für den aktuellen Bitcoin Preis \n')
 
 
 async def alarm(context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Send the alarm message."""
     job = context.job
-    await context.bot.send_message(job.chat_id, text=f"Beep! {job.data} seconds are over!")
+    await context.bot.send_message(job.chat_id, text=f"Beep! {job.data} Sekunden sind vorbei!")
 
 
 def remove_job_if_exists(name: str, context: ContextTypes.DEFAULT_TYPE) -> bool:
-    """Remove job with given name. Returns whether job was removed."""
     current_jobs = context.job_queue.get_jobs_by_name(name)
     if not current_jobs:
         return False
@@ -76,7 +77,6 @@ def remove_job_if_exists(name: str, context: ContextTypes.DEFAULT_TYPE) -> bool:
 
 
 async def set_timer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Add a job to the queue."""
     chat_id = update.effective_message.chat_id
 
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
@@ -103,7 +103,6 @@ async def set_timer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Echo the user message."""
     # await update.message.reply_text(update.message.text)
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
@@ -129,7 +128,7 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                                         f'General kann man sagen:            {weather[4]}\n'
                                         f'Sonnenuntergang ist:                  {weather[6]}\n')
 
-    elif user_message in ("Bitcoin", "3"):
+    elif user_message in ("bitcoin", "3"):
         i = 0
         btc_neu = btc.btc()
         if i == 0:
@@ -146,24 +145,26 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 
 async def unset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Remove the job if the user changed their mind."""
     chat_id = update.message.chat_id
     job_removed = remove_job_if_exists(str(chat_id), context)
-    text = "Timer successfully cancelled!" if job_removed else "You have no active timer."
+    text = "Wecker erfolgreich abgebrochen!" if job_removed else "Du hast keinen aktiven Wecker."
     await update.message.reply_text(text)
 
 
 async def msg(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    chat_id = variables.telegram_user_id
+    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                update.effective_user.last_name, update.effective_user.language_code)
+    chat_id = v.telegram_user_id
     await context.bot.send_message(chat_id,
-                                   text=f'User:({update.effective_user.username}) hat dir ({update.message.text.replace("/msg ","")}) '
+                                   text=f'User:({update.effective_user.username}) hat dir ({update.message.text.replace("/msg ", "")}) '
                                         f'geschickt!')
-    await update.message.reply_text(f'Deine Nachricht {update.message.text.replace("/msg ","")} wurde an den Developer geschickt!')
+    await update.message.reply_text(
+        f'Deine Nachricht {update.message.text.replace("/msg ", "")} wurde an den Developer geschickt!')
 
 
 def main() -> None:
-    """Run bot."""
-    application = Application.builder().token(variables.API).build()
+    application = Application.builder().token(v.telegram_api(live)).build()
 
     # on different commands - answer in Telegram
     application.add_handler(CommandHandler(["start", "help"], start))
