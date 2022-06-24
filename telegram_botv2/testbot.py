@@ -34,13 +34,22 @@ logger = logging.getLogger(__name__)
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text('Benutze /help um diese Nachricht anzuzeigen'
+                                    'Benutze /set <Sekunden> um einen Wecker zu stellen\n'
+                                    'Benutze /msg <Nachricht> um die Nachricht an den Developer zu schicken\n'
+                                    'Schreibe 1 Für das Alter des letzten Datensatzes der SQL-Datenbank Wetter\n'
+                                    'Schreibe 2 Für die Wetterdaten von Heute von Dresden \n'
+                                    'Schreibe 3 Für den aktuellen Bitcoin Preis \n')
+
+
+async def mainmenu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Sends a message with three inline buttons attached."""
     keyboard = [
         [
-            InlineKeyboardButton("Option 1", callback_data="1")],
-            [InlineKeyboardButton("Option 2", callback_data="2")]
+            InlineKeyboardButton("Option 1", callback_data="m1")],
+        [InlineKeyboardButton("Option 2", callback_data="m2")]
         ,
-        [InlineKeyboardButton("Option 3", callback_data="3")],
+        [InlineKeyboardButton("Option 3", callback_data="m3")],
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -48,7 +57,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text("Please choose:", reply_markup=reply_markup)
 
 
-async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Parses the CallbackQuery and updates the message text."""
     query = update.callback_query
 
@@ -56,7 +65,30 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
     await query.answer()
 
-    await query.edit_message_text(text=f"Selected option: {query.data}")
+    if query.data == 'm1':
+        # first submenu
+        menu_1 = [[InlineKeyboardButton('Submenu 1-1', callback_data='m1_1')],
+                  [InlineKeyboardButton('Submenu 1-2', callback_data='m1_2')]]
+        reply_markup = InlineKeyboardMarkup(menu_1)
+        await query.edit_message_text(text='Choose the option:', reply_markup=reply_markup)
+
+    elif query.data == 'm1_1':
+        # second submenu
+        # first submenu
+        menu_2 = [[InlineKeyboardButton('Submenu 2-1', callback_data='m2_1')],
+                  [InlineKeyboardButton('Submenu 2-2', callback_data='m2_2')]]
+        reply_markup = InlineKeyboardMarkup(menu_2)
+        await query.edit_message_text(text='Choose the option:', reply_markup=reply_markup)
+
+    elif query.data == 'm2_1':
+        # second submenu
+        # first submenu
+        await query.answer("Pl input number")
+        zahl = query.data
+        print(zahl)
+
+    else:
+        await query.edit_message_text(text=f"Selected option: {query.data}")
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -70,7 +102,8 @@ def main() -> None:
     application = Application.builder().token(v.telegram_api(live)).build()
 
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(CallbackQueryHandler(button))
+    application.add_handler(CommandHandler("menu", mainmenu))
+    application.add_handler(CallbackQueryHandler(menu_actions))
     application.add_handler(CommandHandler("help", help_command))
 
     # Run the bot until the user presses Ctrl-C
