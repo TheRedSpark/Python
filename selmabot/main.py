@@ -10,6 +10,7 @@ import time
 ort = "home"
 database = "Selma"
 live = False
+loschtimer = 5
 
 try:
     from telegram import __version_info__
@@ -57,6 +58,7 @@ def userlogging(user_id, username, message_chat_id, message_txt, message_id, fir
             time_sql, user_id, username, message_chat_id, message_txt, message_id, first_name, last_name, land_code)
         my_cursor.execute(sql_maske, data_n)
         mydb.commit()
+        my_cursor.close()
 
 
 def usercreate(user_id, username):
@@ -73,6 +75,7 @@ def usercreate(user_id, username):
     sql_maske = "INSERT INTO `Selma`.`Users` (`User_Id`,`Username`) VALUES (%s, %s); "
     data_n = (user_id, username)
     my_cursor.execute(sql_maske, data_n)
+    my_cursor.close()
     mydb.commit()
 
 
@@ -87,6 +90,7 @@ def get_username(user_id):
     my_cursor = mydb.cursor()
     my_cursor.execute(f"SELECT Username_Selma FROM `Selma`.`Users` WHERE User_Id = ({user_id}) ")
     result = my_cursor.fetchone()
+    my_cursor.close()
     return result[0]
 
 
@@ -101,6 +105,7 @@ def get_userpass(user_id):
     my_cursor = mydb.cursor()
     my_cursor.execute(f"SELECT Password_Selma FROM `Selma`.`Users` WHERE User_Id = ({user_id}) ")
     result = my_cursor.fetchone()
+    my_cursor.close()
     return result[0]
 
 
@@ -115,16 +120,32 @@ def get_user_email(user_id):
     my_cursor = mydb.cursor()
     my_cursor.execute(f"SELECT Email FROM `Selma`.`Users` WHERE User_Id = ({user_id}) ")
     result = my_cursor.fetchone()
+    my_cursor.close()
     return result[0]
+
+
+def userdel(user_id):
+    mydb = mysql.connector.connect(
+        host=v.host(ort),
+        user=v.user(ort),
+        passwd=v.passwd(ort),
+        database=v.database(database),
+        auth_plugin='mysql_native_password')
+
+    my_cursor = mydb.cursor()
+    my_cursor.execute(
+        f"UPDATE `Selma`.`Users` SET `Username_Selma` =  'NULL', `Password_Selma` = 'NULL', `Email` = 'NULL' WHERE (`User_Id` = {user_id});")
+    mydb.commit()
+    my_cursor.close()
 
 
 async def setmenu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Sends a message with three inline buttons attached."""
     keyboard = [
-        [InlineKeyboardButton("Benutzernamen Selma", callback_data="m1")],
-        [InlineKeyboardButton("Passwort Selma", callback_data="m2")],
-        [InlineKeyboardButton("Email setzen", callback_data="m3")],
-        [InlineKeyboardButton("Daten löschen", callback_data="m1")],
+        [InlineKeyboardButton("Benutzernamen Selma", callback_data="user")],
+        [InlineKeyboardButton("Passwort Selma", callback_data="passw")],
+        [InlineKeyboardButton("Email setzen", callback_data="email")],
+        [InlineKeyboardButton("Daten löschen", callback_data="datadel")],
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -138,27 +159,72 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     await query.answer()
 
-    if query.data == 'm1':
+    if query.data == 'user':
         # first submenu
-        get_username(update.effective_user.id)
-
-    elif query.data == 'm1_1':
-        # second submenu
-        # first submenu
-        menu_2 = [[InlineKeyboardButton('Submenu 2-1', callback_data='m2_1')],
-                  [InlineKeyboardButton('Submenu 2-2', callback_data='m2_2')]]
+        menu_2 = [[InlineKeyboardButton('Selma Benutzernamen speichern', callback_data='user_speichern')],
+                  [InlineKeyboardButton('Selma Benutzernamen anzeigen', callback_data='user_anzeigen')]]
         reply_markup = InlineKeyboardMarkup(menu_2)
         await query.edit_message_text(text='Choose the option:', reply_markup=reply_markup)
 
-    elif query.data == 'm2_1':
+    elif query.data == 'user_anzeigen':
         # second submenu
         # first submenu
-        await query.answer("Pl input number")
-        zahl = query.data
-        print(zahl)
+        if get_username(update.effective_user.id) is None:
+            await context.bot.send_message(update.effective_message.chat_id,
+                                           text="Du hast noch kein Selma Benutzernamen")
+        else:
+            await context.bot.send_message(update.effective_message.chat_id,
+                                           text=get_username(update.effective_user.id))
+
+
+    elif query.data == 'passw':
+        # first submenu
+        menu_2 = [[InlineKeyboardButton('Selma Passwort speichern', callback_data='passw_speichern')],
+                  [InlineKeyboardButton('Selma Passwort anzeigen', callback_data='passw_anzeigen')]]
+        reply_markup = InlineKeyboardMarkup(menu_2)
+        await query.edit_message_text(text='Choose the option:', reply_markup=reply_markup)
+
+    elif query.data == 'passw_anzeigen':
+        # second submenu
+        # first submenu
+        if get_userpass(update.effective_user.id) is None:
+            await query.edit_message_text(text="Du hast noch kein Passwort")
+        else:
+            await context.bot.send_message(update.effective_message.chat_id,
+                                           text=f"Die nachfolgende Nachricht verschindet in {loschtimer} sec")
+            await query.edit_message_text(text=get_userpass(update.effective_user.id))
+            time.sleep(loschtimer)
+        await query.delete_message()
+
+
+
+
+
+
+    elif query.data == 'email':
+        # second submenu
+        # first submenu
+        menu_2 = [[InlineKeyboardButton('Email Speichern', callback_data='email_speichern')],
+                  [InlineKeyboardButton('Email Anzeigen', callback_data='email_anzeigen')]]
+        reply_markup = InlineKeyboardMarkup(menu_2)
+        await query.edit_message_text(text='Choose the option:', reply_markup=reply_markup)
+
+    elif query.data == 'email_anzeigen':
+        # second submenu
+        # first submenu
+        if get_user_email(update.effective_user.id) is None:
+            await query.edit_message_text(text="Du hast noch keine Email")
+        else:
+            await query.edit_message_text(text=get_user_email(update.effective_user.id))
+
+    elif query.data == 'datadel':
+        userdel(update.effective_user.id)
+        await query.edit_message_text(text="Deine Persönlichen Daten wurden Erfolgreich gelöscht")
+
+
 
     else:
-        await query.edit_message_text(text=f"Selected option: {query.data}")
+        await query.delete_message()
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
