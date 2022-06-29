@@ -123,7 +123,7 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                                         f'mit einer Höchsttemperatur von: {weather[1]} °C \n'
                                         f'und einer Tiefsttemperatur:              {weather[2]} °C. \n'
                                         f'Die Windgeschwindigkeit ist:           {weather[5]} km/h \n'
-                                        f'Die Regenmenge beträgt:         {weather[7]} \n'
+                                        f'Die Regenmenge beträgt:         {weather[7]} \n l/qm'
                                         f'Die Wolkenbedeckung beträgt:        {weather[3]}%\n'
                                         f'General kann man sagen:            {weather[4]}\n'
                                         f'Sonnenuntergang ist:                  {weather[6]}\n')
