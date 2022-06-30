@@ -1,6 +1,8 @@
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
+from bs4 import BeautifulSoup  # V4.10.0
+import requests  # V2.27.1
 import time
 from package import variables as v
 
@@ -42,6 +44,14 @@ browser.find_element_by_xpath("/html/body/div[2]/div[2]/div[1]/ul/li/ul/li[3]/a"
 time.sleep(1)
 browser.find_element_by_xpath("/html/body/div[2]/div[2]/div[1]/ul/li/ul/li[3]/ul/li[2]/a").click()
 time.sleep(1)
+html = browser.page_source
+soup = BeautifulSoup(html, 'html.parser')
+table = soup.find_all('tr', attrs={'style':'tbdata'})
+#table = soup.find('table', attrs={'class': 'tb rw-table'})
+#rows = table.find_all('tr')
+print(table)
+print(soup)
+
 #logoff(login_status)
 
 
