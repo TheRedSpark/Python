@@ -134,7 +134,7 @@ def userdel(user_id):
 
     my_cursor = mydb.cursor()
     my_cursor.execute(
-        f"UPDATE `Selma`.`Users` SET `Username_Selma` =  'NULL', `Password_Selma` = 'NULL', `Email` = 'NULL' WHERE (`User_Id` = {user_id});")
+        f"UPDATE `Selma`.`Users` SET `Email` = NULL,`Username_Selma` = NULL,`Password_Selma` = NULL WHERE (`User_Id` = {user_id});")
     mydb.commit()
     my_cursor.close()
 
@@ -144,7 +144,7 @@ async def setmenu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     keyboard = [
         [InlineKeyboardButton("Benutzernamen Selma", callback_data="user")],
         [InlineKeyboardButton("Passwort Selma", callback_data="passw")],
-        [InlineKeyboardButton("Email setzen", callback_data="email")],
+        [InlineKeyboardButton("Email", callback_data="email")],
         [InlineKeyboardButton("Daten löschen", callback_data="datadel")],
     ]
 
@@ -196,7 +196,17 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             time.sleep(loschtimer)
         await query.delete_message()
 
+    elif query.data == 'passw_speicher':
+        await query.edit_message_text(
+            text="Bitte nutze den /setpassw PASSWORD Befehl wobei PASSWORD durch dein Selmapassword ersetzt wird")
 
+    elif query.data == 'user_anzeigen':
+        await query.edit_message_text(
+            text="Bitte nutze den /setuser BENUTZER Befehl wobei BENUTZER durch dein Selma-Benutzernamen ersetzt wird")
+
+    elif query.data == 'email_speichern':
+        await query.edit_message_text(
+            text="Bitte nutze den /setemail EMAIL Befehl wobei EMAIL durch deie Email ersetzt wird")
 
 
 
@@ -236,6 +246,56 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                                     'Benutze /msg <Nachricht> um die Nachricht an den Developer zu schicken\n')
 
 
+async def setpassw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    passw = str(update.message.text).replace("/setpassw","").strip()
+    mydb = mysql.connector.connect(
+        host=v.host(ort),
+        user=v.user(ort),
+        passwd=v.passwd(ort),
+        database=v.database(database),
+        auth_plugin='mysql_native_password')
+
+    my_cursor = mydb.cursor()
+    my_cursor.execute(
+        f"UPDATE `Selma`.`Users` SET `Password_Selma` = '{passw}' WHERE (`User_Id` = {update.effective_user.id});")
+    mydb.commit()
+    my_cursor.close()
+    await update.message.reply_text('Dein Password wurde Erfolgreich gesetzt')
+
+
+async def setuser(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = str(update.message.text).replace("/setuser","").strip()
+    mydb = mysql.connector.connect(
+        host=v.host(ort),
+        user=v.user(ort),
+        passwd=v.passwd(ort),
+        database=v.database(database),
+        auth_plugin='mysql_native_password')
+
+    my_cursor = mydb.cursor()
+    my_cursor.execute(
+        f"UPDATE `Selma`.`Users` SET `Username_Selma` = '{user}' WHERE (`User_Id` = {update.effective_user.id});")
+    mydb.commit()
+    my_cursor.close()
+    await update.message.reply_text('Dein Benutzername wurde Erfolgreich gesetzt')
+
+
+async def setemail(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    email = str(update.message.text).replace("/setemail","").strip()
+    mydb = mysql.connector.connect(
+        host=v.host(ort),
+        user=v.user(ort),
+        passwd=v.passwd(ort),
+        database=v.database(database),
+        auth_plugin='mysql_native_password')
+
+    my_cursor = mydb.cursor()
+    my_cursor.execute(f"UPDATE `Selma`.`Users` SET `Email` = '{email}' WHERE (`User_Id` = {update.effective_user.id});")
+    mydb.commit()
+    my_cursor.close()
+    await update.message.reply_text('Deine Email wurde Erfolgreich gesetzt')
+
+
 async def msg(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
@@ -255,6 +315,9 @@ def main() -> None:
     application.add_handler(CommandHandler(["start", "help"], start))
     application.add_handler(CommandHandler("msg", msg))
     application.add_handler(CommandHandler("menu", setmenu))
+    application.add_handler(CommandHandler("setpassw", setpassw))
+    application.add_handler(CommandHandler("setuser", setuser))
+    application.add_handler(CommandHandler("setemail", setemail))
     application.add_handler(CallbackQueryHandler(menu_actions))
     # massage handler
     # application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))
