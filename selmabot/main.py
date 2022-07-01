@@ -4,7 +4,7 @@ import logging
 from package import variables as v
 from telegram import __version__ as TG_VER  # v20
 import mysql.connector
-
+import webgetting as selma
 import time
 
 ort = "home"
@@ -246,8 +246,27 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                                     'Benutze /msg <Nachricht> um die Nachricht an den Developer zu schicken\n')
 
 
+async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    exam_data = []
+    exam_data = selma.exam_getter(update.effective_user.id)
+    exam_anzahl = 0
+    exam_anzahl = int(exam_data.pop())
+    i = 0
+    while True:
+        await context.bot.send_message(update.effective_user.id, text=f'{exam_data.pop(0)}')
+        await context.bot.send_message(update.effective_user.id, text=f'{exam_data.pop(0)}')
+        await context.bot.send_message(update.effective_user.id, text=f'{exam_data.pop(0)}')
+        await context.bot.send_message(update.effective_user.id, text=f'{exam_data.pop(0)}')
+        await context.bot.send_message(update.effective_user.id, text=f'{exam_data.pop(0)}')
+        i = i +1
+        if exam_anzahl == i:
+            break
+
+    await update.message.reply_text('Deine Ergebnisse')
+
+
 async def setpassw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    passw = str(update.message.text).replace("/setpassw","").strip()
+    passw = str(update.message.text).replace("/setpassw", "").strip()
     mydb = mysql.connector.connect(
         host=v.host(ort),
         user=v.user(ort),
@@ -264,7 +283,7 @@ async def setpassw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def setuser(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    user = str(update.message.text).replace("/setuser","").strip()
+    user = str(update.message.text).replace("/setuser", "").strip()
     mydb = mysql.connector.connect(
         host=v.host(ort),
         user=v.user(ort),
@@ -281,7 +300,7 @@ async def setuser(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def setemail(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    email = str(update.message.text).replace("/setemail","").strip()
+    email = str(update.message.text).replace("/setemail", "").strip()
     mydb = mysql.connector.connect(
         host=v.host(ort),
         user=v.user(ort),
@@ -318,6 +337,7 @@ def main() -> None:
     application.add_handler(CommandHandler("setpassw", setpassw))
     application.add_handler(CommandHandler("setuser", setuser))
     application.add_handler(CommandHandler("setemail", setemail))
+    application.add_handler(CommandHandler("exam", exam))
     application.add_handler(CallbackQueryHandler(menu_actions))
     # massage handler
     # application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))
