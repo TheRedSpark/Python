@@ -258,7 +258,7 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await context.bot.send_message(update.effective_user.id, text=f'{exam_data.pop(0)}')
         await context.bot.send_message(update.effective_user.id, text=f'{exam_data.pop(0)}')
         await context.bot.send_message(update.effective_user.id, text=f'{exam_data.pop(0)}')
-        i = i +1
+        i = i + 1
         if exam_anzahl == i:
             break
 
