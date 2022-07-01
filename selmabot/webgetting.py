@@ -6,7 +6,6 @@ import requests  # V2.27.1
 import time
 from package import variables as v
 
-
 login_status = False
 headless = False
 base_url = 'https://selma.tu-dresden.de/APP/EXTERNALPAGES/-N000000000000001,-N000155,-AEXT_willkommen'
@@ -27,13 +26,17 @@ else:
 time.sleep(3)
 print("Baseurl getted")
 
+
 def logoff(login_status):
     if login_status:
         browser.find_element_by_xpath("/html/body/div[2]/div[1]/div[2]/div/div[2]/div/form/div/input[1]").click()
         time.sleep(1)
 
-browser.find_element_by_xpath("/html/body/div[2]/div[1]/div[2]/div/div[2]/form/div[1]/div/div[1]/input").send_keys(v.selma_benutzer)
-browser.find_element_by_xpath("/html/body/div[2]/div[1]/div[2]/div/div[2]/form/div[1]/div/div[2]/input").send_keys(v.selma_pass)
+
+browser.find_element_by_xpath("/html/body/div[2]/div[1]/div[2]/div/div[2]/form/div[1]/div/div[1]/input").send_keys(
+    v.selma_benutzer)
+browser.find_element_by_xpath("/html/body/div[2]/div[1]/div[2]/div/div[2]/form/div[1]/div/div[2]/input").send_keys(
+    v.selma_pass)
 login_status = True
 
 time.sleep(0.5)
@@ -45,22 +48,19 @@ time.sleep(1)
 browser.find_element_by_xpath("/html/body/div[2]/div[2]/div[1]/ul/li/ul/li[3]/ul/li[2]/a").click()
 time.sleep(1)
 html = browser.page_source
+browser.quit()
 soup = BeautifulSoup(html, 'html.parser')
-#table = soup.find_all('tr', attrs={'style':'tbdata'})
+# table = soup.find_all('tr', attrs={'style':'tbdata'})
 table = soup.find('table', attrs={'class': 'nb list'})
 prufungen = len(table)
-tablesub = soup.find_all('tr', attrs={'class': 'tbdata'})
-rows = tablesub[1].find_all('td', attrs={'style': 'vertical-align:top;'})
-browser.quit()
-print(rows[1])
 print(prufungen)
+i = 0
+for ergebniss in table:
+    tablesub = soup.find_all('tr', attrs={'class': 'tbdata'})
+    rows = tablesub[i].find_all('td', attrs={'style': 'vertical-align:top;'})
+    print(rows[1])
+    i = + 1
 
-for prufung in range(0,prufungen):
-    print(prufung)
+# print(soup)
 
-#print(soup)
-
-#logoff(login_status)
-
-
-
+# logoff(login_status)
