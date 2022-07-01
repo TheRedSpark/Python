@@ -46,11 +46,19 @@ browser.find_element_by_xpath("/html/body/div[2]/div[2]/div[1]/ul/li/ul/li[3]/ul
 time.sleep(1)
 html = browser.page_source
 soup = BeautifulSoup(html, 'html.parser')
-table = soup.find_all('tr', attrs={'style':'tbdata'})
-#table = soup.find('table', attrs={'class': 'tb rw-table'})
-#rows = table.find_all('tr')
-print(table)
-print(soup)
+#table = soup.find_all('tr', attrs={'style':'tbdata'})
+table = soup.find('table', attrs={'class': 'nb list'})
+prufungen = len(table)
+tablesub = soup.find_all('tr', attrs={'class': 'tbdata'})
+rows = tablesub[1].find_all('td', attrs={'style': 'vertical-align:top;'})
+browser.quit()
+print(rows[1])
+print(prufungen)
+
+for prufung in range(0,prufungen):
+    print(prufung)
+
+#print(soup)
 
 #logoff(login_status)
 
