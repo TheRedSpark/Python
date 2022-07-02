@@ -1,4 +1,4 @@
-version = "V1.1"
+version = "V1.2" #Live
 import logging
 from package import variables as v
 from telegram import __version__ as TG_VER  # v20
@@ -273,6 +273,7 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     exam_data = []
     exam_data = selma.exam_getter(update.effective_user.id)
     if exam_data[0] is False:
+        print(exam_data)
         await context.bot.send_message(update.effective_user.id,
                                        text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu um diese zu aktualisiren")
     else:

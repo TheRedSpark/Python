@@ -9,7 +9,7 @@ import mysql.connector  # V8.0.28
 active_scraper = True
 save_to_txt = True
 login_status = False
-headless = True
+headless = False
 base_url = 'https://selma.tu-dresden.de/APP/EXTERNALPAGES/-N000000000000001,-N000155,-AEXT_willkommen'
 user_id = v.telegram_user_id
 ort = 'home'
@@ -95,7 +95,7 @@ def exam_getter(user_id):
             except:
                 pass
             print("Wait for Login-Website")
-
+        u = 0
         while True:
             try:
                 # Clicking on the "Prüfungsverwaltung" button.
@@ -104,8 +104,16 @@ def exam_getter(user_id):
                 login_status = True
                 break
             except:
+                time.sleep(0.1)
                 pass
-            print("Prüfungsergebnisse-Website bereit")
+            if u % 10 == 0:
+                print("Prüfungsergebnisse-Website nicht bereit")
+            u = u + 1
+            if u == 20:
+                return exam_data_multi
+            print(u)
+
+
 
         html = browser.page_source
         browser.quit()
@@ -128,6 +136,7 @@ def exam_getter(user_id):
     exam_all = soup.find_all('tr', attrs={'class': 'tbdata'})
     anzahl_prufungen = len(exam_all)
     i = 0
+    del exam_data_multi[0]
     # A while loop that iterates through all the exams and prints the exam_kennung, exam_beschreibung, exam_date, exam_mark
     # and exam_comment.
     while True:
