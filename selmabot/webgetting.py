@@ -34,6 +34,8 @@ def exam_getter(user_id):
     selma_pass = result[1]
     my_cursor.close()
 
+
+
     if active_scraper:
         # Checking if the headless variable is true or false. If it is true, it will open a headless browser. If it is false,
         # it will open a normal browser.
@@ -139,3 +141,4 @@ def exam_getter(user_id):
 #     if login_status:
 #         browser.find_element_by_xpath("/html/body/div[2]/div[1]/div[2]/div/div[2]/div/form/div/input[1]").click()
 #         time.sleep(1)
+#exam_getter(v.telegram_user_id)

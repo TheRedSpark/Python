@@ -1,5 +1,4 @@
-# V1.0
-
+# V1.1
 import logging
 from package import variables as v
 from telegram import __version__ as TG_VER  # v20
@@ -26,9 +25,7 @@ if __version_info__ < (20, 0, 0, "alpha", 1):
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler, MessageHandler, filters
 
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
+logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 
 
 def userlogging(user_id, username, message_chat_id, message_txt, message_id, first_name, last_name, land_code):
@@ -71,12 +68,16 @@ def usercreate(user_id, username):
 
     my_cursor = mydb.cursor()
     time_sql = time.strftime("%Y-%m-%d %H:%M:%S")
-
-    sql_maske = "INSERT INTO `Selma`.`Users` (`User_Id`,`Username`) VALUES (%s, %s); "
-    data_n = (user_id, username)
-    my_cursor.execute(sql_maske, data_n)
+    my_cursor.execute(f"SELECT Username_Selma,Password_Selma FROM `Selma`.`Users` WHERE User_Id = ({user_id}) ")
+    result = my_cursor.fetchone()
+    if result is None:
+        sql_maske = "INSERT INTO `Selma`.`Users` (`User_Id`,`Username`) VALUES (%s, %s); "
+        data_n = (user_id, username)
+        my_cursor.execute(sql_maske, data_n)
+        mydb.commit()
+    else:
+        pass
     my_cursor.close()
-    mydb.commit()
 
 
 def get_username(user_id):
@@ -158,6 +159,9 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     query = update.callback_query
 
     await query.answer()
+    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                update.effective_user.last_name, update.effective_user.language_code)
 
     if query.data == 'user':
         # first submenu
@@ -247,17 +251,21 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                update.effective_user.last_name, update.effective_user.language_code)
     exam_data = []
     exam_data = selma.exam_getter(update.effective_user.id)
     exam_anzahl = 0
     exam_anzahl = int(exam_data.pop())
     i = 0
     while True:
-        await context.bot.send_message(update.effective_user.id, text=f'{exam_data.pop(0)}')
-        await context.bot.send_message(update.effective_user.id, text=f'{exam_data.pop(0)}')
-        await context.bot.send_message(update.effective_user.id, text=f'{exam_data.pop(0)}')
-        await context.bot.send_message(update.effective_user.id, text=f'{exam_data.pop(0)}')
-        await context.bot.send_message(update.effective_user.id, text=f'{exam_data.pop(0)}')
+        await context.bot.send_message(update.effective_user.id, text=f'{exam_data.pop(0)}\n'
+                                                                      f'{exam_data.pop(0)}\n'
+                                                                      f'{exam_data.pop(0)}\n'
+                                                                      f'{exam_data.pop(0)}\n'
+                                                                      f'{exam_data.pop(0)}')
+
         i = i + 1
         if exam_anzahl == i:
             break
@@ -266,6 +274,9 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def setpassw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                update.effective_user.last_name, update.effective_user.language_code)
     passw = str(update.message.text).replace("/setpassw", "").strip()
     mydb = mysql.connector.connect(
         host=v.host(ort),
@@ -283,6 +294,9 @@ async def setpassw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def setuser(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                update.effective_user.last_name, update.effective_user.language_code)
     user = str(update.message.text).replace("/setuser", "").strip()
     mydb = mysql.connector.connect(
         host=v.host(ort),
@@ -300,6 +314,9 @@ async def setuser(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def setemail(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                update.effective_user.last_name, update.effective_user.language_code)
     email = str(update.message.text).replace("/setemail", "").strip()
     mydb = mysql.connector.connect(
         host=v.host(ort),
@@ -327,10 +344,17 @@ async def msg(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f'Deine Nachricht {update.message.text.replace("/msg ", "")} wurde an den Developer geschickt!')
 
 
+async def logging(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                update.effective_user.last_name, update.effective_user.language_code)
+
+
 def main() -> None:
     application = Application.builder().token(v.telegram_selma_api(live)).build()
 
     # on different commands - answer in Telegram
+    # application.add_handler(CommandHandler(["start", "help", "menu", "setpassw", "setuser", "setemail", "exam"], logging))
     application.add_handler(CommandHandler(["start", "help"], start))
     application.add_handler(CommandHandler("msg", msg))
     application.add_handler(CommandHandler("menu", setmenu))
