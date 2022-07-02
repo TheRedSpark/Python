@@ -14,25 +14,31 @@ base_url = 'https://selma.tu-dresden.de/APP/EXTERNALPAGES/-N000000000000001,-N00
 user_id = v.telegram_user_id
 ort = 'home'
 database = 'Selma'
-exam_data_multi = []
+exam_data_multi = [False]
 
-mydb = mysql.connector.connect(
-    host=v.host(ort),
-    user=v.user(ort),
-    passwd=v.passwd(ort),
-    database=v.database(database),
-    auth_plugin='mysql_native_password')
+
 
 
 def exam_getter(user_id):
+    mydb = mysql.connector.connect(
+        host=v.host(ort),
+        user=v.user(ort),
+        passwd=v.passwd(ort),
+        database=v.database(database),
+        auth_plugin='mysql_native_password')
     # Getting the username and password from the database.
     global exam_data_multi
     my_cursor = mydb.cursor()
     my_cursor.execute(f"SELECT Username_Selma,Password_Selma FROM `Selma`.`Users` WHERE User_Id = ({user_id}) ")
     result = my_cursor.fetchone()
+    print(result)
     selma_benutzer = result[0]
     selma_pass = result[1]
     my_cursor.close()
+    if selma_benutzer is not None and selma_pass is not None:
+        pass
+    else:
+        return exam_data_multi
 
     if active_scraper:
         # Checking if the headless variable is true or false. If it is true, it will open a headless browser. If it is false,
