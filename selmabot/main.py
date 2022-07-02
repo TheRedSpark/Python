@@ -1,4 +1,4 @@
-# V1.1
+version = "V1.1"
 import logging
 from package import variables as v
 from telegram import __version__ as TG_VER  # v20
@@ -140,6 +140,32 @@ def userdel(user_id):
     my_cursor.close()
 
 
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                update.effective_user.last_name, update.effective_user.language_code)
+    usercreate(update.effective_user.id, update.effective_user.username)
+    await context.bot.send_message(update.effective_user.id, text=f"Der Selma-Bot sagt herzlich hallo ;-)\n"
+                                                                  f"Bei Problemen Bugs oder Anmerkungen gerne die Msg Funktion benutzen\n"
+                                                                  f"Selma Bot Version {version}")
+    await update.message.reply_text('Benutze /help um Hilfe mit den Befehlen und der Funktionsweise des Bots zu '
+                                    'erhalten. \n'
+                                    'Benutze /menu um den Bot aufzusetzen oder um deine Daten zu löschen\n'
+                                    'Benutze /exam um deine Prüfungsergebnisse abzurufen\n'
+                                    'Benutze /msg <Nachricht> um die Nachricht an die Developer zu schicken\n')
+
+
+async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                update.effective_user.last_name, update.effective_user.language_code)
+    await update.message.reply_text('Benutze /help um Hilfe mit den Befehlen und der Funktionsweise des Bots zu '
+                                    'erhalten. \n'
+                                    'Benutze /menu um den Bot aufzusetzen oder um deine Daten zu löschen\n'
+                                    'Benutze /exam um deine Prüfungsergebnisse abzurufen\n'
+                                    'Benutze /msg <Nachricht> um die Nachricht an die Developer zu schicken\n')
+
+
 async def setmenu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Sends a message with three inline buttons attached."""
     keyboard = [
@@ -159,9 +185,6 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     query = update.callback_query
 
     await query.answer()
-    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
-                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
-                update.effective_user.last_name, update.effective_user.language_code)
 
     if query.data == 'user':
         # first submenu
@@ -179,6 +202,7 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         else:
             await context.bot.send_message(update.effective_message.chat_id,
                                            text=get_username(update.effective_user.id))
+        await query.delete_message()
 
 
     elif query.data == 'passw':
@@ -200,11 +224,11 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             time.sleep(loschtimer)
         await query.delete_message()
 
-    elif query.data == 'passw_speicher':
+    elif query.data == 'passw_speichern':
         await query.edit_message_text(
             text="Bitte nutze den /setpassw PASSWORD Befehl wobei PASSWORD durch dein Selmapassword ersetzt wird")
 
-    elif query.data == 'user_anzeigen':
+    elif query.data == 'user_speichern':
         await query.edit_message_text(
             text="Bitte nutze den /setuser BENUTZER Befehl wobei BENUTZER durch dein Selma-Benutzernamen ersetzt wird")
 
@@ -241,15 +265,6 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         await query.delete_message()
 
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
-                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
-                update.effective_user.last_name, update.effective_user.language_code)
-    usercreate(update.effective_user.id, update.effective_user.username)
-    await update.message.reply_text('Benutze /help um diese Nachricht anzuzeigen'
-                                    'Benutze /msg <Nachricht> um die Nachricht an den Developer zu schicken\n')
-
-
 async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
@@ -257,20 +272,24 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await context.bot.send_message(update.effective_user.id, text="Deine Daten werden aktuell Abgerufen bitte warten:")
     exam_data = []
     exam_data = selma.exam_getter(update.effective_user.id)
-    exam_anzahl = 0
-    exam_anzahl = int(exam_data.pop())
-    i = 0
-    while True:
-        await context.bot.send_message(update.effective_user.id, text=f'{exam_data.pop(0)}\n'
-                                                                      f'{exam_data.pop(0)}\n'
-                                                                      f'{exam_data.pop(0)}\n'
-                                                                      f'{exam_data.pop(0)}\n'
-                                                                      f'{exam_data.pop(0)}')
-        i = i + 1
-        if exam_anzahl == i:
-            break
+    if exam_data[0] is False:
+        await context.bot.send_message(update.effective_user.id,
+                                       text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu um diese zu aktualisiren")
+    else:
+        exam_anzahl = 0
+        exam_anzahl = int(exam_data.pop())
+        i = 0
+        while True:
+            await context.bot.send_message(update.effective_user.id, text=f'{exam_data.pop(0)}\n'
+                                                                          f'{exam_data.pop(0)}\n'
+                                                                          f'{exam_data.pop(0)}\n'
+                                                                          f'{exam_data.pop(0)}\n'
+                                                                          f'{exam_data.pop(0)}')
+            i = i + 1
+            if exam_anzahl == i:
+                break
 
-    await update.message.reply_text('Deine Ergebnisse')
+        await update.message.reply_text('Deine Ergebnisse')
 
 
 async def setpassw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
