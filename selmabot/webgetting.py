@@ -149,12 +149,12 @@ def exam_getter(user_id):
         exam_comment = str(exam_single[3]).strip().replace(f'<td style="vertical-align:top;">', '').replace("</td>",
                                                                                                             "").strip()
 
-        print(exam_kennung)
-        print(exam_beschreibung)
-        print(exam_date)
-        print(exam_mark)
-        print(exam_comment)
-        print()
+        # print(exam_kennung)
+        # print(exam_beschreibung)
+        # print(exam_date)
+        # print(exam_mark)
+        # print(exam_comment)
+        # print()
         exam_data_single = [exam_kennung, exam_beschreibung, exam_date, exam_mark, exam_comment]
         exam_data_multi = exam_data_multi + exam_data_single
         i = i + 1
