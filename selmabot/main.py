@@ -254,6 +254,7 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
+    await context.bot.send_message(update.effective_user.id, text="Deine Daten werden aktuell Abgerufen bitte warten:")
     exam_data = []
     exam_data = selma.exam_getter(update.effective_user.id)
     exam_anzahl = 0
@@ -265,7 +266,6 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                                                                       f'{exam_data.pop(0)}\n'
                                                                       f'{exam_data.pop(0)}\n'
                                                                       f'{exam_data.pop(0)}')
-
         i = i + 1
         if exam_anzahl == i:
             break
