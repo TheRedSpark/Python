@@ -68,8 +68,6 @@ def exam_getter(user_id):
             "/html/body/div[2]/div[1]/div[2]/div/div[2]/form/div[1]/div/div[2]/input").send_keys(
             selma_pass)
 
-
-
         while True:
             try:
                 # Clicking on the login button.
@@ -102,7 +100,6 @@ def exam_getter(user_id):
             except:
                 pass
             print("Prüfungsergebnisse-Website bereit")
-
 
         html = browser.page_source
         browser.quit()
@@ -173,4 +170,4 @@ def exam_getter(user_id):
 #     if login_status:
 #         browser.find_element_by_xpath("/html/body/div[2]/div[1]/div[2]/div/div[2]/div/form/div/input[1]").click()
 #         time.sleep(1)
-exam_getter(v.telegram_user_id)
+# exam_getter(v.telegram_user_id)
