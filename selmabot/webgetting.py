@@ -9,7 +9,7 @@ import mysql.connector  # V8.0.28
 active_scraper = True
 save_to_txt = True
 login_status = False
-headless = False
+headless = True
 base_url = 'https://selma.tu-dresden.de/APP/EXTERNALPAGES/-N000000000000001,-N000155,-AEXT_willkommen'
 user_id = v.telegram_user_id
 ort = 'home'
@@ -34,8 +34,6 @@ def exam_getter(user_id):
     selma_pass = result[1]
     my_cursor.close()
 
-
-
     if active_scraper:
         # Checking if the headless variable is true or false. If it is true, it will open a headless browser. If it is false,
         # it will open a normal browser.
@@ -51,9 +49,16 @@ def exam_getter(user_id):
         else:
             browser = webdriver.Chrome(ChromeDriverManager().install())
             browser.get(base_url)
-
-        time.sleep(3)
         print("Baseurl getted")
+        while True:
+            try:
+                # Checking if the login form is loaded.
+                browser.find_element_by_xpath("/html/body/div[2]/div[1]/div[2]/div/div[2]/form")
+                print("Baseurl getted")
+                break
+            except:
+                pass
+                print("Website nicht bereit")
 
         # Logging in to the selma website and then clicking on the "Prüfungsverwaltung" and then on "Ergebnisse"
         browser.find_element_by_xpath(
@@ -62,16 +67,43 @@ def exam_getter(user_id):
         browser.find_element_by_xpath(
             "/html/body/div[2]/div[1]/div[2]/div/div[2]/form/div[1]/div/div[2]/input").send_keys(
             selma_pass)
-        login_status = True
 
-        time.sleep(2)
 
-        browser.find_element_by_xpath("/html/body/div[2]/div[1]/div[2]/div/div[2]/form/div[1]/input[9]").click()
-        time.sleep(2)
-        browser.find_element_by_xpath("/html/body/div[2]/div[2]/div[1]/ul/li/ul/li[3]/a").click()
-        time.sleep(2)
-        browser.find_element_by_xpath("/html/body/div[2]/div[2]/div[1]/ul/li/ul/li[3]/ul/li[2]/a").click()
-        time.sleep(2)
+
+        while True:
+            try:
+                # Clicking on the login button.
+                browser.find_element_by_xpath("/html/body/div[2]/div[1]/div[2]/div/div[2]/form/div[1]/input[9]").click()
+                print("Login Erfolgreich")
+                login_status = True
+                break
+            except:
+                pass
+            print("Wait for Login")
+
+        while True:
+            try:
+                # Clicking on the "Prüfungsverwaltung" button.
+                browser.find_element_by_xpath("/html/body/div[2]/div[2]/div[1]/ul/li/ul/li[3]/a").click()
+                print("Login-Website nicht bereit")
+                login_status = True
+                break
+            except:
+                pass
+            print("Wait for Login-Website")
+
+        while True:
+            try:
+                # Clicking on the "Prüfungsverwaltung" button.
+                browser.find_element_by_xpath("/html/body/div[2]/div[2]/div[1]/ul/li/ul/li[3]/ul/li[2]/a").click()
+                print("Prüfungsergebnisse-Website bereit")
+                login_status = True
+                break
+            except:
+                pass
+            print("Prüfungsergebnisse-Website bereit")
+
+
         html = browser.page_source
         browser.quit()
 
@@ -120,12 +152,12 @@ def exam_getter(user_id):
         exam_comment = str(exam_single[3]).strip().replace(f'<td style="vertical-align:top;">', '').replace("</td>",
                                                                                                             "").strip()
 
-        # print(exam_kennung)
-        # print(exam_beschreibung)
-        # print(exam_date)
-        # print(exam_mark)
-        # print(exam_comment)
-        # print()
+        print(exam_kennung)
+        print(exam_beschreibung)
+        print(exam_date)
+        print(exam_mark)
+        print(exam_comment)
+        print()
         exam_data_single = [exam_kennung, exam_beschreibung, exam_date, exam_mark, exam_comment]
         exam_data_multi = exam_data_multi + exam_data_single
         i = i + 1
@@ -141,4 +173,4 @@ def exam_getter(user_id):
 #     if login_status:
 #         browser.find_element_by_xpath("/html/body/div[2]/div[1]/div[2]/div/div[2]/div/form/div/input[1]").click()
 #         time.sleep(1)
-#exam_getter(v.telegram_user_id)
+exam_getter(v.telegram_user_id)
