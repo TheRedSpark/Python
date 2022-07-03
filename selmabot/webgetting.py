@@ -7,16 +7,15 @@ from package import variables as v
 import mysql.connector  # V8.0.28
 
 active_scraper = True
-save_to_txt = True
+save_to_txt = False
 login_status = False
-headless = False
+on_server = False
+headless = True
 base_url = 'https://selma.tu-dresden.de/APP/EXTERNALPAGES/-N000000000000001,-N000155,-AEXT_willkommen'
 user_id = v.telegram_user_id
 ort = 'home'
 database = 'Selma'
 exam_data_multi = [False]
-
-
 
 
 def exam_getter(user_id):
@@ -46,9 +45,12 @@ def exam_getter(user_id):
         if headless:
             options = Options()
             options.headless = True
-            browser = webdriver.Chrome(options=options,
-                                       executable_path=r'C:\Users\Win10\.wdm\drivers\chromedriver\win32\102.0.5005.61'
-                                                       r'\chromedriver.exe')
+            if on_server:
+                browser = webdriver.Chrome(options=options,
+                                           executable_path=r'/usr/local/share/chromedriver')
+            else:
+                browser = webdriver.Chrome(options=options,
+                                           executable_path=r'C:\Users\Win10\.wdm\drivers\chromedriver\win32\102.0.5005.61\chromedriver.exe')
             browser.get(base_url)
             print("Headless Chrome Initialized")
 
@@ -94,6 +96,7 @@ def exam_getter(user_id):
                 break
             except:
                 pass
+            time.sleep(0.1)
             print("Wait for Login-Website")
         u = 0
         while True:
@@ -112,8 +115,6 @@ def exam_getter(user_id):
             if u == 20:
                 return exam_data_multi
             print(u)
-
-
 
         html = browser.page_source
         browser.quit()
@@ -136,7 +137,7 @@ def exam_getter(user_id):
     exam_all = soup.find_all('tr', attrs={'class': 'tbdata'})
     anzahl_prufungen = len(exam_all)
     i = 0
-    del exam_data_multi[0]
+    #
     # A while loop that iterates through all the exams and prints the exam_kennung, exam_beschreibung, exam_date, exam_mark
     # and exam_comment.
     while True:
@@ -177,7 +178,11 @@ def exam_getter(user_id):
             break
 
     exam_data_multi = exam_data_multi + [str(anzahl_prufungen)]
+    if not exam_data_multi[0]:
+        del exam_data_multi[0]
     return exam_data_multi
+
+
 #     logoff(login_status)
 #
 #
