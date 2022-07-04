@@ -5,8 +5,8 @@ After=syslog.target
 [Service]
 Restart=always
 Type=simple
-WorkingDirectory=/root/telegram
-ExecStart=python3 /root/telegram/main.py
+WorkingDirectory=/home/bot/bot
+ExecStart=python3 /home/bot/bot/main.py
 SyslogIdentifier=selma
 RestartSec=5
 
