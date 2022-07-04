@@ -6,7 +6,7 @@ import time
 from package import variables as v
 import mysql.connector  # V8.0.28
 
-active_scraper = True
+active_scraper = False
 save_to_txt = False
 login_status = False
 on_server = False
@@ -15,7 +15,52 @@ base_url = 'https://selma.tu-dresden.de/APP/EXTERNALPAGES/-N000000000000001,-N00
 user_id = v.telegram_user_id
 ort = 'home'
 database = 'Selma'
-exam_data_multi = [False]
+exam_data_multi = []
+
+
+def anzahl_prufungen_updater(prufungen_neu, user_id):
+    mydb = mysql.connector.connect(
+        host=v.host(ort),
+        user=v.user(ort),
+        passwd=v.passwd(ort),
+        database=v.database(database),
+        auth_plugin='mysql_native_password')
+    # Getting the username and password from the database.
+    global exam_data_multi
+    my_cursor = mydb.cursor()
+    my_cursor.execute(f"SELECT `Results_Num` FROM `Selma`.`Users` WHERE User_Id = ({user_id}) ")
+    prufungen_alt = my_cursor.fetchone()
+    prufungen_alt = int(str(prufungen_alt).replace("(", "").replace(",)", ""))
+    my_cursor.close()
+
+    if prufungen_alt == 0:
+        mydb = mysql.connector.connect(
+            host=v.host(ort),
+            user=v.user(ort),
+            passwd=v.passwd(ort),
+            database=v.database(database),
+            auth_plugin='mysql_native_password')
+
+        my_cursor = mydb.cursor()
+        my_cursor.execute(
+            f"UPDATE `Selma`.`Users` SET `Results_Num` = '{prufungen_neu}' WHERE (`User_Id` = {user_id});")
+        mydb.commit()
+        my_cursor.close()
+    elif prufungen_alt < prufungen_neu:
+        mydb = mysql.connector.connect(
+            host=v.host(ort),
+            user=v.user(ort),
+            passwd=v.passwd(ort),
+            database=v.database(database),
+            auth_plugin='mysql_native_password')
+
+        my_cursor = mydb.cursor()
+        my_cursor.execute(
+            f"UPDATE `Selma`.`Users` SET `Results_Num` = '{prufungen_neu}',`Results_Update` = '1' WHERE (`User_Id` = {user_id});")
+        mydb.commit()
+        my_cursor.close()
+    else:
+        pass
 
 
 def exam_getter(user_id):
@@ -37,7 +82,7 @@ def exam_getter(user_id):
     if selma_benutzer is not None and selma_pass is not None:
         pass
     else:
-        return exam_data_multi
+        return False
 
     if active_scraper:
         # Checking if the headless variable is true or false. If it is true, it will open a headless browser. If it is false,
@@ -112,8 +157,8 @@ def exam_getter(user_id):
             if u % 10 == 0:
                 print("Prüfungsergebnisse-Website nicht bereit")
             u = u + 1
-            if u == 20:
-                return exam_data_multi
+            if u == 30:
+                return False
             print(u)
 
         html = browser.page_source
@@ -178,10 +223,9 @@ def exam_getter(user_id):
             break
 
     exam_data_multi = exam_data_multi + [str(anzahl_prufungen)]
-    if not exam_data_multi[0]:
-        del exam_data_multi[0]
-    return exam_data_multi
 
+    anzahl_prufungen_updater(anzahl_prufungen, user_id)
+    return exam_data_multi
 
 #     logoff(login_status)
 #

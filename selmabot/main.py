@@ -8,7 +8,7 @@ import time
 
 ort = "home"
 database = "Selma"
-live = True
+live = False
 loschtimer = 5
 
 try:
@@ -272,7 +272,7 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await context.bot.send_message(update.effective_user.id, text="Deine Daten werden aktuell Abgerufen bitte warten:")
     exam_data = []
     exam_data = selma.exam_getter(update.effective_user.id)
-    if exam_data[0] is False:
+    if exam_data is False:
         #print(exam_data)
         await context.bot.send_message(update.effective_user.id,
                                        text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu um diese zu aktualisiren")
