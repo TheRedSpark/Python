@@ -425,6 +425,7 @@ def main() -> None:
     application.add_handler(CommandHandler("setemail", setemail))
     application.add_handler(CommandHandler("exam", exam))
     application.add_handler(CallbackQueryHandler(menu_actions))
+
     # massage handler
     # application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))
 
