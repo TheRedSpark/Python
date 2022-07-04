@@ -6,7 +6,7 @@ import time
 from package import variables as v
 import mysql.connector  # V8.0.28
 
-active_scraper = False
+active_scraper = True
 save_to_txt = False
 login_status = False
 on_server = False
@@ -16,6 +16,169 @@ user_id = v.telegram_user_id
 ort = 'home'
 database = 'Selma'
 exam_data_multi = []
+
+
+# def scraper(user_id):
+
+
+def exam_updater(user_id):
+    mydb = mysql.connector.connect(
+        host=v.host(ort),
+        user=v.user(ort),
+        passwd=v.passwd(ort),
+        database=v.database(database),
+        auth_plugin='mysql_native_password')
+    # Getting the username and password from the database.
+    my_cursor = mydb.cursor()
+    my_cursor.execute(f"SELECT `Results_Update` FROM `Selma`.`Users` WHERE User_Id = ({user_id}) ")
+    update = my_cursor.fetchone()
+    my_cursor.close()
+    update = int(str(update).replace("(", "").replace(",)", ""))
+    if update == 1:
+        return 1
+    elif update == 0:
+        mydb = mysql.connector.connect(
+            host=v.host(ort),
+            user=v.user(ort),
+            passwd=v.passwd(ort),
+            database=v.database(database),
+            auth_plugin='mysql_native_password')
+        # Getting the username and password from the database.
+        my_cursor = mydb.cursor()
+        my_cursor.execute(f"SELECT `Results_Num` FROM `Selma`.`Users` WHERE User_Id = ({user_id}) ")
+        prufungen_alt = my_cursor.fetchone()
+        my_cursor.close()
+        prufungen_alt = int(str(prufungen_alt).replace("(", "").replace(",)", ""))
+
+        mydb = mysql.connector.connect(
+            host=v.host(ort),
+            user=v.user(ort),
+            passwd=v.passwd(ort),
+            database=v.database(database),
+            auth_plugin='mysql_native_password')
+        # Getting the username and password from the database.
+        my_cursor = mydb.cursor()
+        my_cursor.execute(f"SELECT Username_Selma,Password_Selma FROM `Selma`.`Users` WHERE User_Id = ({user_id}) ")
+        result = my_cursor.fetchone()
+        selma_benutzer = result[0]
+        selma_pass = result[1]
+        my_cursor.close()
+        if selma_benutzer is not None and selma_pass is not None:
+            pass
+        else:
+            return False
+
+        if active_scraper:
+            # Checking if the headless variable is true or false. If it is true, it will open a headless browser. If it is false,
+            # it will open a normal browser.
+            if headless:
+                options = Options()
+                options.headless = True
+                if on_server:
+                    browser = webdriver.Chrome(options=options,
+                                               executable_path=r'/usr/local/share/chromedriver')
+                else:
+                    browser = webdriver.Chrome(options=options,
+                                               executable_path=r'C:\Users\Win10\.wdm\drivers\chromedriver\win32\102.0.5005.61\chromedriver.exe')
+                browser.get(base_url)
+                print("Headless Chrome Initialized")
+
+            else:
+                browser = webdriver.Chrome(ChromeDriverManager().install())
+                browser.get(base_url)
+            while True:
+                try:
+                    # Checking if the login form is loaded.
+                    browser.find_element_by_xpath("/html/body/div[2]/div[1]/div[2]/div/div[2]/form")
+                    print("Baseurl getted")
+                    break
+                except:
+                    pass
+                    print("Website nicht bereit")
+
+            # Logging in to the selma website and then clicking on the "Prüfungsverwaltung" and then on "Ergebnisse"
+            browser.find_element_by_xpath(
+                "/html/body/div[2]/div[1]/div[2]/div/div[2]/form/div[1]/div/div[1]/input").send_keys(
+                selma_benutzer)
+            browser.find_element_by_xpath(
+                "/html/body/div[2]/div[1]/div[2]/div/div[2]/form/div[1]/div/div[2]/input").send_keys(
+                selma_pass)
+
+            while True:
+                try:
+                    # Clicking on the login button.
+                    browser.find_element_by_xpath(
+                        "/html/body/div[2]/div[1]/div[2]/div/div[2]/form/div[1]/input[9]").click()
+                    print("Login Erfolgreich")
+                    login_status = True
+                    break
+                except:
+                    pass
+                print("Wait for Login")
+
+            while True:
+                try:
+                    # Clicking on the "Prüfungsverwaltung" button.
+                    browser.find_element_by_xpath("/html/body/div[2]/div[2]/div[1]/ul/li/ul/li[3]/a").click()
+                    print("Login-Website nicht bereit")
+                    login_status = True
+                    break
+                except:
+                    pass
+                time.sleep(0.1)
+                print("Wait for Login-Website")
+            u = 0
+            while True:
+                try:
+                    # Clicking on the "Prüfungsverwaltung" button.
+                    browser.find_element_by_xpath("/html/body/div[2]/div[2]/div[1]/ul/li/ul/li[3]/ul/li[2]/a").click()
+                    print("Prüfungsergebnisse-Website bereit")
+                    login_status = True
+                    break
+                except:
+                    time.sleep(0.1)
+                    pass
+                if u % 10 == 0:
+                    print("Prüfungsergebnisse-Website nicht bereit")
+                u = u + 1
+                if u == 30:
+                    return False
+                print(u)
+
+            html = browser.page_source
+            browser.quit()
+
+        # Saving the html code to a txt file.
+        if save_to_txt:
+            text_file = open("data.txt", "w")
+            text_file.write(html)
+            text_file.close()
+
+        elif active_scraper:
+            pass
+
+        else:
+            text_file = open("data.txt", "r")
+            html = text_file.read()
+            text_file.close()
+
+        soup = BeautifulSoup(html, 'html.parser')
+        exam_all = soup.find_all('tr', attrs={'class': 'tbdata'})
+        anzahl_prufungen = len(exam_all)
+
+        if prufungen_alt == anzahl_prufungen:
+            return 0
+        elif prufungen_alt != anzahl_prufungen:
+            anzahl_prufungen_updater(anzahl_prufungen, user_id)
+            return 1
+
+    else:
+        return False
+
+
+"""""""""""
+Funkionabel
+"""
 
 
 def anzahl_prufungen_updater(prufungen_neu, user_id):
@@ -102,7 +265,6 @@ def exam_getter(user_id):
         else:
             browser = webdriver.Chrome(ChromeDriverManager().install())
             browser.get(base_url)
-        print("Baseurl getted")
         while True:
             try:
                 # Checking if the login form is loaded.

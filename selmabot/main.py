@@ -1,4 +1,4 @@
-version = "V1.3" #Live
+version = "V1.4" #Live
 import logging
 from package import variables as v
 from telegram import __version__ as TG_VER  # v20
@@ -151,6 +151,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text('Benutze /help um Hilfe mit den Befehlen und der Funktionsweise des Bots zu '
                                     'erhalten. \n'
                                     'Benutze /menu um den Bot aufzusetzen oder um deine Daten zu löschen\n'
+                                    'Benutze /update um zu Überprüfen ob neue Prüfungsergebnisse Vorliegen'
                                     'Benutze /exam um deine Prüfungsergebnisse abzurufen\n'
                                     'Benutze /msg <Nachricht> um die Nachricht an die Developer zu schicken\n')
 
@@ -165,6 +166,27 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                                     'Benutze /exam um deine Prüfungsergebnisse abzurufen\n'
                                     'Benutze /msg <Nachricht> um die Nachricht an die Developer zu schicken\n')
 
+async def update_exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                update.effective_user.last_name, update.effective_user.language_code)
+    await context.bot.send_message(update.effective_user.id, text="Deine Daten werden aktuell Abgerufen bitte warten:")
+    exam_data = selma.exam_updater(update.effective_user.id)
+    print(exam_data)
+    if exam_data is False:
+        #print(exam_data)
+        await context.bot.send_message(update.effective_user.id,
+                                       text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu um diese zu aktualisiren")
+    elif exam_data == 0:
+        await context.bot.send_message(update.effective_user.id,
+                                       text="Leider gibt es keine neuen Prüfungsergebnisse für dich")
+    elif exam_data == 1:
+        await context.bot.send_message(update.effective_user.id,
+                                       text="Hurrah es gibt neue Ergebnisse nutze /exam um diese abzurufen! \n"
+                                            "Und denk dran mit /reset um die Benachrichtigungen zurückzusetzen!")
+    else:
+        await context.bot.send_message(update.effective_user.id,
+                                       text="Leider ist etwas schiefgelaufen bitte schreibe dem Developer")
 
 async def setmenu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Sends a message with three inline buttons attached."""
@@ -352,6 +374,24 @@ async def setemail(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text('Deine Email wurde Erfolgreich gesetzt')
 
 
+async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                update.effective_user.last_name, update.effective_user.language_code)
+    mydb = mysql.connector.connect(
+        host=v.host(ort),
+        user=v.user(ort),
+        passwd=v.passwd(ort),
+        database=v.database(database),
+        auth_plugin='mysql_native_password')
+
+    my_cursor = mydb.cursor()
+    my_cursor.execute(f"UPDATE `Selma`.`Users` SET `Results_Update` = '0' WHERE (`User_Id` = {update.effective_user.id});")
+    mydb.commit()
+    my_cursor.close()
+    await update.message.reply_text('Reset wurde erfolgreich Durchgeführt')
+
+
 async def msg(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
@@ -379,6 +419,8 @@ def main() -> None:
     application.add_handler(CommandHandler("msg", msg))
     application.add_handler(CommandHandler("menu", setmenu))
     application.add_handler(CommandHandler("setpassw", setpassw))
+    application.add_handler(CommandHandler("reset", reset))
+    application.add_handler(CommandHandler("update", update_exam))
     application.add_handler(CommandHandler("setuser", setuser))
     application.add_handler(CommandHandler("setemail", setemail))
     application.add_handler(CommandHandler("exam", exam))
