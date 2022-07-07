@@ -1,11 +1,35 @@
 import time
-import webgetting
+
 import mysql.connector
+
+import webgetting
 from package import variables as v
+
 day = 0
 ort = "home"
 database = "Selma"
 results_clean = []
+
+
+def push(updates, user):
+    mydb = mysql.connector.connect(
+        host=v.host(ort),
+        user=v.user(ort),
+        passwd=v.passwd(ort),
+        database=v.database(database),
+        auth_plugin='mysql_native_password')
+
+    my_cursor = mydb.cursor()
+    if updates:
+        my_cursor.execute(
+            f"UPDATE `Selma`.`Users` SET `Push` = '1' WHERE (`User_Id` = {user});")
+    else:
+        my_cursor.execute(
+            f"UPDATE `Selma`.`Users` SET `Push` = '0' WHERE (`User_Id` = {user});")
+    mydb.commit()
+    my_cursor.close()
+
+
 while True:
     zeit = time.strftime("%Y-%m-%d %H:%M:%S")
     trigger = time.gmtime()
@@ -32,10 +56,13 @@ while True:
         if data is False:
             # print(exam_data)
             print("fehler bei zugang")
+            continue
         elif data == 0:
             print("keine updates")
+            push(False, person)
         elif data == 1:
             print("updates")
+            push(True, person)
         else:
             print("grober fehler")
     break

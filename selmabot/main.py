@@ -6,6 +6,7 @@ import mysql.connector
 import webgetting as selma
 import time
 
+
 ort = "home"
 database = "Selma"
 live = False
@@ -157,6 +158,51 @@ def exam_save_toggle(speichern, update):
             f"UPDATE `Selma`.`Users` SET `Speichern_Prüfungen` = '0' WHERE (`User_Id` = {update.effective_user.id});")
     mydb.commit()
     my_cursor.close()
+
+
+def push_updates():
+    results_clean = []
+    mydb = mysql.connector.connect(
+        host=v.host(ort),
+        user=v.user(ort),
+        passwd=v.passwd(ort),
+        database=v.database(database),
+        auth_plugin='mysql_native_password')
+
+    my_cursor = mydb.cursor()
+    my_cursor.execute(f"SELECT User_Id FROM `Selma`.`Users` WHERE Push = 1 ")
+    results_raw = my_cursor.fetchall()
+    my_cursor.close()
+    for raw in results_raw:
+        clen = int(str(raw).replace("(", "").replace(",)", "").strip())
+        results_clean.append(clen)
+        mydb = mysql.connector.connect(
+            host=v.host(ort),
+            user=v.user(ort),
+            passwd=v.passwd(ort),
+            database=v.database(database),
+            auth_plugin='mysql_native_password')
+
+        my_cursor = mydb.cursor()
+        my_cursor.execute(
+            f"UPDATE `Selma`.`Users` SET `Push` = 0 WHERE (`User_Id` = {clen});")
+        mydb.commit()
+        my_cursor.close()
+    return results_clean
+
+
+async def send_push(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    print("send push")
+    anzahl = push_updates()
+    print(anzahl)
+    for t_user in anzahl:
+        try:
+            await context.bot.send_message(t_user, text="Du Hast neue Prüfungsergebnisse!\n"
+                                                        "Benutze im Bot /exam um diese abzurufen und setze mit /reset die Benachrichtigungen zurück!")
+            print(f'Erfolg für User: {t_user}')
+        except:
+            print(f'Fehlgeschlagen für User: {t_user}')
+    await context.bot.send_message(v.telegram_user_id,text=f'Push fertig für {len(anzahl)}')
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -465,6 +511,7 @@ def main() -> None:
     application.add_handler(CommandHandler("setuser", setuser))
     application.add_handler(CommandHandler("setemail", setemail))
     application.add_handler(CommandHandler("exam", exam))
+    application.add_handler(CommandHandler("push", send_push))
     application.add_handler(CallbackQueryHandler(menu_actions))
 
     # massage handler
