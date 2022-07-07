@@ -10,3 +10,4 @@ instabot==0.117.0
 responses==0.21.0
 webdriver_manager>=0.0
 selenium==3.14.1
+python-telegram-bot==20.0a1
