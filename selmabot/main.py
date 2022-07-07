@@ -1,4 +1,4 @@
-version = "V1.4" #Live
+version = "V1.4"  # Live
 import logging
 from package import variables as v
 from telegram import __version__ as TG_VER  # v20
@@ -8,7 +8,7 @@ import time
 
 ort = "home"
 database = "Selma"
-live = True
+live = False
 loschtimer = 5
 
 try:
@@ -140,6 +140,25 @@ def userdel(user_id):
     my_cursor.close()
 
 
+def exam_save_toggle(speichern, update):
+    mydb = mysql.connector.connect(
+        host=v.host(ort),
+        user=v.user(ort),
+        passwd=v.passwd(ort),
+        database=v.database(database),
+        auth_plugin='mysql_native_password')
+
+    my_cursor = mydb.cursor()
+    if speichern:
+        my_cursor.execute(
+            f"UPDATE `Selma`.`Users` SET `Speichern_Prüfungen` = '1' WHERE (`User_Id` = {update.effective_user.id});")
+    else:
+        my_cursor.execute(
+            f"UPDATE `Selma`.`Users` SET `Speichern_Prüfungen` = '0' WHERE (`User_Id` = {update.effective_user.id});")
+    mydb.commit()
+    my_cursor.close()
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
@@ -166,6 +185,7 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                                     'Benutze /exam um deine Prüfungsergebnisse abzurufen\n'
                                     'Benutze /msg <Nachricht> um die Nachricht an die Developer zu schicken\n')
 
+
 async def update_exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
@@ -174,7 +194,7 @@ async def update_exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     exam_data = selma.exam_updater(update.effective_user.id)
     print(exam_data)
     if exam_data is False:
-        #print(exam_data)
+        # print(exam_data)
         await context.bot.send_message(update.effective_user.id,
                                        text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu um diese zu aktualisiren")
     elif exam_data == 0:
@@ -188,6 +208,7 @@ async def update_exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         await context.bot.send_message(update.effective_user.id,
                                        text="Leider ist etwas schiefgelaufen bitte schreibe dem Developer")
 
+
 async def setmenu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Sends a message with three inline buttons attached."""
     keyboard = [
@@ -195,6 +216,7 @@ async def setmenu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         [InlineKeyboardButton("Passwort Selma", callback_data="passw")],
         [InlineKeyboardButton("Email", callback_data="email")],
         [InlineKeyboardButton("Daten löschen", callback_data="datadel")],
+        [InlineKeyboardButton("Ergebnisspeicherung", callback_data="exam_save")],
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -225,6 +247,24 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             await context.bot.send_message(update.effective_message.chat_id,
                                            text=get_username(update.effective_user.id))
         await query.delete_message()
+
+    elif query.data == 'exam_save':
+        # first submenu
+        menu_2 = [[InlineKeyboardButton('Deine Prüfungsdaten Speichern', callback_data='exam_save_on')],
+                  [InlineKeyboardButton('Deine Prüfungsdaten nicht speichern(Standard)',
+                                        callback_data='exam_save_off')]]
+        reply_markup = InlineKeyboardMarkup(menu_2)
+        await query.edit_message_text(text='Choose the option:', reply_markup=reply_markup)
+
+    elif query.data == 'exam_save_on':
+        # first submenu
+        exam_save_toggle(True, update)
+        await query.edit_message_text(text='Deine Prüfungsergebnisse werden nun gespeichert')
+
+    elif query.data == 'exam_save_off':
+        # first submenu
+        exam_save_toggle(False, update)
+        await query.edit_message_text(text='Deine Prüfungsergebnisse werden nun nicht gespeichert')
 
 
     elif query.data == 'passw':
@@ -295,7 +335,7 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     exam_data = []
     exam_data = selma.exam_getter(update.effective_user.id)
     if exam_data is False:
-        #print(exam_data)
+        # print(exam_data)
         await context.bot.send_message(update.effective_user.id,
                                        text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu um diese zu aktualisiren")
     else:
@@ -386,7 +426,8 @@ async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         auth_plugin='mysql_native_password')
 
     my_cursor = mydb.cursor()
-    my_cursor.execute(f"UPDATE `Selma`.`Users` SET `Results_Update` = '0' WHERE (`User_Id` = {update.effective_user.id});")
+    my_cursor.execute(
+        f"UPDATE `Selma`.`Users` SET `Results_Update` = '0' WHERE (`User_Id` = {update.effective_user.id});")
     mydb.commit()
     my_cursor.close()
     await update.message.reply_text('Reset wurde erfolgreich Durchgeführt')
