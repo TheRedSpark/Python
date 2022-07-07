@@ -8,7 +8,7 @@ import time
 
 ort = "home"
 database = "Selma"
-live = False
+live = True
 loschtimer = 5
 
 try:
