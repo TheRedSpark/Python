@@ -6,7 +6,7 @@ from package import variables as v
 
 ort = "home"
 database = "Selma"
-live = False
+live = True
 results_clen = []
 update_version = 1.4
 update_message = f'Der Bot updatet auf V{update_version}\n' \
