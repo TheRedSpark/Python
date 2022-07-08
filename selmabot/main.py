@@ -4,7 +4,9 @@ from package import variables as v
 from telegram import __version__ as TG_VER  # v20
 import mysql.connector
 import webgetting as selma
+import crypro_neu as cry
 import time
+
 
 
 ort = "home"
