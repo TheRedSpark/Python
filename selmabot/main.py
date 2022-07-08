@@ -7,11 +7,9 @@ import webgetting as selma
 import crypro_neu as cry
 import time
 
-
-
 ort = "home"
 database = "Selma"
-live = False
+live = True
 loschtimer = 5
 
 try:
@@ -206,7 +204,7 @@ async def send_push(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             print(f'Erfolg für User: {t_user}')
         except:
             print(f'Fehlgeschlagen für User: {t_user}')
-    await context.bot.send_message(v.telegram_user_id,text=f'Push fertig für {len(anzahl)}')
+    await context.bot.send_message(v.telegram_user_id, text=f'Push fertig für {len(anzahl)}')
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -293,10 +291,14 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         if get_username(update.effective_user.id) is None:
             await context.bot.send_message(update.effective_message.chat_id,
                                            text="Du hast noch kein Selma Benutzernamen")
+        elif get_username(update.effective_user.id) is False:
+            await query.edit_message_text(
+                text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu um diese zu aktualisieren")
+
         else:
             await context.bot.send_message(update.effective_message.chat_id,
                                            text=get_username(update.effective_user.id))
-        await query.delete_message()
+            await query.delete_message()
 
     elif query.data == 'exam_save':
         # first submenu
@@ -329,12 +331,15 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         # first submenu
         if get_userpass(update.effective_user.id) is None:
             await query.edit_message_text(text="Du hast noch kein Passwort")
+        elif get_userpass(update.effective_user.id) is False:
+            await query.edit_message_text(
+                text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu um diese zu aktualisieren")
         else:
             await context.bot.send_message(update.effective_message.chat_id,
                                            text=f"Die nachfolgende Nachricht verschindet in {loschtimer} sec")
             await query.edit_message_text(text=get_userpass(update.effective_user.id))
             time.sleep(loschtimer)
-        await query.delete_message()
+            await query.delete_message()
 
     elif query.data == 'passw_speichern':
         await query.edit_message_text(
@@ -387,7 +392,7 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if exam_data is False:
         # print(exam_data)
         await context.bot.send_message(update.effective_user.id,
-                                       text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu um diese zu aktualisiren")
+                                       text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu um diese zu aktualisieren")
     else:
         exam_anzahl = 0
         exam_anzahl = int(exam_data.pop())

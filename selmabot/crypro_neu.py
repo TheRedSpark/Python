@@ -10,6 +10,9 @@ def encoding(message):
 
 
 def decoding(message):
-    str_decoded = cryptocode.decrypt(message, key)
-    return str_decoded
+    try:
+        str_decoded = cryptocode.decrypt(message, key)
+        return str_decoded
+    except:
+        return False
 
