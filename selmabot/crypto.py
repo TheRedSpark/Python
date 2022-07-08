@@ -1,6 +1,7 @@
 import rsa
 import mysql.connector
 from package import variables as v
+import base64
 
 ort = "home"
 database = "Selma"
@@ -44,9 +45,9 @@ def verify(message, signature, key):
         return False
 
 
-#generateKeys()
+# generateKeys()
 privateKey, publicKey = loadKeys()
-#message = input('Write your message here:')
+# message = input('Write your message here:')
 message = "gasfsdfwerrfasdaserfdasdsadsdwe"
 print(len(message))
 ciphertext = encrypt(message, publicKey)
@@ -68,7 +69,10 @@ if verify(text, signature, publicKey):
 else:
     print('The message signature could not be verified')
 
-bla
+bla = "blabla"
+ciphertextstr = str(ciphertext)
+print(ciphertextstr)
+a = 2
 
 mydb = mysql.connector.connect(
     host=v.host(ort),
@@ -78,6 +82,28 @@ mydb = mysql.connector.connect(
     auth_plugin='mysql_native_password')
 
 my_cursor = mydb.cursor()
-my_cursor.execute(f"UPDATE `Test`.`Cipher` SET `Pass` = {message} WHERE (`idCipher` = 4);")
+# my_cursor.execute(f"UPDATE `Selma`.`Users` SET `Push` = 0 WHERE (`User_Id` = {clen});")
+my_cursor.execute(f'UPDATE `Test`.`Cipher` SET `Pass` = "{ciphertext}" WHERE (`idCipher` = {a});')
+# my_cursor.execute(f'UPDATE `Test`.`Cipher` SET `Pass` = '{bla}' WHERE `idCipher` = 5;');")
 mydb.commit()
 my_cursor.close()
+
+mydb = mysql.connector.connect(
+    host=v.host(ort),
+    user=v.user(ort),
+    passwd=v.passwd(ort),
+    database=v.database(database),
+    auth_plugin='mysql_native_password')
+
+my_cursor = mydb.cursor()
+my_cursor.execute(f"SELECT Pass FROM `Test`.`Cipher` WHERE (`idCipher` = {a}) ")
+result = my_cursor.fetchone()
+print(type(result))
+result = str(result).replace(f'(bytearray(b""','').replace(f'"),)','')
+#result = bytearray(result)
+my_cursor.close()
+print(ciphertext)
+print(result)
+print(type(result))
+text2 = decrypt(result, privateKey)
+print(text2)
