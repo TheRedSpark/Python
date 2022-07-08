@@ -13,3 +13,4 @@ selenium==3.14.1
 python-telegram-bot==20.0a1
 dvb==1.2
 rsa==4.8
+cryptocode==0.1
