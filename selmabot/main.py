@@ -93,9 +93,10 @@ def get_username(user_id):
 
     my_cursor = mydb.cursor()
     my_cursor.execute(f"SELECT Username_Selma FROM `Selma`.`Users` WHERE User_Id = ({user_id}) ")
-    result = my_cursor.fetchone()
+    enc_username = my_cursor.fetchone()
     my_cursor.close()
-    return result[0]
+    dec_username = cry.decoding(enc_username[0])
+    return dec_username
 
 
 def get_userpass(user_id):
@@ -108,9 +109,10 @@ def get_userpass(user_id):
 
     my_cursor = mydb.cursor()
     my_cursor.execute(f"SELECT Password_Selma FROM `Selma`.`Users` WHERE User_Id = ({user_id}) ")
-    result = my_cursor.fetchone()
+    enc_userpass = my_cursor.fetchone()
     my_cursor.close()
-    return result[0]
+    dec_userpass = cry.decoding(enc_userpass[0])
+    return dec_userpass
 
 
 def get_user_email(user_id):
@@ -407,7 +409,8 @@ async def setpassw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
-    passw = str(update.message.text).replace("/setpassw", "").strip()
+    passw_raw = str(update.message.text).replace("/setpassw", "").strip()
+    passw = cry.encoding(passw_raw)
     mydb = mysql.connector.connect(
         host=v.host(ort),
         user=v.user(ort),
@@ -427,7 +430,8 @@ async def setuser(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
-    user = str(update.message.text).replace("/setuser", "").strip()
+    user_raw = str(update.message.text).replace("/setuser", "").strip()
+    user = cry.encoding(user_raw)
     mydb = mysql.connector.connect(
         host=v.host(ort),
         user=v.user(ort),

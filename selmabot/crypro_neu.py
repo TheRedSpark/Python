@@ -5,10 +5,11 @@ key = v.cryptokey
 
 
 def encoding(message):
-    message = cryptocode.encrypt(message, key)
-    return message
+    str_encoded = cryptocode.encrypt(message, key)
+    return str_encoded
 
 
 def decoding(message):
     str_decoded = cryptocode.decrypt(message, key)
-    return message
+    return str_decoded
+

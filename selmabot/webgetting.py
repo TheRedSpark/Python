@@ -3,6 +3,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup  # V4.10.0
 import time
+import crypro_neu as cry
 from package import variables as v
 import mysql.connector  # V8.0.28
 
@@ -60,10 +61,12 @@ def exam_updater(user_id):
         my_cursor = mydb.cursor()
         my_cursor.execute(f"SELECT Username_Selma,Password_Selma FROM `Selma`.`Users` WHERE User_Id = ({user_id}) ")
         result = my_cursor.fetchone()
-        selma_benutzer = result[0]
-        selma_pass = result[1]
         my_cursor.close()
-        if selma_benutzer is not None and selma_pass is not None:
+        selma_benutzer_enc = result[0]
+        selma_pass_enc = result[1]
+        selma_benutzer = cry.decoding(selma_benutzer_enc)
+        selma_pass = cry.decoding(selma_pass_enc)
+        if selma_benutzer is not False and selma_pass is not False:
             pass
         else:
             return False
@@ -238,11 +241,12 @@ def exam_getter(user_id):
     my_cursor = mydb.cursor()
     my_cursor.execute(f"SELECT Username_Selma,Password_Selma FROM `Selma`.`Users` WHERE User_Id = ({user_id}) ")
     result = my_cursor.fetchone()
-    print(result)
-    selma_benutzer = result[0]
-    selma_pass = result[1]
-    my_cursor.close()
-    if selma_benutzer is not None and selma_pass is not None:
+    mydb.close()
+    selma_benutzer_enc = result[0]
+    selma_pass_enc = result[1]
+    selma_benutzer = cry.decoding(selma_benutzer_enc)
+    selma_pass = cry.decoding(selma_pass_enc)
+    if selma_benutzer is not False and selma_pass is not False:
         pass
     else:
         return False
