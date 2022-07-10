@@ -8,9 +8,9 @@ ort = "home"
 database = "Selma"
 live = True
 results_clen = []
-update_version = 1.5
+update_version = 1.6
 update_message = f'Der Bot updatet auf V{update_version}\n' \
-                 f'Bug fixes und Erweiterung der Sicherheit führte dazu das Selma-Benutzer und Pass gelöscht wurden'
+                 f'Der Bot kann nun auch dich automatisch per Push benachrichtigen wenn neue Updates vorliegen'
 
 try:
     from telegram import __version_info__

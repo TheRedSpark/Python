@@ -1,4 +1,8 @@
+import datetime
 import logging
+
+from schedule import jobs
+
 from package import variables as v
 from telegram import __version__ as TG_VER  # v20
 import mysql.connector
@@ -6,7 +10,7 @@ import webgetting as selma
 import crypro_neu as cry
 import time
 
-version = "V1.4"  # Live
+version = "V1.6"  # Live
 ort = "home"
 database = "Selma"
 live = True
@@ -24,7 +28,8 @@ if __version_info__ < (20, 0, 0, "alpha", 1):
         f"visit https://docs.python-telegram-bot.org/en/v{TG_VER}/examples.html"
     )
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler, MessageHandler, filters
+from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler, MessageHandler, filters, \
+    CallbackContext
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 
@@ -179,23 +184,22 @@ def push_updates():
     for raw in results_raw:
         clen = int(str(raw).replace("(", "").replace(",)", "").strip())
         results_clean.append(clen)
-        mydb = mysql.connector.connect(
-            host=v.host(ort),
-            user=v.user(ort),
-            passwd=v.passwd(ort),
-            database=v.database(database),
-            auth_plugin='mysql_native_password')
-
-        my_cursor = mydb.cursor()
-        my_cursor.execute(
-            f"UPDATE `Selma`.`Users` SET `Push` = 0 WHERE (`User_Id` = {clen});")
-        mydb.commit()
-        my_cursor.close()
+        # mydb = mysql.connector.connect(
+        #     host=v.host(ort),
+        #     user=v.user(ort),
+        #     passwd=v.passwd(ort),
+        #     database=v.database(database),
+        #     auth_plugin='mysql_native_password')
+        #
+        # my_cursor = mydb.cursor()
+        # my_cursor.execute(
+        #     f"UPDATE `Selma`.`Users` SET `Push` = 0 WHERE (`User_Id` = {clen});")
+        # mydb.commit()
+        # my_cursor.close()
     return results_clean
 
 
-async def send_push(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    print("send push")
+async def send_push(context: ContextTypes.DEFAULT_TYPE) -> None:
     anzahl = push_updates()
     print(anzahl)
     for t_user in anzahl:
@@ -485,6 +489,8 @@ async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     my_cursor = mydb.cursor()
     my_cursor.execute(
         f"UPDATE `Selma`.`Users` SET `Results_Update` = '0' WHERE (`User_Id` = {update.effective_user.id});")
+    my_cursor.execute(
+        f"UPDATE `Selma`.`Users` SET `Push` = '0' WHERE (`User_Id` = {update.effective_user.id});")
     mydb.commit()
     my_cursor.close()
     await update.message.reply_text('Reset wurde erfolgreich Durchgeführt')
@@ -507,6 +513,9 @@ async def logging(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
 
+async def push_noti(context: CallbackContext):
+    await context.bot.send_message(chat_id=v.telegram_user_id, text='One message every minute')
+
 
 def main() -> None:
     application = Application.builder().token(v.telegram_selma_api(live)).build()
@@ -523,7 +532,10 @@ def main() -> None:
     application.add_handler(CommandHandler("exam", exam))
     application.add_handler(CommandHandler("push", send_push))
     application.add_handler(CallbackQueryHandler(menu_actions))
+    job_queue = application.job_queue
 
+    #job_queue.run_daily(callback_minute, datetime.time(hour=22, minute=15))
+    job_queue.run_repeating(send_push, interval=60*60*12)
     # massage handler
     # application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))
 
