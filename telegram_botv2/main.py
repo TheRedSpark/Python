@@ -32,7 +32,7 @@ logging.basicConfig(
 )
 
 
-def userlogging(user_id, username, message_chat_id, message_txt, message_id, first_name, last_name, land_code):
+def user_logging(user_id, username, message_chat_id, message_txt, message_id, first_name, last_name, land_code):
     if live:
         mydb = mysql.connector.connect(
             host=v.host(ort),
@@ -51,9 +51,9 @@ def userlogging(user_id, username, message_chat_id, message_txt, message_id, fir
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
-                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
-                update.effective_user.last_name, update.effective_user.language_code)
+    user_logging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                 update.effective_user.last_name, update.effective_user.language_code)
     await update.message.reply_text('Benutze /help um diese Nachricht anzuzeigen'
                                     'Benutze /set <Sekunden> um einen Wecker zu stellen\n'
                                     'Benutze /msg <Nachricht> um die Nachricht an den Developer zu schicken\n'
@@ -79,9 +79,9 @@ def remove_job_if_exists(name: str, context: ContextTypes.DEFAULT_TYPE) -> bool:
 async def set_timer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = update.effective_message.chat_id
 
-    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
-                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
-                update.effective_user.last_name, update.effective_user.language_code)
+    user_logging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                 update.effective_user.last_name, update.effective_user.language_code)
 
     try:
         # args[0] should contain the time for the timer in seconds
@@ -92,7 +92,7 @@ async def set_timer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
         job_removed = remove_job_if_exists(str(chat_id), context)
         context.job_queue.run_once(alarm, due, chat_id=chat_id, name=str(chat_id), data=due)
-
+        context.job_queue.run_daily()
         text = "Timer successfully set!"
         if job_removed:
             text += " Old one was removed."
@@ -104,9 +104,9 @@ async def set_timer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # await update.message.reply_text(update.message.text)
-    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
-                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
-                update.effective_user.last_name, update.effective_user.language_code)
+    user_logging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                 update.effective_user.last_name, update.effective_user.language_code)
     user_message = str(update.message.text).lower()
 
     if user_message in ("zeitabstand", "1"):
@@ -152,9 +152,9 @@ async def unset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def msg(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
-                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
-                update.effective_user.last_name, update.effective_user.language_code)
+    user_logging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                 update.effective_user.last_name, update.effective_user.language_code)
     chat_id = v.telegram_user_id
     await context.bot.send_message(chat_id,
                                    text=f'User:({update.effective_user.username}) hat dir ({update.message.text.replace("/msg ", "")}) '

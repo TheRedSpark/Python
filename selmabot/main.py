@@ -1,4 +1,3 @@
-version = "V1.4"  # Live
 import logging
 from package import variables as v
 from telegram import __version__ as TG_VER  # v20
@@ -7,6 +6,7 @@ import webgetting as selma
 import crypro_neu as cry
 import time
 
+version = "V1.4"  # Live
 ort = "home"
 database = "Selma"
 live = True
@@ -59,7 +59,7 @@ def userlogging(user_id, username, message_chat_id, message_txt, message_id, fir
         my_cursor.close()
 
 
-def usercreate(user_id, username):
+def user_create(user_id, username):
     mydb = mysql.connector.connect(
         host=v.host(ort),
         user=v.user(ort),
@@ -123,9 +123,10 @@ def get_user_email(user_id):
 
     my_cursor = mydb.cursor()
     my_cursor.execute(f"SELECT Email FROM `Selma`.`Users` WHERE User_Id = ({user_id}) ")
-    result = my_cursor.fetchone()
+    enc_email = my_cursor.fetchone()
     my_cursor.close()
-    return result[0]
+    dec_userpass = cry.decoding(enc_email[0])
+    return dec_userpass
 
 
 def userdel(user_id):
@@ -211,9 +212,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
-    usercreate(update.effective_user.id, update.effective_user.username)
+    user_create(update.effective_user.id, update.effective_user.username)
     await context.bot.send_message(update.effective_user.id, text=f"Der Selma-Bot sagt herzlich hallo ;-)\n"
-                                                                  f"Bei Problemen Bugs oder Anmerkungen gerne die Msg Funktion benutzen\n"
+                                                                  f"Bei Problemen Bugs oder Anmerkungen gerne die Msg "
+                                                                  f"Funktion benutzen\n "
                                                                   f"Selma Bot Version {version}")
     await update.message.reply_text('Benutze /help um Hilfe mit den Befehlen und der Funktionsweise des Bots zu '
                                     'erhalten. \n'
@@ -223,7 +225,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                                     'Benutze /msg <Nachricht> um die Nachricht an die Developer zu schicken\n')
 
 
-async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def help_page(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
@@ -244,7 +246,8 @@ async def update_exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     if exam_data is False:
         # print(exam_data)
         await context.bot.send_message(update.effective_user.id,
-                                       text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu um diese zu aktualisiren")
+                                       text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu um diese zu "
+                                            "aktualisieren")
     elif exam_data == 0:
         await context.bot.send_message(update.effective_user.id,
                                        text="Leider gibt es keine neuen Prüfungsergebnisse für dich")
@@ -257,7 +260,7 @@ async def update_exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                                        text="Leider ist etwas schiefgelaufen bitte schreibe dem Developer")
 
 
-async def setmenu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def set_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Sends a message with three inline buttons attached."""
     keyboard = [
         [InlineKeyboardButton("Benutzernamen Selma", callback_data="user")],
@@ -318,7 +321,6 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         exam_save_toggle(False, update)
         await query.edit_message_text(text='Deine Prüfungsergebnisse werden nun nicht gespeichert')
 
-
     elif query.data == 'passw':
         # first submenu
         menu_2 = [[InlineKeyboardButton('Selma Passwort speichern', callback_data='passw_speichern')],
@@ -353,9 +355,6 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         await query.edit_message_text(
             text="Bitte nutze den /setemail EMAIL Befehl wobei EMAIL durch deie Email ersetzt wird")
 
-
-
-
     elif query.data == 'email':
         # second submenu
         # first submenu
@@ -369,14 +368,15 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         # first submenu
         if get_user_email(update.effective_user.id) is None:
             await query.edit_message_text(text="Du hast noch keine Email")
+        elif get_user_email(update.effective_user.id) is False:
+            await query.edit_message_text(
+                text="Deine Email ist Fehlerhaft bitte benutze /menu um diese zu aktualisieren")
         else:
             await query.edit_message_text(text=get_user_email(update.effective_user.id))
 
     elif query.data == 'datadel':
         userdel(update.effective_user.id)
         await query.edit_message_text(text="Deine Persönlichen Daten wurden Erfolgreich gelöscht")
-
-
 
     else:
         await query.delete_message()
@@ -387,14 +387,13 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
     await context.bot.send_message(update.effective_user.id, text="Deine Daten werden aktuell Abgerufen bitte warten:")
-    exam_data = []
     exam_data = selma.exam_getter(update.effective_user.id)
     if exam_data is False:
         # print(exam_data)
         await context.bot.send_message(update.effective_user.id,
-                                       text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu um diese zu aktualisieren")
+                                       text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu um diese zu "
+                                            "aktualisieren")
     else:
-        exam_anzahl = 0
         exam_anzahl = int(exam_data.pop())
         i = 0
         while True:
@@ -412,7 +411,7 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def setpassw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
-                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                "/setpassw", update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
     passw_raw = str(update.message.text).replace("/setpassw", "").strip()
     passw = cry.encoding(passw_raw)
@@ -433,7 +432,7 @@ async def setpassw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def setuser(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
-                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                "/setuser", update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
     user_raw = str(update.message.text).replace("/setuser", "").strip()
     user = cry.encoding(user_raw)
@@ -452,11 +451,12 @@ async def setuser(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text('Dein Benutzername wurde Erfolgreich gesetzt')
 
 
-async def setemail(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def set_email(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
-    email = str(update.message.text).replace("/setemail", "").strip()
+    email_raw = str(update.message.text).replace("/setemail", "").strip()
+    email = cry.encoding(email_raw)
     mydb = mysql.connector.connect(
         host=v.host(ort),
         user=v.user(ort),
@@ -512,15 +512,14 @@ def main() -> None:
     application = Application.builder().token(v.telegram_selma_api(live)).build()
 
     # on different commands - answer in Telegram
-    # application.add_handler(CommandHandler(["start", "help", "menu", "setpassw", "setuser", "setemail", "exam"], logging))
     application.add_handler(CommandHandler(["start", "help"], start))
     application.add_handler(CommandHandler("msg", msg))
-    application.add_handler(CommandHandler("menu", setmenu))
+    application.add_handler(CommandHandler("menu", set_menu))
     application.add_handler(CommandHandler("setpassw", setpassw))
     application.add_handler(CommandHandler("reset", reset))
     application.add_handler(CommandHandler("update", update_exam))
     application.add_handler(CommandHandler("setuser", setuser))
-    application.add_handler(CommandHandler("setemail", setemail))
+    application.add_handler(CommandHandler("setemail", set_email))
     application.add_handler(CommandHandler("exam", exam))
     application.add_handler(CommandHandler("push", send_push))
     application.add_handler(CallbackQueryHandler(menu_actions))
