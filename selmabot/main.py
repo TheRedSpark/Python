@@ -13,7 +13,7 @@ import time
 version = "V1.6"  # Live
 ort = "home"
 database = "Selma"
-live = True
+live = False
 loschtimer = 5
 
 try:
@@ -31,7 +31,10 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler, MessageHandler, filters, \
     CallbackContext
 
-logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
+if selma.on_server:
+    pass
+else:
+    logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 
 
 def userlogging(user_id, username, message_chat_id, message_txt, message_id, first_name, last_name, land_code):
@@ -168,6 +171,25 @@ def exam_save_toggle(speichern, update):
     my_cursor.close()
 
 
+def noti_toggle(speichern, update):
+    mydb = mysql.connector.connect(
+        host=v.host(ort),
+        user=v.user(ort),
+        passwd=v.passwd(ort),
+        database=v.database(database),
+        auth_plugin='mysql_native_password')
+
+    my_cursor = mydb.cursor()
+    if speichern:
+        my_cursor.execute(
+            f"UPDATE `Selma`.`Users` SET `Push_Toggle` = '1' WHERE (`User_Id` = {update.effective_user.id});")
+    else:
+        my_cursor.execute(
+            f"UPDATE `Selma`.`Users` SET `Push_Toggle` = '0' WHERE (`User_Id` = {update.effective_user.id});")
+    mydb.commit()
+    my_cursor.close()
+
+
 def push_updates():
     results_clean = []
     mydb = mysql.connector.connect(
@@ -218,13 +240,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 update.effective_user.last_name, update.effective_user.language_code)
     user_create(update.effective_user.id, update.effective_user.username)
     await context.bot.send_message(update.effective_user.id, text=f"Der Selma-Bot sagt herzlich hallo ;-)\n"
-                                                                  f"Bei Problemen Bugs oder Anmerkungen gerne die Msg "
-                                                                  f"Funktion benutzen\n "
+                                                                  f"Bei Problemen Bugs oder "
+                                                                  f"Anmerkungen/Schreibfehlern gerne die Msg Funktion "
+                                                                  f"benutzen\n "
+                                                                  f"Natürlich werden alle deine persönlichen Daten verschlüsselt\n"
                                                                   f"Selma Bot Version {version}")
     await update.message.reply_text('Benutze /help um Hilfe mit den Befehlen und der Funktionsweise des Bots zu '
                                     'erhalten. \n'
-                                    'Benutze /menu um den Bot aufzusetzen oder um deine Daten zu löschen\n'
-                                    'Benutze /update um zu Überprüfen ob neue Prüfungsergebnisse Vorliegen'
+                                    'Benutze /menu um den Bot für dich einzurichten oder um deine Daten zu löschen\n'
+                                    'Benutze /update um zu Überprüfen ob neue Prüfungsergebnisse Vorliegen\n'
                                     'Benutze /exam um deine Prüfungsergebnisse abzurufen\n'
                                     'Benutze /msg <Nachricht> um die Nachricht an die Developer zu schicken\n')
 
@@ -235,7 +259,7 @@ async def help_page(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 update.effective_user.last_name, update.effective_user.language_code)
     await update.message.reply_text('Benutze /help um Hilfe mit den Befehlen und der Funktionsweise des Bots zu '
                                     'erhalten. \n'
-                                    'Benutze /menu um den Bot aufzusetzen oder um deine Daten zu löschen\n'
+                                    'Benutze /menu um den Bot für dich einzurichten oder um deine Daten zu löschen\n'
                                     'Benutze /exam um deine Prüfungsergebnisse abzurufen\n'
                                     'Benutze /msg <Nachricht> um die Nachricht an die Developer zu schicken\n')
 
@@ -269,9 +293,10 @@ async def set_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     keyboard = [
         [InlineKeyboardButton("Benutzernamen Selma", callback_data="user")],
         [InlineKeyboardButton("Passwort Selma", callback_data="passw")],
-        [InlineKeyboardButton("Email", callback_data="email")],
+        #[InlineKeyboardButton("Email", callback_data="email")],
+        [InlineKeyboardButton("Notification", callback_data="noti")],
         [InlineKeyboardButton("Daten löschen", callback_data="datadel")],
-        [InlineKeyboardButton("Ergebnisspeicherung", callback_data="exam_save")],
+        # [InlineKeyboardButton("Ergebnisspeicherung", callback_data="exam_save")],
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -290,7 +315,7 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         menu_2 = [[InlineKeyboardButton('Selma Benutzernamen speichern', callback_data='user_speichern')],
                   [InlineKeyboardButton('Selma Benutzernamen anzeigen', callback_data='user_anzeigen')]]
         reply_markup = InlineKeyboardMarkup(menu_2)
-        await query.edit_message_text(text='Choose the option:', reply_markup=reply_markup)
+        await query.edit_message_text(text='Deine Daten werden Verschlüsselt gespeichert!', reply_markup=reply_markup)
 
     elif query.data == 'user_anzeigen':
         # second submenu
@@ -306,6 +331,24 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             await context.bot.send_message(update.effective_message.chat_id,
                                            text=get_username(update.effective_user.id))
             await query.delete_message()
+
+    elif query.data == 'noti':
+        # first submenu
+        menu_2 = [[InlineKeyboardButton('Push Benachrichtigungen deaktivieren', callback_data='noti_off')],
+                  [InlineKeyboardButton('Push Benachrichtigungen aktivieren (Standard)',
+                                        callback_data='noti_on')]]
+        reply_markup = InlineKeyboardMarkup(menu_2)
+        await query.edit_message_text(text='Choose the option:', reply_markup=reply_markup)
+
+    elif query.data == 'noti_on':
+        # first submenu
+        noti_toggle(True, update)
+        await query.edit_message_text(text='Nun wirst du aktiv benachrichtigt')
+
+    elif query.data == 'noti_off':
+        # first submenu
+        noti_toggle(False, update)
+        await query.edit_message_text(text='Nun wirst du nicht mehr belästigt')
 
     elif query.data == 'exam_save':
         # first submenu
@@ -330,7 +373,7 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         menu_2 = [[InlineKeyboardButton('Selma Passwort speichern', callback_data='passw_speichern')],
                   [InlineKeyboardButton('Selma Passwort anzeigen', callback_data='passw_anzeigen')]]
         reply_markup = InlineKeyboardMarkup(menu_2)
-        await query.edit_message_text(text='Choose the option:', reply_markup=reply_markup)
+        await query.edit_message_text(text='Deine Daten werden Verschlüsselt gespeichert!', reply_markup=reply_markup)
 
     elif query.data == 'passw_anzeigen':
         # second submenu
@@ -365,7 +408,7 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         menu_2 = [[InlineKeyboardButton('Email Speichern', callback_data='email_speichern')],
                   [InlineKeyboardButton('Email Anzeigen', callback_data='email_anzeigen')]]
         reply_markup = InlineKeyboardMarkup(menu_2)
-        await query.edit_message_text(text='Choose the option:', reply_markup=reply_markup)
+        await query.edit_message_text(text='Deine Daten werden Verschlüsselt gespeichert!', reply_markup=reply_markup)
 
     elif query.data == 'email_anzeigen':
         # second submenu
@@ -457,7 +500,7 @@ async def setuser(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def set_email(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
-                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                "/setmail", update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
     email_raw = str(update.message.text).replace("/setemail", "").strip()
     email = cry.encoding(email_raw)
@@ -513,6 +556,7 @@ async def logging(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
 
+
 async def push_noti(context: CallbackContext):
     await context.bot.send_message(chat_id=v.telegram_user_id, text='One message every minute')
 
@@ -534,8 +578,8 @@ def main() -> None:
     application.add_handler(CallbackQueryHandler(menu_actions))
     job_queue = application.job_queue
 
-    #job_queue.run_daily(callback_minute, datetime.time(hour=22, minute=15))
-    job_queue.run_repeating(send_push, interval=60*60*12)
+    # job_queue.run_daily(callback_minute, datetime.time(hour=22, minute=15))
+    job_queue.run_repeating(send_push, interval=60 * 60 * 12)
     # massage handler
     # application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))
 

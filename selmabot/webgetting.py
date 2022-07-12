@@ -79,7 +79,7 @@ def exam_updater(user_id):
                 options.headless = True
                 if on_server:
                     browser = webdriver.Chrome(options=options,
-                                               executable_path=r'/usr/local/share/chromedriver')
+                                               executable_path=r'chromedriver')
                 else:
                     browser = webdriver.Chrome(options=options,
                                                executable_path=r'C:\Users\Win10\.wdm\drivers\chromedriver\win32\102.0.5005.61\chromedriver.exe')
@@ -259,7 +259,7 @@ def exam_getter(user_id):
             options.headless = True
             if on_server:
                 browser = webdriver.Chrome(options=options,
-                                           executable_path=r'/usr/local/share/chromedriver')
+                                           executable_path=r'chromedriver')
             else:
                 browser = webdriver.Chrome(options=options,
                                            executable_path=r'C:\Users\Win10\.wdm\drivers\chromedriver\win32\102.0.5005.61\chromedriver.exe')
