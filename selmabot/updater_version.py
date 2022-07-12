@@ -3,14 +3,15 @@ from package import variables as v
 from telegram import __version__ as TG_VER  # v20
 import mysql.connector
 from package import variables as v
+import main
 
 ort = "home"
 database = "Selma"
 live = True
 results_clen = []
-update_version = 1.6
-update_message = f'Der Bot updatet auf V{update_version}\n' \
-                 f'Der Bot kann nun auch dich automatisch per Push benachrichtigen wenn neue Updates vorliegen'
+update_version = main.version
+update_message = f'Der Bot updatet auf {update_version}\n' \
+                 f'Minor Bug fixes und du kannst nun die aktive Benachrichtigung an und ausschalten'
 
 try:
     from telegram import __version_info__
@@ -60,6 +61,7 @@ def main() -> None:
     # on different commands - answer in Telegram
     # application.add_handler(CommandHandler(["start", "help", "menu", "setpassw", "setuser", "setemail", "exam"], logging))
     application.add_handler(CommandHandler("send", send))
+
 
     # massage handler
     # application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))

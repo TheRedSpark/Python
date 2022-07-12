@@ -10,7 +10,7 @@ import webgetting as selma
 import crypro_neu as cry
 import time
 
-version = "V1.6"  # Live
+version = "V1.7"  # Live
 ort = "home"
 database = "Selma"
 live = False
