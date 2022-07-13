@@ -1,14 +1,12 @@
-import datetime
 import logging
-
-from schedule import jobs
-
-from package import variables as v
-from telegram import __version__ as TG_VER  # v20
-import mysql.connector
-import webgetting as selma
-import crypro_neu as cry
 import time
+
+import mysql.connector
+from telegram import __version__ as TG_VER  # v20
+
+import crypro_neu as cry
+import webgetting as selma
+from package import variables as v
 
 version = "V1.7"  # Live
 ort = "home"
@@ -28,8 +26,7 @@ if __version_info__ < (20, 0, 0, "alpha", 1):
         f"visit https://docs.python-telegram-bot.org/en/v{TG_VER}/examples.html"
     )
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler, MessageHandler, filters, \
-    CallbackContext
+from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler, CallbackContext
 
 if selma.on_server:
     pass
@@ -240,26 +237,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 update.effective_user.last_name, update.effective_user.language_code)
     user_create(update.effective_user.id, update.effective_user.username)
     await context.bot.send_message(update.effective_user.id, text=f"Der Selma-Bot sagt herzlich hallo ;-)\n"
-                                                                  f"Bei Problemen Bugs oder "
-                                                                  f"Anmerkungen/Schreibfehlern gerne die Msg Funktion "
-                                                                  f"benutzen\n "
-                                                                  f"Natürlich werden alle deine persönlichen Daten verschlüsselt\n"
+                                                                  f"Alle deine persönlichen Daten werden verschlüsselt.\n"
+                                                                  f"Du kannst deine Anregungen gerne mit der /msg Funktion teilen.\n"
                                                                   f"Selma Bot Version {version}")
     await update.message.reply_text('Benutze /help um Hilfe mit den Befehlen und der Funktionsweise des Bots zu '
                                     'erhalten. \n'
                                     'Benutze /menu um den Bot für dich einzurichten oder um deine Daten zu löschen\n'
-                                    'Benutze /update um zu Überprüfen ob neue Prüfungsergebnisse Vorliegen\n'
-                                    'Benutze /exam um deine Prüfungsergebnisse abzurufen\n'
-                                    'Benutze /msg <Nachricht> um die Nachricht an die Developer zu schicken\n')
-
-
-async def help_page(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
-                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
-                update.effective_user.last_name, update.effective_user.language_code)
-    await update.message.reply_text('Benutze /help um Hilfe mit den Befehlen und der Funktionsweise des Bots zu '
-                                    'erhalten. \n'
-                                    'Benutze /menu um den Bot für dich einzurichten oder um deine Daten zu löschen\n'
+                                    'Benutze /update um zu Überprüfen ob neue Prüfungsergebnisse vorliegen\n'
                                     'Benutze /exam um deine Prüfungsergebnisse abzurufen\n'
                                     'Benutze /msg <Nachricht> um die Nachricht an die Developer zu schicken\n')
 
@@ -268,7 +252,7 @@ async def update_exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
-    await context.bot.send_message(update.effective_user.id, text="Deine Daten werden aktuell Abgerufen bitte warten:")
+    await context.bot.send_message(update.effective_user.id, text="Deine Daten werden aktuell abgerufen bitte warten:")
     exam_data = selma.exam_updater(update.effective_user.id)
     print(exam_data)
     if exam_data is False:
@@ -293,7 +277,7 @@ async def set_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     keyboard = [
         [InlineKeyboardButton("Benutzernamen Selma", callback_data="user")],
         [InlineKeyboardButton("Passwort Selma", callback_data="passw")],
-        #[InlineKeyboardButton("Email", callback_data="email")],
+        # [InlineKeyboardButton("Email", callback_data="email")],
         [InlineKeyboardButton("Notification", callback_data="noti")],
         [InlineKeyboardButton("Daten löschen", callback_data="datadel")],
         # [InlineKeyboardButton("Ergebnisspeicherung", callback_data="exam_save")],
@@ -373,7 +357,7 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         menu_2 = [[InlineKeyboardButton('Selma Passwort speichern', callback_data='passw_speichern')],
                   [InlineKeyboardButton('Selma Passwort anzeigen', callback_data='passw_anzeigen')]]
         reply_markup = InlineKeyboardMarkup(menu_2)
-        await query.edit_message_text(text='Deine Daten werden Verschlüsselt gespeichert!', reply_markup=reply_markup)
+        await query.edit_message_text(text='Deine Daten werden verschlüsselt gespeichert!', reply_markup=reply_markup)
 
     elif query.data == 'passw_anzeigen':
         # second submenu
@@ -385,7 +369,7 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
                 text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu um diese zu aktualisieren")
         else:
             await context.bot.send_message(update.effective_message.chat_id,
-                                           text=f"Die nachfolgende Nachricht verschindet in {loschtimer} sec")
+                                           text=f"Die nachfolgende Nachricht verschwindet in {loschtimer} sec")
             await query.edit_message_text(text=get_userpass(update.effective_user.id))
             time.sleep(loschtimer)
             await query.delete_message()
@@ -396,7 +380,7 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     elif query.data == 'user_speichern':
         await query.edit_message_text(
-            text="Bitte nutze den /setuser BENUTZER Befehl wobei BENUTZER durch dein Selma-Benutzernamen ersetzt wird")
+            text="Bitte nutze den /setuser BENUTZER Befehl wobei BENUTZER durch deinen Selma-Benutzernamen ersetzt wird")
 
     elif query.data == 'email_speichern':
         await query.edit_message_text(
@@ -433,7 +417,7 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
-    await context.bot.send_message(update.effective_user.id, text="Deine Daten werden aktuell Abgerufen bitte warten:")
+    await context.bot.send_message(update.effective_user.id, text="Deine Daten werden aktuell abgerufen bitte warten:")
     exam_data = selma.exam_getter(update.effective_user.id)
     if exam_data is False:
         # print(exam_data)
@@ -474,7 +458,7 @@ async def setpassw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f"UPDATE `Selma`.`Users` SET `Password_Selma` = '{passw}' WHERE (`User_Id` = {update.effective_user.id});")
     mydb.commit()
     my_cursor.close()
-    await update.message.reply_text('Dein Password wurde Erfolgreich gesetzt')
+    await update.message.reply_text('Dein Password wurde erfolgreich gesetzt')
 
 
 async def setuser(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -495,7 +479,7 @@ async def setuser(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f"UPDATE `Selma`.`Users` SET `Username_Selma` = '{user}' WHERE (`User_Id` = {update.effective_user.id});")
     mydb.commit()
     my_cursor.close()
-    await update.message.reply_text('Dein Benutzername wurde Erfolgreich gesetzt')
+    await update.message.reply_text('Dein Benutzername wurde erfolgreich gesetzt')
 
 
 async def set_email(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
