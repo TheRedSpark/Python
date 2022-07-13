@@ -5,8 +5,7 @@ import pyowm  # V2.10.0
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import variables as v
-import zugang as integration  # eigene
+from package import variables as v
 
 x = 1
 schutzsleep = 60
@@ -18,17 +17,17 @@ username = v.username
 password = v.password
 mail_from = v.mail_from
 mail_to = v.mail_to
-mail_subject_rain = v.mail_subject_rain
-mail_subject_wind = v.mail_subject_wind
+#mail_subject_rain = v.mail_subject_rain
+#mail_subject_wind = v.mail_subject_wind
 
-ort = 'lap'
+ort = 'home'
 database = 'Wetter'
 
 mydb = mysql.connector.connect(
-    host=integration.host(ort),
-    user=integration.user(ort),
-    passwd=integration.passwd(ort),
-    database=integration.database(database),
+    host=v.host(ort),
+    user=v.user(ort),
+    passwd=v.passwd(ort),
+    database=v.database(database),
     auth_plugin='mysql_native_password')
 
 my_cursor = mydb.cursor()
@@ -88,6 +87,22 @@ def fetching():
         elif city == 'London, GB':
             orte_id = 2
             sql_maske = "INSERT INTO `Wetter`.`London` (`Temperatur`,`Zeit`,`Luftfeuchtigkeit`," \
+                        "`Windgeschwindigkeit`,`Wolken`, `Regen`, `Schnee`, `Luftdruck`,`Windrichtung`," \
+                        "`Zusammenfassung`) VALUES (%s, %s, %s, %s, %s, " \
+                        "%s, %s, %s, %s, %s); "
+            my_cursor.execute(sql_maske, data_n)
+            mydb.commit()
+            sql_maske_g = "INSERT INTO `Wetter`.`Gesammt` (`Temperatur`,`Zeit`,`Luftfeuchtigkeit`," \
+                          "`Windgeschwindigkeit`,`Wolken`, `Regen`, `Schnee`, `Luftdruck`,`Windrichtung`," \
+                          " `Zusammenfassung`, `Wetter_Orte_Id`) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s, %s); "
+            data_g = (temp, time_sql, humidity, wind_speed, clouds, rain, snow, pressure, wind, general, orte_id)
+            my_cursor.execute(sql_maske_g, data_g)
+            mydb.commit()
+            print(f'Erfolg in der SQL Eingabe für {city}')
+
+        elif city == 'Dresden,DE':
+            orte_id = 11
+            sql_maske = "INSERT INTO `Wetter`.`Dresden` (`Temperatur`,`Zeit`,`Luftfeuchtigkeit`," \
                         "`Windgeschwindigkeit`,`Wolken`, `Regen`, `Schnee`, `Luftdruck`,`Windrichtung`," \
                         "`Zusammenfassung`) VALUES (%s, %s, %s, %s, %s, " \
                         "%s, %s, %s, %s, %s); "
