@@ -43,7 +43,7 @@ while True:
         auth_plugin='mysql_native_password')
 
     my_cursor = mydb.cursor()
-    my_cursor.execute(f"SELECT User_Id FROM `Selma`.`Users` ")
+    my_cursor.execute(f"SELECT User_Id FROM `Selma`.`Users` WHERE Zugelassen = 1")
     results_raw = my_cursor.fetchall()
     my_cursor.close()
     for raw in results_raw:

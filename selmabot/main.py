@@ -34,6 +34,25 @@ else:
     logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 
 
+def zugelassen(user_id):
+    mydb = mysql.connector.connect(
+        host=v.host(ort),
+        user=v.user(ort),
+        passwd=v.passwd(ort),
+        database=v.database(database),
+        auth_plugin='mysql_native_password')
+
+    my_cursor = mydb.cursor()
+    my_cursor.execute(f"SELECT Zugelassen FROM `Selma`.`Users` WHERE User_Id = ({user_id}) ")
+    zug = my_cursor.fetchone()
+    my_cursor.close()
+    zug = int(str(zug).replace("(", "").replace(",)", ""))
+    if zug == 1:
+        return True
+    else:
+        return False
+
+
 def userlogging(user_id, username, message_chat_id, message_txt, message_id, first_name, last_name, land_code):
     mydb = mysql.connector.connect(
         host=v.host(ort),
@@ -240,36 +259,46 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                                                                   f"Alle deine persönlichen Daten werden verschlüsselt.\n"
                                                                   f"Du kannst deine Anregungen gerne mit der /msg Funktion teilen.\n"
                                                                   f"Selma Bot {version}")
-    await update.message.reply_text('Benutze /help um Hilfe mit den Befehlen und der Funktionsweise des Bots zu '
-                                    'erhalten. \n'
-                                    'Benutze /menu um den Bot für dich einzurichten oder um deine Daten zu löschen\n'
-                                    'Benutze /update um zu Überprüfen ob neue Prüfungsergebnisse vorliegen\n'
-                                    'Benutze /exam um deine Prüfungsergebnisse abzurufen\n'
-                                    'Benutze /msg <Nachricht> um die Nachricht an die Developer zu schicken\n')
+    await context.bot.send_message(update.effective_user.id,
+                                   text=f'Benutze /help um Hilfe mit den Befehlen und der Funktionsweise des Bots zu '
+                                        'erhalten. \n'
+                                        'Benutze /menu um den Bot für dich einzurichten oder um deine Daten zu löschen\n'
+                                        'Benutze /update um zu Überprüfen ob neue Prüfungsergebnisse vorliegen\n'
+                                        'Benutze /exam um deine Prüfungsergebnisse abzurufen\n'
+                                        'Benutze /msg <Nachricht> um die Nachricht an die Developer zu schicken\n')
+
+    if not zugelassen(update.effective_user.id):
+        await context.bot.send_message(update.effective_user.id,
+                                 text=f'Du bist leider nicht für die Nutzung des Bots berechtigt, du kannst ihn dennoch gerne mit /menu aufsetzen, das steigert deine Möglichkeiten.'
+                                      f'Du wirst benachrichtigt, wenn etwas von den begrenzten Kapazitäten frei wird ;-)')
 
 
 async def update_exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
-    await context.bot.send_message(update.effective_user.id, text="Deine Daten werden aktuell abgerufen bitte warten:")
-    exam_data = selma.exam_updater(update.effective_user.id)
-    print(exam_data)
-    if exam_data is False:
-        # print(exam_data)
+    if not zugelassen(update.effective_user.id):
         await context.bot.send_message(update.effective_user.id,
-                                       text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu um diese zu "
-                                            "aktualisieren")
-    elif exam_data == 0:
-        await context.bot.send_message(update.effective_user.id,
-                                       text="Leider gibt es keine neuen Prüfungsergebnisse für dich")
-    elif exam_data == 1:
-        await context.bot.send_message(update.effective_user.id,
-                                       text="Hurrah es gibt neue Ergebnisse nutze /exam um diese abzurufen! \n"
-                                            "Und denk dran mit /reset um die Benachrichtigungen zurückzusetzen!")
+                                 text=f'Du bist leider nicht für die Nutzung des Bots berechtigt, du kannst ihn dennoch gerne mit /menu aufsetzen, das steigert deine Möglichkeiten.'
+                                      f'Du wirst benachrichtigt, wenn etwas von den begrenzten Kapazitäten frei wird ;-)')
     else:
-        await context.bot.send_message(update.effective_user.id,
-                                       text="Leider ist etwas schiefgelaufen bitte schreibe dem Developer")
+        await context.bot.send_message(update.effective_user.id, text="Deine Daten werden aktuell abgerufen bitte warten:")
+        exam_data = selma.exam_updater(update.effective_user.id)
+        if exam_data is False:
+            # print(exam_data)
+            await context.bot.send_message(update.effective_user.id,
+                                           text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu um diese zu "
+                                                "aktualisieren")
+        elif exam_data == 0:
+            await context.bot.send_message(update.effective_user.id,
+                                           text="Leider gibt es keine neuen Prüfungsergebnisse für dich")
+        elif exam_data == 1:
+            await context.bot.send_message(update.effective_user.id,
+                                           text="Hurrah es gibt neue Ergebnisse nutze /exam um diese abzurufen! \n"
+                                                "Und denk dran mit /reset um die Benachrichtigungen zurückzusetzen!")
+        else:
+            await context.bot.send_message(update.effective_user.id,
+                                           text="Leider ist etwas schiefgelaufen bitte schreibe dem Developer")
 
 
 async def set_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -417,27 +446,32 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
-    await context.bot.send_message(update.effective_user.id, text="Deine Daten werden aktuell abgerufen bitte warten:")
-    exam_data = selma.exam_getter(update.effective_user.id)
-    if exam_data is False:
-        # print(exam_data)
+    if not zugelassen(update.effective_user.id):
         await context.bot.send_message(update.effective_user.id,
-                                       text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu um diese zu "
-                                            "aktualisieren")
+                                 text=f'Du bist leider nicht für die Nutzung des Bots berechtigt, du kannst ihn dennoch gerne mit /menu aufsetzen, das steigert deine Möglichkeiten.'
+                                      f'Du wirst benachrichtigt, wenn etwas von den begrenzten Kapazitäten frei wird ;-)')
     else:
-        exam_anzahl = int(exam_data.pop())
-        i = 0
-        while True:
-            await context.bot.send_message(update.effective_user.id, text=f'{exam_data.pop(0)}\n'
-                                                                          f'{exam_data.pop(0)}\n'
-                                                                          f'{exam_data.pop(0)}\n'
-                                                                          f'{exam_data.pop(0)}\n'
-                                                                          f'{exam_data.pop(0)}')
-            i = i + 1
-            if exam_anzahl == i:
-                break
+        await context.bot.send_message(update.effective_user.id, text="Deine Daten werden aktuell abgerufen bitte warten:")
+        exam_data = selma.exam_getter(update.effective_user.id)
+        if exam_data is False:
+            # print(exam_data)
+            await context.bot.send_message(update.effective_user.id,
+                                           text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu um diese zu "
+                                                "aktualisieren")
+        else:
+            exam_anzahl = int(exam_data.pop())
+            i = 0
+            while True:
+                await context.bot.send_message(update.effective_user.id, text=f'{exam_data.pop(0)}\n'
+                                                                              f'{exam_data.pop(0)}\n'
+                                                                              f'{exam_data.pop(0)}\n'
+                                                                              f'{exam_data.pop(0)}\n'
+                                                                              f'{exam_data.pop(0)}')
+                i = i + 1
+                if exam_anzahl == i:
+                    break
 
-        await update.message.reply_text('Deine Ergebnisse')
+            await update.message.reply_text('Deine Ergebnisse')
 
 
 async def setpassw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
