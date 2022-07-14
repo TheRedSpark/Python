@@ -10,4 +10,5 @@ CREATE TABLE `Selma`.`Users` (
   `Speichern_Prüfungen` TINYINT NULL DEFAULT 0,
   `Push` TINYINT NULL DEFAULT 0,
   `Push_Toggle` TINYINT NULL DEFAULT 1,
+  `Zugelassen` TINYINT NULL DEFAULT 1,
   PRIMARY KEY (`idUser`));
