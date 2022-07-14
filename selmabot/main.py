@@ -1,37 +1,33 @@
+# Importing the necessary modules for the bot to work.
 import logging
 import time
 
-import mysql.connector
-from telegram import __version__ as TG_VER  # v20
+import mysql.connector  # 8.0.28
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup  # 20.0a1
+from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler, MessageHandler, \
+    filters  # 20.0a1
 
-import crypro_neu as cry
-import webgetting as selma
+import crypro_neu as cry  # own
+import webgetting as selma  # own
 from package import variables as v
 
-version = "V1.7"  # Live
+# Defining the variables that are used in the program.
+version = "V2.0"  # Live
 ort = "home"
 database = "Selma"
 live = False
 loschtimer = 5
+stundenabstand_push = 2
 
-try:
-    from telegram import __version_info__
-except ImportError:
-    __version_info__ = (0, 0, 0, 0, 0)  # type: ignore[assignment]
-
-if __version_info__ < (20, 0, 0, "alpha", 1):
-    raise RuntimeError(
-        f"Dieses Beispiel ist nicht kompatibel mit deiner PTB version {TG_VER}."
-        f"{TG_VER} version von diesem Beispiel, "
-        f"visit https://docs.python-telegram-bot.org/en/v{TG_VER}/examples.html"
-    )
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler, CallbackContext
-
+# Setting up the logging module to log info messages.
 if selma.on_server:
     pass
 else:
     logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
+
+"""""""""
+Interne Funktionen für die Botverwaltung
+"""""
 
 
 def zugelassen(user_id):
@@ -237,6 +233,87 @@ def push_updates():
     return results_clean
 
 
+def benutzer_setzer(userid, benutzer):
+    try:
+        user = cry.encoding(benutzer)
+        mydb = mysql.connector.connect(
+            host=v.host(ort),
+            user=v.user(ort),
+            passwd=v.passwd(ort),
+            database=v.database(database),
+            auth_plugin='mysql_native_password')
+
+        my_cursor = mydb.cursor()
+        my_cursor.execute(
+            f"UPDATE `Selma`.`Users` SET `Username_Selma` = '{user}' WHERE (`User_Id` = {userid});")
+        mydb.commit()
+        my_cursor.close()
+        return True
+    except:
+        return False
+
+
+def passwort_setzer(userid, passwort):
+    try:
+        passw = cry.encoding(passwort)
+        mydb = mysql.connector.connect(
+            host=v.host(ort),
+            user=v.user(ort),
+            passwd=v.passwd(ort),
+            database=v.database(database),
+            auth_plugin='mysql_native_password')
+
+        my_cursor = mydb.cursor()
+        my_cursor.execute(
+            f"UPDATE `Selma`.`Users` SET `Password_Selma` = '{passw}' WHERE (`User_Id` = {userid});")
+        mydb.commit()
+        my_cursor.close()
+        return True
+    except:
+        return False
+
+
+def email_setzer(userid, email):
+    try:
+        email = cry.encoding(email)
+        mydb = mysql.connector.connect(
+            host=v.host(ort),
+            user=v.user(ort),
+            passwd=v.passwd(ort),
+            database=v.database(database),
+            auth_plugin='mysql_native_password')
+
+        my_cursor = mydb.cursor()
+        my_cursor.execute(f"UPDATE `Selma`.`Users` SET `Email` = '{email}' WHERE (`User_Id` = {userid});")
+        mydb.commit()
+        my_cursor.close()
+        return True
+    except:
+        return False
+
+
+def resetter(userid):
+    mydb = mysql.connector.connect(
+        host=v.host(ort),
+        user=v.user(ort),
+        passwd=v.passwd(ort),
+        database=v.database(database),
+        auth_plugin='mysql_native_password')
+
+    my_cursor = mydb.cursor()
+    my_cursor.execute(
+        f"UPDATE `Selma`.`Users` SET `Results_Update` = '0' WHERE (`User_Id` = {userid});")
+    my_cursor.execute(
+        f"UPDATE `Selma`.`Users` SET `Push` = '0' WHERE (`User_Id` = {userid});")
+    mydb.commit()
+    my_cursor.close()
+
+
+"""""""""
+Bot Funktionen
+"""
+
+
 async def send_push(context: ContextTypes.DEFAULT_TYPE) -> None:
     anzahl = push_updates()
     print(anzahl)
@@ -269,8 +346,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if not zugelassen(update.effective_user.id):
         await context.bot.send_message(update.effective_user.id,
-                                 text=f'Du bist leider nicht für die Nutzung des Bots berechtigt, du kannst ihn dennoch gerne mit /menu aufsetzen, das steigert deine Möglichkeiten.'
-                                      f'Du wirst benachrichtigt, wenn etwas von den begrenzten Kapazitäten frei wird ;-)')
+                                       text=f'Du bist leider nicht für die Nutzung des Bots berechtigt, du kannst ihn dennoch gerne mit /menu aufsetzen, das steigert deine Möglichkeiten.'
+                                            f'Du wirst benachrichtigt, wenn etwas von den begrenzten Kapazitäten frei wird ;-)')
 
 
 async def update_exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -279,10 +356,11 @@ async def update_exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                 update.effective_user.last_name, update.effective_user.language_code)
     if not zugelassen(update.effective_user.id):
         await context.bot.send_message(update.effective_user.id,
-                                 text=f'Du bist leider nicht für die Nutzung des Bots berechtigt, du kannst ihn dennoch gerne mit /menu aufsetzen, das steigert deine Möglichkeiten.'
-                                      f'Du wirst benachrichtigt, wenn etwas von den begrenzten Kapazitäten frei wird ;-)')
+                                       text=f'Du bist leider nicht für die Nutzung des Bots berechtigt, du kannst ihn dennoch gerne mit /menu aufsetzen, das steigert deine Möglichkeiten.'
+                                            f'Du wirst benachrichtigt, wenn etwas von den begrenzten Kapazitäten frei wird ;-)')
     else:
-        await context.bot.send_message(update.effective_user.id, text="Deine Daten werden aktuell abgerufen bitte warten:")
+        await context.bot.send_message(update.effective_user.id,
+                                       text="Deine Daten werden aktuell abgerufen bitte warten:")
         exam_data = selma.exam_updater(update.effective_user.id)
         if exam_data is False:
             # print(exam_data)
@@ -318,9 +396,7 @@ async def set_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Parses the CallbackQuery and updates the message text."""
     query = update.callback_query
-
     await query.answer()
 
     if query.data == 'user':
@@ -448,10 +524,11 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 update.effective_user.last_name, update.effective_user.language_code)
     if not zugelassen(update.effective_user.id):
         await context.bot.send_message(update.effective_user.id,
-                                 text=f'Du bist leider nicht für die Nutzung des Bots berechtigt, du kannst ihn dennoch gerne mit /menu aufsetzen, das steigert deine Möglichkeiten.'
-                                      f'Du wirst benachrichtigt, wenn etwas von den begrenzten Kapazitäten frei wird ;-)')
+                                       text=f'Du bist leider nicht für die Nutzung des Bots berechtigt, du kannst ihn dennoch gerne mit /menu aufsetzen, das steigert deine Möglichkeiten.'
+                                            f'Du wirst benachrichtigt, wenn etwas von den begrenzten Kapazitäten frei wird ;-)')
     else:
-        await context.bot.send_message(update.effective_user.id, text="Deine Daten werden aktuell abgerufen bitte warten:")
+        await context.bot.send_message(update.effective_user.id,
+                                       text="Deine Daten werden aktuell abgerufen bitte warten:")
         exam_data = selma.exam_getter(update.effective_user.id)
         if exam_data is False:
             # print(exam_data)
@@ -479,20 +556,10 @@ async def setpassw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 "/setpassw", update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
     passw_raw = str(update.message.text).replace("/setpassw", "").strip()
-    passw = cry.encoding(passw_raw)
-    mydb = mysql.connector.connect(
-        host=v.host(ort),
-        user=v.user(ort),
-        passwd=v.passwd(ort),
-        database=v.database(database),
-        auth_plugin='mysql_native_password')
-
-    my_cursor = mydb.cursor()
-    my_cursor.execute(
-        f"UPDATE `Selma`.`Users` SET `Password_Selma` = '{passw}' WHERE (`User_Id` = {update.effective_user.id});")
-    mydb.commit()
-    my_cursor.close()
-    await update.message.reply_text('Dein Password wurde erfolgreich gesetzt')
+    if passwort_setzer(update.effective_user.id, passw_raw):
+        await update.message.reply_text('Dein Password wurde erfolgreich gesetzt')
+    else:
+        await update.message.reply_text('Dein Password konnte nicht gesetzt werden')
 
 
 async def setuser(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -500,20 +567,10 @@ async def setuser(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 "/setuser", update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
     user_raw = str(update.message.text).replace("/setuser", "").strip()
-    user = cry.encoding(user_raw)
-    mydb = mysql.connector.connect(
-        host=v.host(ort),
-        user=v.user(ort),
-        passwd=v.passwd(ort),
-        database=v.database(database),
-        auth_plugin='mysql_native_password')
-
-    my_cursor = mydb.cursor()
-    my_cursor.execute(
-        f"UPDATE `Selma`.`Users` SET `Username_Selma` = '{user}' WHERE (`User_Id` = {update.effective_user.id});")
-    mydb.commit()
-    my_cursor.close()
-    await update.message.reply_text('Dein Benutzername wurde erfolgreich gesetzt')
+    if benutzer_setzer(update.effective_user.id, user_raw):
+        await update.message.reply_text('Dein Benutzername wurde erfolgreich gesetzt')
+    else:
+        await update.message.reply_text('Dein Benutzername konnte nicht gesetzt werden')
 
 
 async def set_email(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -521,43 +578,22 @@ async def set_email(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 "/setmail", update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
     email_raw = str(update.message.text).replace("/setemail", "").strip()
-    email = cry.encoding(email_raw)
-    mydb = mysql.connector.connect(
-        host=v.host(ort),
-        user=v.user(ort),
-        passwd=v.passwd(ort),
-        database=v.database(database),
-        auth_plugin='mysql_native_password')
-
-    my_cursor = mydb.cursor()
-    my_cursor.execute(f"UPDATE `Selma`.`Users` SET `Email` = '{email}' WHERE (`User_Id` = {update.effective_user.id});")
-    mydb.commit()
-    my_cursor.close()
-    await update.message.reply_text('Deine Email wurde Erfolgreich gesetzt')
+    if email_setzer(update.effective_user.id, email_raw):
+        await update.message.reply_text('Deine Email wurde Erfolgreich gesetzt')
+    else:
+        await update.message.reply_text('Deine Email konnte nicht gesetzt werden')
 
 
 async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
-    mydb = mysql.connector.connect(
-        host=v.host(ort),
-        user=v.user(ort),
-        passwd=v.passwd(ort),
-        database=v.database(database),
-        auth_plugin='mysql_native_password')
-
-    my_cursor = mydb.cursor()
-    my_cursor.execute(
-        f"UPDATE `Selma`.`Users` SET `Results_Update` = '0' WHERE (`User_Id` = {update.effective_user.id});")
-    my_cursor.execute(
-        f"UPDATE `Selma`.`Users` SET `Push` = '0' WHERE (`User_Id` = {update.effective_user.id});")
-    mydb.commit()
-    my_cursor.close()
+    resetter(update.effective_user.id)
     await update.message.reply_text('Reset wurde erfolgreich Durchgeführt')
 
 
 async def msg(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    # The code is sending a message to the developer.
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
@@ -575,14 +611,19 @@ async def logging(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 update.effective_user.last_name, update.effective_user.language_code)
 
 
-async def push_noti(context: CallbackContext):
-    await context.bot.send_message(chat_id=v.telegram_user_id, text='One message every minute')
+async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                update.effective_user.last_name, update.effective_user.language_code)
+
+    await update.message.reply_text('Kein Befehl erkannt, bitte nutze einen Befehl unter /help')
 
 
 def main() -> None:
+    # Creating a telegram bot.
     application = Application.builder().token(v.telegram_selma_api(live)).build()
 
-    # on different commands - answer in Telegram
+    # Adding the handlers for the commands.
     application.add_handler(CommandHandler(["start", "help"], start))
     application.add_handler(CommandHandler("msg", msg))
     application.add_handler(CommandHandler("menu", set_menu))
@@ -594,15 +635,13 @@ def main() -> None:
     application.add_handler(CommandHandler("exam", exam))
     application.add_handler(CommandHandler("push", send_push))
     application.add_handler(CallbackQueryHandler(menu_actions))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))
     job_queue = application.job_queue
 
-    # job_queue.run_daily(callback_minute, datetime.time(hour=22, minute=15))
-    job_queue.run_repeating(send_push, interval=60 * 60 * 12)
-    # massage handler
-    # application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))
+    # Running the function send_push every 60 seconds * 60 minutes * stundenabstand_push.
+    job_queue.run_repeating(send_push, interval=60 * 60 * stundenabstand_push)
 
-    # Run the bot until the user presses Ctrl-C
-    application.run_polling()
+    application.run_polling(1)
 
 
 if __name__ == "__main__":

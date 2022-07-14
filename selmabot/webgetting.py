@@ -1,9 +1,9 @@
-from selenium import webdriver
+from selenium import webdriver  # 3.14.1
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup  # V4.10.0
 import time
-import crypro_neu as cry
+import crypro_neu as cry  # own
 from package import variables as v
 import mysql.connector  # V8.0.28
 
@@ -17,9 +17,6 @@ user_id = v.telegram_user_id
 ort = 'home'
 database = 'Selma'
 exam_data_multi = []
-
-
-# def scraper(user_id):
 
 
 def exam_updater(user_id):
