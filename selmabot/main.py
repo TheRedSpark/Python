@@ -223,12 +223,12 @@ async def send_push(context: ContextTypes.DEFAULT_TYPE) -> None:
     print(anzahl)
     for t_user in anzahl:
         try:
-            await context.bot.send_message(t_user, text="Du Hast neue Prüfungsergebnisse!\n"
+            await context.bot.send_message(t_user, text="Du hast neue Prüfungsergebnisse!\n"
                                                         "Benutze im Bot /exam um diese abzurufen und setze mit /reset die Benachrichtigungen zurück!")
             print(f'Erfolg für User: {t_user}')
         except:
             print(f'Fehlgeschlagen für User: {t_user}')
-    await context.bot.send_message(v.telegram_user_id, text=f'Push fertig für {len(anzahl)}')
+    await context.bot.send_message(v.telegram_user_id, text=f'Push fertig für {len(anzahl)} User')
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -239,7 +239,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await context.bot.send_message(update.effective_user.id, text=f"Der Selma-Bot sagt herzlich hallo ;-)\n"
                                                                   f"Alle deine persönlichen Daten werden verschlüsselt.\n"
                                                                   f"Du kannst deine Anregungen gerne mit der /msg Funktion teilen.\n"
-                                                                  f"Selma Bot Version {version}")
+                                                                  f"Selma Bot {version}")
     await update.message.reply_text('Benutze /help um Hilfe mit den Befehlen und der Funktionsweise des Bots zu '
                                     'erhalten. \n'
                                     'Benutze /menu um den Bot für dich einzurichten oder um deine Daten zu löschen\n'
