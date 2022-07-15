@@ -17,7 +17,8 @@ ort = "home"
 database = "Selma"
 live = False
 loschtimer = 5
-stundenabstand_push = 2
+stundenabstand_push = 0.5
+day = 0
 
 # Setting up the logging module to log info messages.
 if selma.on_server:
@@ -212,24 +213,12 @@ def push_updates():
         auth_plugin='mysql_native_password')
 
     my_cursor = mydb.cursor()
-    my_cursor.execute(f"SELECT User_Id FROM `Selma`.`Users` WHERE Push = 1 ")
+    my_cursor.execute(f"SELECT User_Id FROM `Selma`.`Users` WHERE Push_Toggle = 1 and Push = 1")
     results_raw = my_cursor.fetchall()
     my_cursor.close()
     for raw in results_raw:
         clen = int(str(raw).replace("(", "").replace(",)", "").strip())
         results_clean.append(clen)
-        # mydb = mysql.connector.connect(
-        #     host=v.host(ort),
-        #     user=v.user(ort),
-        #     passwd=v.passwd(ort),
-        #     database=v.database(database),
-        #     auth_plugin='mysql_native_password')
-        #
-        # my_cursor = mydb.cursor()
-        # my_cursor.execute(
-        #     f"UPDATE `Selma`.`Users` SET `Push` = 0 WHERE (`User_Id` = {clen});")
-        # mydb.commit()
-        # my_cursor.close()
     return results_clean
 
 
@@ -309,22 +298,57 @@ def resetter(userid):
     my_cursor.close()
 
 
+def get_allpush_0():
+    results_clean = []
+    mydb = mysql.connector.connect(
+        host=v.host(ort),
+        user=v.user(ort),
+        passwd=v.passwd(ort),
+        database=v.database(database),
+        auth_plugin='mysql_native_password')
+
+    my_cursor = mydb.cursor()
+    my_cursor.execute(f"SELECT User_Id FROM `Selma`.`Users` WHERE Push_Toggle = 1 and Push = 0 and Zugelassen = 0")
+    results_raw = my_cursor.fetchall()
+    my_cursor.close()
+    for raw in results_raw:
+        clen = int(str(raw).replace("(", "").replace(",)", "").strip())
+        results_clean.append(clen)
+    return results_clean
+
+
 """""""""
 Bot Funktionen
 """
 
 
-async def send_push(context: ContextTypes.DEFAULT_TYPE) -> None:
+async def send_push(context: ContextTypes.DEFAULT_TYPE, day=None) -> None:
     anzahl = push_updates()
-    print(anzahl)
     for t_user in anzahl:
         try:
             await context.bot.send_message(t_user, text="Du hast neue Prüfungsergebnisse!\n"
                                                         "Benutze im Bot /exam um diese abzurufen und setze mit /reset die Benachrichtigungen zurück!")
-            print(f'Erfolg für User: {t_user}')
+            print(f'Update:Erfolg für User: {t_user}')
+            await context.bot.send_message(v.telegram_user_id, text=f'Push fertig für {len(anzahl)} User')
         except:
             print(f'Fehlgeschlagen für User: {t_user}')
-    await context.bot.send_message(v.telegram_user_id, text=f'Push fertig für {len(anzahl)} User')
+    trigger = time.gmtime()
+    if trigger.tm_hour + 2 == 12:
+        #day = trigger.tm_mday
+        anzahl_0 = get_allpush_0()
+        #anzahl_0 = [v.telegram_user_id]
+        for t_user in anzahl_0:
+            try:
+                await context.bot.send_message(t_user, text=f'Deine tägliche Benachrichtigung:\n'
+                                                            f'Leider gibt es keine Neuigkeiten für dich ;-(\n'
+                                                            f'Du kannst diese Benachrichtigungen unter /menu '
+                                                            f'abstellen.\n'
+                                                            f'Bei Neuigkeiten wirst du Sofort unabhängig von dieser '
+                                                            f'Benachrichtigt.\n')
+                print(f'Daily:Erfolg für User: {t_user}')
+                await context.bot.send_message(v.telegram_user_id, text=f'Push fertig für {len(anzahl)} User')
+            except:
+                print(f'Fehlgeschlagen für User: {t_user}')
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -639,7 +663,7 @@ def main() -> None:
     job_queue = application.job_queue
 
     # Running the function send_push every 60 seconds * 60 minutes * stundenabstand_push.
-    job_queue.run_repeating(send_push, interval=60 * 60 * stundenabstand_push)
+    job_queue.run_repeating(send_push, interval=stundenabstand_push, first=10)
 
     application.run_polling(1)
 
