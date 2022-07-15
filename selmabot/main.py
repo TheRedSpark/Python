@@ -17,7 +17,7 @@ ort = "home"
 database = "Selma"
 live = False
 loschtimer = 5
-stundenabstand_push = 0.5
+stundenabstand_push = 1
 day = 0
 
 # Setting up the logging module to log info messages.
@@ -663,7 +663,7 @@ def main() -> None:
     job_queue = application.job_queue
 
     # Running the function send_push every 60 seconds * 60 minutes * stundenabstand_push.
-    job_queue.run_repeating(send_push, interval=stundenabstand_push, first=10)
+    job_queue.run_repeating(send_push, interval=60 * 60 * stundenabstand_push, first=10)
 
     application.run_polling(1)
 
