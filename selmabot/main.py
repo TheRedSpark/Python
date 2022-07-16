@@ -12,10 +12,10 @@ import webgetting as selma  # own
 from package import variables as v
 
 # Defining the variables that are used in the program.
-version = "V2.1"  # Live
+version = "V2.2"  # Live
 ort = "home"
 database = "Selma"
-live = False
+live = True
 loschtimer = 5
 stundenabstand_push = 1
 day = 0
@@ -308,7 +308,7 @@ def get_allpush_0():
         auth_plugin='mysql_native_password')
 
     my_cursor = mydb.cursor()
-    my_cursor.execute(f"SELECT User_Id FROM `Selma`.`Users` WHERE Push_Toggle = 1 and Push = 0 and Zugelassen = 0")
+    my_cursor.execute(f"SELECT User_Id FROM `Selma`.`Users` WHERE Push_Toggle = 1 and Push = 0 and Zugelassen = 1")
     results_raw = my_cursor.fetchall()
     my_cursor.close()
     for raw in results_raw:
@@ -334,21 +334,19 @@ async def send_push(context: ContextTypes.DEFAULT_TYPE, day=None) -> None:
             print(f'Fehlgeschlagen für User: {t_user}')
     trigger = time.gmtime()
     if trigger.tm_hour + 2 == 12:
-        #day = trigger.tm_mday
         anzahl_0 = get_allpush_0()
-        #anzahl_0 = [v.telegram_user_id]
         for t_user in anzahl_0:
             try:
-                await context.bot.send_message(t_user, text=f'Deine tägliche Benachrichtigung:\n'
+                await context.bot.send_message(t_user, text=f'Mahlzeit! Deine tägliche Benachrichtigung:\n'
                                                             f'Leider gibt es keine Neuigkeiten für dich ;-(\n'
-                                                            f'Du kannst diese Benachrichtigungen unter /menu '
-                                                            f'abstellen.\n'
-                                                            f'Bei Neuigkeiten wirst du Sofort unabhängig von dieser '
+                                                            f'Du kannst diese Benachrichtigungen unter\n'
+                                                            f' /menu abstellen.\n'
+                                                            f'Bei Neuigkeiten wirst du sofort unabhängig von dieser '
                                                             f'Benachrichtigt.\n')
                 print(f'Daily:Erfolg für User: {t_user}')
-                await context.bot.send_message(v.telegram_user_id, text=f'Push fertig für {len(anzahl)} User')
             except:
                 print(f'Fehlgeschlagen für User: {t_user}')
+            await context.bot.send_message(v.telegram_user_id, text=f'Daily: Push fertig für {len(anzahl_0)} User')
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
