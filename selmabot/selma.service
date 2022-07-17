@@ -4,7 +4,7 @@ After=syslog.target
 
 [Service]
 Restart=always
-Type=exec
+Type=simple
 WorkingDirectory=/home/selma/bot
 ExecStart=python3 /home/selma/bot/main.py
 SyslogIdentifier=Selma Bot

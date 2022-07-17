@@ -9,7 +9,6 @@ import mysql.connector  # V8.0.28
 
 active_scraper = True
 save_to_txt = False
-login_status = False
 on_server = False
 headless = True
 base_url = 'https://selma.tu-dresden.de/APP/EXTERNALPAGES/-N000000000000001,-N000155,-AEXT_willkommen'
@@ -115,7 +114,7 @@ def exam_updater(user_id):
                 except:
                     pass
                 print("Wait for Login")
-
+            s = 0
             while True:
                 try:
                     # Clicking on the "Prüfungsverwaltung" button.
@@ -127,13 +126,15 @@ def exam_updater(user_id):
                     pass
                 time.sleep(0.1)
                 print("Wait for Login-Website")
+                s = s + 1
+                if s == 40:
+                    break
             u = 0
             while True:
                 try:
                     # Clicking on the "Prüfungsverwaltung" button.
                     browser.find_element_by_xpath("/html/body/div[2]/div[2]/div[1]/ul/li/ul/li[3]/ul/li[2]/a").click()
                     print("Prüfungsergebnisse-Website bereit")
-                    login_status = True
                     break
                 except:
                     time.sleep(0.1)
@@ -295,6 +296,7 @@ def exam_getter(user_id):
                 pass
             print("Wait for Login")
 
+        s = 0
         while True:
             try:
                 # Clicking on the "Prüfungsverwaltung" button.
@@ -306,6 +308,9 @@ def exam_getter(user_id):
                 pass
             time.sleep(0.1)
             print("Wait for Login-Website")
+            s = s + 1
+            if s == 30:
+                break
         u = 0
         while True:
             try:

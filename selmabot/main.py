@@ -12,10 +12,10 @@ import webgetting as selma  # own
 from package import variables as v
 
 # Defining the variables that are used in the program.
-version = "V2.2"  # Live
+version = "V2.3"  # Live
 ort = "home"
 database = "Selma"
-live = True
+live = False
 loschtimer = 5
 stundenabstand_push = 1
 day = 0
@@ -294,6 +294,8 @@ def resetter(userid):
         f"UPDATE `Selma`.`Users` SET `Results_Update` = '0' WHERE (`User_Id` = {userid});")
     my_cursor.execute(
         f"UPDATE `Selma`.`Users` SET `Push` = '0' WHERE (`User_Id` = {userid});")
+    my_cursor.execute(
+        f"UPDATE `Selma`.`Users` SET `Error_Anmeldung` = '0' WHERE (`User_Id` = {userid});")
     mydb.commit()
     my_cursor.close()
 
@@ -317,6 +319,26 @@ def get_allpush_0():
     return results_clean
 
 
+def error_anzahl(user):
+    mydb = mysql.connector.connect(
+        host=v.host(ort),
+        user=v.user(ort),
+        passwd=v.passwd(ort),
+        database=v.database(database),
+        auth_plugin='mysql_native_password')
+
+    my_cursor = mydb.cursor()
+    my_cursor.execute(
+        f"SELECT Error_Anmeldung FROM `Selma`.`Users` WHERE User_Id = {user}")
+    fehleranzahl = my_cursor.fetchone()
+    my_cursor.close()
+    fehleranzahl = int(str(fehleranzahl).replace("(", "").replace(",)", ""))
+    if fehleranzahl >= 20:
+        return True
+    else:
+        return False
+
+
 """""""""
 Bot Funktionen
 """
@@ -333,7 +355,7 @@ async def send_push(context: ContextTypes.DEFAULT_TYPE, day=None) -> None:
         except:
             print(f'Fehlgeschlagen für User: {t_user}')
     trigger = time.gmtime()
-    if trigger.tm_hour + 2 == 12:
+    if trigger.tm_hour + 2 == 19:
         anzahl_0 = get_allpush_0()
         for t_user in anzahl_0:
             try:
@@ -346,7 +368,16 @@ async def send_push(context: ContextTypes.DEFAULT_TYPE, day=None) -> None:
                 print(f'Daily:Erfolg für User: {t_user}')
             except:
                 print(f'Fehlgeschlagen für User: {t_user}')
-            await context.bot.send_message(v.telegram_user_id, text=f'Daily: Push fertig für {len(anzahl_0)} User')
+            if error_anzahl(t_user):
+                try:
+                    await context.bot.send_message(t_user, text="Du bekommst keine automatischen Updates mehr! Bitte "
+                                                                "kontrolliere deine Zugangsdaten und benutze /reset "
+                                                                "um wieder Automatische Updates zu erhalten.")
+
+                except:
+                    print(f'Fehlgeschlagen für User: {t_user}')
+
+        await context.bot.send_message(v.telegram_user_id, text=f'Daily: Push fertig für {len(anzahl_0)} User')
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -511,7 +542,7 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     elif query.data == 'email_speichern':
         await query.edit_message_text(
-            text="Bitte nutze den /setemail EMAIL Befehl wobei EMAIL durch deie Email ersetzt wird")
+            text="Bitte nutze den /setemail EMAIL Befehl wobei EMAIL durch deine Email ersetzt wird")
 
     elif query.data == 'email':
         # second submenu
@@ -611,7 +642,7 @@ async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
     resetter(update.effective_user.id)
-    await update.message.reply_text('Reset wurde erfolgreich Durchgeführt')
+    await update.message.reply_text('Reset wurde erfolgreich durchgeführt')
 
 
 async def msg(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
