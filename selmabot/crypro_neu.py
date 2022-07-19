@@ -15,4 +15,3 @@ def decoding(message):
         return str_decoded
     except:
         return False
-

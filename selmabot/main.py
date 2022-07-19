@@ -697,5 +697,7 @@ def main() -> None:
     application.run_polling(1)
 
 
+print("Main Started")
+
 if __name__ == "__main__":
     main()

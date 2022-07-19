@@ -67,6 +67,7 @@ def push(updates, user):
     my_cursor.close()
 
 
+print("Autosearch started")
 while True:
     zeit = time.strftime("%Y-%m-%d %H:%M:%S")
     trigger = time.gmtime()
