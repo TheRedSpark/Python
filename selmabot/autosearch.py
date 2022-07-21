@@ -73,7 +73,7 @@ while True:
     trigger = time.gmtime()
     if trigger.tm_hour + 2 != stunde:
         stunde = trigger.tm_hour + 2
-        if 7 < stunde < 20:
+        if 7 < stunde < 18:
             print(trigger)
             mydb = mysql.connector.connect(
                 host=v.host(ort),

@@ -344,7 +344,7 @@ Bot Funktionen
 """
 
 
-async def send_push(context: ContextTypes.DEFAULT_TYPE, day=None) -> None:
+async def send_push(context: ContextTypes.DEFAULT_TYPE) -> None:
     anzahl = push_updates()
     for t_user in anzahl:
         try:
@@ -355,7 +355,7 @@ async def send_push(context: ContextTypes.DEFAULT_TYPE, day=None) -> None:
         except:
             print(f'Fehlgeschlagen für User: {t_user}')
     trigger = time.gmtime()
-    if trigger.tm_hour + 2 == 19:
+    if trigger.tm_hour + 2 == 12:
         anzahl_0 = get_allpush_0()
         for t_user in anzahl_0:
             try:
