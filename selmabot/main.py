@@ -12,7 +12,7 @@ import webgetting as selma  # own
 from package import variables as v
 
 # Defining the variables that are used in the program.
-version = "V2.3"  # Live
+version = "V2.4"  # Live
 ort = "home"
 database = "Selma"
 live = False
@@ -345,37 +345,38 @@ Bot Funktionen
 
 
 async def send_push(context: ContextTypes.DEFAULT_TYPE) -> None:
-    anzahl = push_updates()
-    for t_user in anzahl:
-        try:
-            await context.bot.send_message(t_user, text="Du hast neue Prüfungsergebnisse!\n"
-                                                        "Benutze im Bot /exam um diese abzurufen und setze mit /reset die Benachrichtigungen zurück!")
-            print(f'Update:Erfolg für User: {t_user}')
-            await context.bot.send_message(v.telegram_user_id, text=f'Push fertig für {len(anzahl)} User')
-        except:
-            print(f'Fehlgeschlagen für User: {t_user}')
-    trigger = time.gmtime()
-    if trigger.tm_hour + 2 == 12:
-        anzahl_0 = get_allpush_0()
-        for t_user in anzahl_0:
+    if live:
+        anzahl = push_updates()
+        for t_user in anzahl:
             try:
-                await context.bot.send_message(t_user, text=f'Mahlzeit! Deine tägliche Benachrichtigung:\n'
-                                                            f'Leider gibt es keine Neuigkeiten für dich ;-(\n'
-                                                            f'Du kannst diese Benachrichtigungen unter\n'
-                                                            f' /menu abstellen.\n'
-                                                            f'Bei Neuigkeiten wirst du sofort unabhängig von dieser '
-                                                            f'Benachrichtigt.\n')
-                print(f'Daily:Erfolg für User: {t_user}')
+                await context.bot.send_message(t_user, text="Du hast neue Prüfungsergebnisse!\n"
+                                                            "Benutze im Bot /exam um diese abzurufen und setze mit /reset die Benachrichtigungen zurück!")
+                print(f'Update:Erfolg für User: {t_user}')
+                await context.bot.send_message(v.telegram_user_id, text=f'Push fertig für {len(anzahl)} User')
             except:
                 print(f'Fehlgeschlagen für User: {t_user}')
-            if error_anzahl(t_user):
+        trigger = time.gmtime()
+        if trigger.tm_hour + 2 == 12:
+            anzahl_0 = get_allpush_0()
+            for t_user in anzahl_0:
                 try:
-                    await context.bot.send_message(t_user, text="Du bekommst keine automatischen Updates mehr! Bitte "
-                                                                "kontrolliere deine Zugangsdaten und benutze /reset "
-                                                                "um wieder Automatische Updates zu erhalten.")
-
+                    await context.bot.send_message(t_user, text=f'Mahlzeit! Deine tägliche Benachrichtigung:\n'
+                                                                f'Leider gibt es keine Neuigkeiten für dich ;-(\n'
+                                                                f'Du kannst diese Benachrichtigungen unter\n'
+                                                                f' /menu abstellen.\n'
+                                                                f'Bei Neuigkeiten wirst du sofort unabhängig von dieser '
+                                                                f'Benachrichtigt.\n')
+                    print(f'Daily:Erfolg für User: {t_user}')
                 except:
                     print(f'Fehlgeschlagen für User: {t_user}')
+                if error_anzahl(t_user):
+                    try:
+                        await context.bot.send_message(t_user, text="Du bekommst keine automatischen Updates mehr! Bitte "
+                                                                    "kontrolliere deine Zugangsdaten und benutze /reset "
+                                                                    "um wieder Automatische Updates zu erhalten.")
+
+                    except:
+                        print(f'Fehlgeschlagen für User: {t_user}')
 
         await context.bot.send_message(v.telegram_user_id, text=f'Daily: Push fertig für {len(anzahl_0)} User')
 
@@ -609,10 +610,14 @@ async def setpassw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 "/setpassw", update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
     passw_raw = str(update.message.text).replace("/setpassw", "").strip()
-    if passwort_setzer(update.effective_user.id, passw_raw):
-        await update.message.reply_text('Dein Password wurde erfolgreich gesetzt')
+    if passw_raw == "":
+        await update.message.reply_text("Dein Passwort ist leer und kann deshalb nicht gesetzt werden.\n"
+                                        "Du benutzt diesen Befehl so:/setpassw DEINPASSWORT")
     else:
-        await update.message.reply_text('Dein Password konnte nicht gesetzt werden')
+        if passwort_setzer(update.effective_user.id, passw_raw) and not passw_raw == "":
+            await update.message.reply_text('Dein Passwort wurde erfolgreich gesetzt')
+        else:
+            await update.message.reply_text('Dein Passwort konnte nicht gesetzt werden')
 
 
 async def setuser(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -620,10 +625,14 @@ async def setuser(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 "/setuser", update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
     user_raw = str(update.message.text).replace("/setuser", "").strip()
-    if benutzer_setzer(update.effective_user.id, user_raw):
-        await update.message.reply_text('Dein Benutzername wurde erfolgreich gesetzt')
+    if user_raw == "":
+        await update.message.reply_text("Dein Username ist leer und kann deshalb nicht gesetzt werden.\n"
+                                        "Du benutzt diesen Befehl so:/setuser DEINUSERNAME")
     else:
-        await update.message.reply_text('Dein Benutzername konnte nicht gesetzt werden')
+        if benutzer_setzer(update.effective_user.id, user_raw):
+            await update.message.reply_text('Dein Benutzername wurde erfolgreich gesetzt')
+        else:
+            await update.message.reply_text('Dein Benutzername konnte nicht gesetzt werden')
 
 
 async def set_email(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -631,10 +640,14 @@ async def set_email(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 "/setmail", update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
     email_raw = str(update.message.text).replace("/setemail", "").strip()
-    if email_setzer(update.effective_user.id, email_raw):
-        await update.message.reply_text('Deine Email wurde Erfolgreich gesetzt')
+    if email_raw == "":
+        await update.message.reply_text("Deine Email ist leer und kann deshalb nicht gesetzt werden.\n"
+                                        "Du benutzt diesen Befehl so:/setemail DEINEEMAIL")
     else:
-        await update.message.reply_text('Deine Email konnte nicht gesetzt werden')
+        if email_setzer(update.effective_user.id, email_raw):
+            await update.message.reply_text('Deine Email wurde Erfolgreich gesetzt')
+        else:
+            await update.message.reply_text('Deine Email konnte nicht gesetzt werden')
 
 
 async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
