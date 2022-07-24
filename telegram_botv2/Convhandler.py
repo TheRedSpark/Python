@@ -15,6 +15,7 @@ bot.
 """
 from package import variables as v
 import mysql.connector  # 8.0.28
+import time
 
 ort = "home"
 database = "Main"
@@ -69,7 +70,7 @@ def fragen_getter():
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Starts the conversation and asks the user about their gender."""
-    reply_keyboard = [["Boy", "Girl", "Other"]]
+    reply_keyboard = [[f'a', f'b', f'c', f'd']]
     await update.message.reply_text(
         "Hi! My name is Professor Bot. I will hold a conversation with you. "
         "Send /cancel to stop talking to me.\n\n"
@@ -83,32 +84,38 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 async def gender(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Stores the selected gender and asks for a photo."""
+    print("Entry")
     frage = fragen_getter()
-    reply_keyboard = [["Boy", "Girl", "Other"]]
+    # reply_keyboard = [[f'a', f'b', f'c', f'd']]
+    # print(update.message.text)
+    # await update.message.reply_text(
+    #     f'{frage[3]}\n\n'
+    #     f'a) {frage[4]}\n'
+    #     f'b) {frage[5]}\n'
+    #     f'b) {frage[6]}\n'
+    #     f'c) {frage[7]}\n'
+    #     f'Antwort {frage[8]}',
+    #     reply_markup=ReplyKeyboardMarkup(
+    #         reply_keyboard, one_time_keyboard=True, input_field_placeholder="Wähle deine Antwort aus"
+    #     ), )
     print(update.message.text)
-    await update.message.reply_text(
-        "Hi! My name is Professor Bot. I will hold a conversation with you. "
-        "Send /cancel to stop talking to me.\n\n"
-        "Are you a boy or a girl?",
-        reply_markup=ReplyKeyboardMarkup(
-            reply_keyboard, one_time_keyboard=True, input_field_placeholder="Boy or Girl?"
-        ),
-    )
-
-    return GENDER
 
 
 async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Stores the photo and asks for a location."""
-    user = update.message.from_user
-    photo_file = await update.message.photo[-1].get_file()
-    await photo_file.download("user_photo.jpg")
-    logger.info("Photo of %s: %s", user.first_name, "user_photo.jpg")
-    await update.message.reply_text(
-        "Gorgeous! Now, send me your location please, or send /skip if you don't want to."
-    )
+    answer = update.message.text
+    print("entry photo")
+    if answer == "a":
+        print("Deine Antwort war a")
+    elif answer == "b":
+        print("Deine Antwort war b")
+    elif answer == "c":
+        print("Deine Antwort war c")
+    elif answer == "ggg":
+        print("Deine Antwort war ggg")
+    else:
+        print("Deine Antwort war d")
 
-    return LOCATION
+    return GENDER
 
 
 async def skip_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -176,12 +183,9 @@ def main() -> None:
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
         states={
-            GENDER: [MessageHandler(filters.Regex("^(Boy|Girl|Other)$"), gender)],
-            PHOTO: [MessageHandler(filters.PHOTO, photo), CommandHandler("skip", skip_photo)],
-            LOCATION: [
-                MessageHandler(filters.LOCATION, location),
-                CommandHandler("skip", skip_location),
-            ],
+            GENDER: [MessageHandler(filters.Regex("^(a|b|c|d)$"), gender)],
+            PHOTO: [MessageHandler(filters.TEXT & ~filters.COMMAND, photo), CommandHandler("skip", skip_photo)],
+            LOCATION: [MessageHandler(filters.LOCATION, location), CommandHandler("skip", skip_location)],
             BIO: [MessageHandler(filters.TEXT & ~filters.COMMAND, bio)],
         },
         fallbacks=[CommandHandler("cancel", cancel)],
