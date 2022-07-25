@@ -13,7 +13,11 @@ Send /start to initiate the conversation.
 Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 """
+from package import variables as v
 
+ort = "home"
+database = "Telegram"
+live = False
 import logging
 
 from telegram import __version__ as TG_VER
@@ -45,7 +49,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-GENDER, PHOTO, LOCATION, BIO = range(4)
+START, GENDER, PHOTO, LOCATION, BIO = range(5)
+
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -60,7 +65,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             reply_keyboard, one_time_keyboard=True, input_field_placeholder="Boy or Girl?"
         ),
     )
-
+    print(GENDER)
     return GENDER
 
 
@@ -149,7 +154,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 def main() -> None:
     """Run the bot."""
     # Create the Application and pass it your bot's token.
-    application = Application.builder().token("TOKEN").build()
+    application = Application.builder().token(v.telegram_api(live)).build()
 
     # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
     conv_handler = ConversationHandler(
