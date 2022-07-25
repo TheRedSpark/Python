@@ -15,7 +15,7 @@ from package import variables as v
 version = "V2.4"  # Live
 ort = "home"
 database = "Selma"
-live = False
+live = True
 loschtimer = 5
 stundenabstand_push = 1
 day = 0
@@ -224,7 +224,7 @@ def push_updates():
 
 def benutzer_setzer(userid, benutzer):
     try:
-        user = cry.encoding(benutzer)
+        user = cry.encoding(benutzer.strip())
         mydb = mysql.connector.connect(
             host=v.host(ort),
             user=v.user(ort),
@@ -244,7 +244,7 @@ def benutzer_setzer(userid, benutzer):
 
 def passwort_setzer(userid, passwort):
     try:
-        passw = cry.encoding(passwort)
+        passw = cry.encoding(passwort.strip())
         mydb = mysql.connector.connect(
             host=v.host(ort),
             user=v.user(ort),
@@ -382,6 +382,7 @@ async def send_push(context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    print(update.effective_user.id)
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
@@ -454,7 +455,6 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     await query.answer()
 
     if query.data == 'user':
-        # first submenu
         menu_2 = [[InlineKeyboardButton('Selma Benutzernamen speichern', callback_data='user_speichern')],
                   [InlineKeyboardButton('Selma Benutzernamen anzeigen', callback_data='user_anzeigen')]]
         reply_markup = InlineKeyboardMarkup(menu_2)
