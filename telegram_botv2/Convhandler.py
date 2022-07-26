@@ -124,7 +124,6 @@ def antwort_setter(antwort, fragen_id):
         mydb.commit()
         my_cursor.close()
 
-
         mydb = mysql.connector.connect(
             host=v.host(ort),
             user=v.user(ort),
@@ -180,33 +179,47 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     elif query.data == 'antwort_a':
         if frage[8] == "a":
             antwort_setter(True, frage[0])
+            await context.bot.send_message(update.effective_message.chat_id,
+                                           text="Das war die Richtige Antwort!")
         else:
             antwort_setter(False, frage[0])
+            await context.bot.send_message(update.effective_message.chat_id,
+                                           text=f'Die richtige Antwort war {frage[8]}')
         await query.delete_message()
 
     elif query.data == 'antwort_b':
         if frage[8] == "b":
             antwort_setter(True, frage[0])
+            await context.bot.send_message(update.effective_message.chat_id,
+                                           text="Das war die Richtige Antwort!")
         else:
             antwort_setter(False, frage[0])
+            await context.bot.send_message(update.effective_message.chat_id,
+                                           text=f'Die richtige Antwort war {frage[8]}')
         await query.delete_message()
     elif query.data == 'antwort_c':
         if frage[8] == "c":
             antwort_setter(True, frage[0])
+            await context.bot.send_message(update.effective_message.chat_id,
+                                           text="Das war die Richtige Antwort!")
         else:
             antwort_setter(False, frage[0])
+            await context.bot.send_message(update.effective_message.chat_id,
+                                           text=f'Die richtige Antwort war {frage[8]}')
         await query.delete_message()
     elif query.data == 'antwort_d':
         if frage[8] == "d":
             antwort_setter(True, frage[0])
+            await context.bot.send_message(update.effective_message.chat_id,
+                                           text="Das war die Richtige Antwort!")
         else:
             antwort_setter(False, frage[0])
+            await context.bot.send_message(update.effective_message.chat_id,
+                                           text=f'Die richtige Antwort war {frage[8]}')
         await query.delete_message()
     else:
         pass
-
-
-
+    frage = []
 
 
 def main() -> None:
