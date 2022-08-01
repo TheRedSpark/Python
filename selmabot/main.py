@@ -20,6 +20,9 @@ loschtimer = 5
 stundenabstand_push = 1
 day = 0
 
+update_message = f'Der Bot updatet auf {version}\n' \
+                 f'Bug fix: Bestimmte User mit einer großen ID konnten den Bot nicht nutzen.'
+
 # Setting up the logging module to log info messages.
 if selma.on_server:
     pass
@@ -372,9 +375,10 @@ async def send_push(context: ContextTypes.DEFAULT_TYPE) -> None:
                     print(f'Fehlgeschlagen für User: {t_user}')
                 if error_anzahl(t_user):
                     try:
-                        await context.bot.send_message(t_user, text="Du bekommst keine automatischen Updates mehr! Bitte "
-                                                                    "kontrolliere deine Zugangsdaten und benutze /reset "
-                                                                    "um wieder Automatische Updates zu erhalten.")
+                        await context.bot.send_message(t_user,
+                                                       text="Du bekommst keine automatischen Updates mehr! Bitte "
+                                                            "kontrolliere deine Zugangsdaten und benutze /reset "
+                                                            "um wieder Automatische Updates zu erhalten.")
 
                     except:
                         print(f'Fehlgeschlagen für User: {t_user}')
@@ -686,6 +690,34 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     await update.message.reply_text('Kein Befehl erkannt, bitte nutze einen Befehl unter /help')
 
 
+async def send(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    results_clen = []
+    if update.effective_user.id == v.telegram_user_id:
+        mydb = mysql.connector.connect(
+            host=v.host(ort),
+            user=v.user(ort),
+            passwd=v.passwd(ort),
+            database=v.database(database),
+            auth_plugin='mysql_native_password')
+
+        my_cursor = mydb.cursor()
+        my_cursor.execute(f"SELECT User_Id FROM `Selma`.`Users` ")
+        results_raw = my_cursor.fetchall()
+        my_cursor.close()
+        for raw in results_raw:
+            clen = int(str(raw).replace("(", "").replace(",)", "").strip())
+            results_clen.append(clen)
+        for t_user in results_clen:
+            try:
+                await context.bot.send_message(t_user, text=update_message)
+                print(f'Erfolg für User: {t_user}')
+            except:
+                print(f'Fehlgeschlagen für User: {t_user}')
+    else:
+        context.bot.send_message(v.telegram_user_id,
+                                 text=f'User {update.effective_user.id} hat versucht /send auszuführen')
+
+
 def main() -> None:
     # Creating a telegram bot.
     application = Application.builder().token(v.telegram_selma_api(live)).build()
@@ -701,6 +733,7 @@ def main() -> None:
     application.add_handler(CommandHandler("setemail", set_email))
     application.add_handler(CommandHandler("exam", exam))
     application.add_handler(CommandHandler("push", send_push))
+    application.add_handler(CommandHandler("send", send))
     application.add_handler(CallbackQueryHandler(menu_actions))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))
     job_queue = application.job_queue

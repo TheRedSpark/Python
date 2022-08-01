@@ -13,6 +13,12 @@ update_version = main.version
 update_message = f'Der Bot updatet auf {update_version}\n' \
                  f'Bug fix: Bestimmte User mit einer großen ID konnten den Bot nicht nutzen.'
 
+
+"""""""""""
+Unused see Changelog
+"""
+
+
 try:
     from telegram import __version_info__
 except ImportError:
@@ -29,24 +35,25 @@ from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQuer
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 
-mydb = mysql.connector.connect(
-    host=v.host(ort),
-    user=v.user(ort),
-    passwd=v.passwd(ort),
-    database=v.database(database),
-    auth_plugin='mysql_native_password')
 
-my_cursor = mydb.cursor()
-my_cursor.execute(f"SELECT User_Id FROM `Selma`.`Users` ")
-results_raw = my_cursor.fetchall()
-my_cursor.close()
-for raw in results_raw:
-    clen = int(str(raw).replace("(", "").replace(",)", "").strip())
-    results_clen.append(clen)
 
 
 
 async def send(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    mydb = mysql.connector.connect(
+        host=v.host(ort),
+        user=v.user(ort),
+        passwd=v.passwd(ort),
+        database=v.database(database),
+        auth_plugin='mysql_native_password')
+
+    my_cursor = mydb.cursor()
+    my_cursor.execute(f"SELECT User_Id FROM `Selma`.`Users` ")
+    results_raw = my_cursor.fetchall()
+    my_cursor.close()
+    for raw in results_raw:
+        clen = int(str(raw).replace("(", "").replace(",)", "").strip())
+        results_clen.append(clen)
     for t_user in results_clen:
         try:
             await context.bot.send_message(t_user, text=update_message)
