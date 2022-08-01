@@ -11,7 +11,7 @@ live = True
 results_clen = []
 update_version = main.version
 update_message = f'Der Bot updatet auf {update_version}\n' \
-                 f'Bug fix das durch das bloße draufklicken auf einen /set Befehl eine angebliche Speicherung stattgefunden hat dies ist nun behoben.'
+                 f'Bug fix: Bestimmte User mit einer großen ID konnten den Bot nicht nutzen.'
 
 try:
     from telegram import __version_info__

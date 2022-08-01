@@ -12,7 +12,7 @@ import webgetting as selma  # own
 from package import variables as v
 
 # Defining the variables that are used in the program.
-version = "V2.4"  # Live
+version = "V2.5"  # Live
 ort = "home"
 database = "Selma"
 live = True
@@ -428,7 +428,7 @@ async def update_exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         elif exam_data == 1:
             await context.bot.send_message(update.effective_user.id,
                                            text="Hurrah es gibt neue Ergebnisse nutze /exam um diese abzurufen! \n"
-                                                "Und denk dran mit /reset um die Benachrichtigungen zurückzusetzen!")
+                                                "Und denk dran mit /reset die Benachrichtigungen zurückzusetzen!")
         else:
             await context.bot.send_message(update.effective_user.id,
                                            text="Leider ist etwas schiefgelaufen bitte schreibe dem Developer")
