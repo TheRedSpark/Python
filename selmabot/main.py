@@ -345,6 +345,7 @@ Bot Funktionen
 
 
 async def send_push(context: ContextTypes.DEFAULT_TYPE) -> None:
+    global anzahl_0
     if live:
         anzahl = push_updates()
         for t_user in anzahl:
