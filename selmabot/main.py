@@ -377,7 +377,7 @@ def status(user):
     else:
         zuge = f'Nein'
 
-    if int(status[4]) == 0:
+    if int(status[5]) == 0:
         zuga = f'functional'
     else:
         zuga = f'fehlerhaft'
