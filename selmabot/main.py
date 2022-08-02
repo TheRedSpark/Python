@@ -16,7 +16,7 @@ version = "V2.6"  # Live
 ort = "home"
 database = "Selma"
 live = False
-loschtimer = 5
+loschtimer = 7
 stundenabstand_push = 1
 day = 0
 
@@ -428,7 +428,7 @@ async def send_push(context: ContextTypes.DEFAULT_TYPE) -> None:
                     except:
                         print(f'Fehlgeschlagen für User: {t_user}')
 
-        await context.bot.send_message(v.telegram_user_id, text=f'Daily: Push fertig für {len(anzahl_0)} User')
+            await context.bot.send_message(v.telegram_user_id, text=f'Daily: Push fertig für {len(anzahl_0)} User')
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
