@@ -12,16 +12,17 @@ import webgetting as selma  # own
 from package import variables as v
 
 # Defining the variables that are used in the program.
-version = "V2.5"  # Live
+version = "V2.6"  # Live
 ort = "home"
 database = "Selma"
-live = True
+live = False
 loschtimer = 5
 stundenabstand_push = 1
 day = 0
 
 update_message = f'Der Bot updatet auf {version}\n' \
-                 f'Bug fix: Bestimmte User mit einer großen ID konnten den Bot nicht nutzen.'
+                 f'Feature: Im Menu kann nun eine Statusmeldung abgerufen werden\n' \
+                 f'Minor Bug fixes'
 
 # Setting up the logging module to log info messages.
 if selma.on_server:
@@ -342,6 +343,50 @@ def error_anzahl(user):
         return False
 
 
+def status(user):
+    mydb = mysql.connector.connect(
+        host=v.host(ort),
+        user=v.user(ort),
+        passwd=v.passwd(ort),
+        database=v.database(database),
+        auth_plugin='mysql_native_password')
+
+    my_cursor = mydb.cursor()
+    my_cursor.execute(
+        f"SELECT Username,Results_Num,Results_Update,Push_Toggle,Zugelassen,Error_Anmeldung FROM `Selma`.`Users` WHERE User_Id = {user}")
+    status = my_cursor.fetchone()
+    my_cursor.close()
+    print(status)
+    if str(status[0]) == "None":
+        username = "Nicht vorhanden"
+    else:
+        username = str(status[0])
+    anzahl_prufungen = int(status[1])
+    if int(status[2]) == 1:
+        neue_ergebnisse = f'Ja'
+    else:
+        neue_ergebnisse = f'Nein'
+
+    if int(status[3]) == 1:
+        push_benach = f'Ja'
+    else:
+        push_benach = f'Nein'
+
+    if int(status[4]) == 1:
+        zuge = f'Ja'
+    else:
+        zuge = f'Nein'
+
+    if int(status[4]) == 0:
+        zuga = f'functional'
+    else:
+        zuga = f'fehlerhaft'
+
+    error_anmel = int(status[5])
+
+    return [username, anzahl_prufungen, neue_ergebnisse, push_benach, zuge, error_anmel, zuga]
+
+
 """""""""
 Bot Funktionen
 """
@@ -442,6 +487,7 @@ async def update_exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 async def set_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Sends a message with three inline buttons attached."""
     keyboard = [
+        [InlineKeyboardButton("Status abrufen", callback_data="status")],
         [InlineKeyboardButton("Benutzernamen Selma", callback_data="user")],
         [InlineKeyboardButton("Passwort Selma", callback_data="passw")],
         # [InlineKeyboardButton("Email", callback_data="email")],
@@ -464,6 +510,17 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
                   [InlineKeyboardButton('Selma Benutzernamen anzeigen', callback_data='user_anzeigen')]]
         reply_markup = InlineKeyboardMarkup(menu_2)
         await query.edit_message_text(text='Deine Daten werden Verschlüsselt gespeichert!', reply_markup=reply_markup)
+
+    elif query.data == 'status':
+        status_liste = status(update.effective_user.id)
+        await query.edit_message_text(text=f'Statusmeldung:\n'
+                                           f'Username:   ({status_liste[0]})\n'
+                                           f'Zugangsdaten:   ({status_liste[6]})\n'
+                                           f'Anzahl der Prüfungen:   ({status_liste[1]})\n'
+                                           f'Neue Ergebnisse:   ({status_liste[2]})\n'
+                                           f'Automatische Benachrichtigungen:   ({status_liste[3]})\n'
+                                           f'Zugangsberechtigung zum Bot:   ({status_liste[4]})\n'
+                                           f'Fehlanmeldungen:   ({status_liste[5]})\n', )
 
     elif query.data == 'user_anzeigen':
         # second submenu
