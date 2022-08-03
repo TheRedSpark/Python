@@ -343,6 +343,23 @@ def error_anzahl(user):
         return False
 
 
+def nachrichten_getter(user):
+    mydb = mysql.connector.connect(
+        host=v.host(ort),
+        user=v.user(ort),
+        passwd=v.passwd(ort),
+        database=v.database(database),
+        auth_plugin='mysql_native_password')
+
+    my_cursor = mydb.cursor()
+    my_cursor.execute(
+        f"SELECT COUNT(User_Id) FROM Selma.Messages where User_Id = {user}")
+    nachrichten = my_cursor.fetchone()
+    my_cursor.close()
+    nachrichten = int(str(nachrichten).replace("(", "").replace(",)", ""))
+    return nachrichten
+
+
 def status(user):
     mydb = mysql.connector.connect(
         host=v.host(ort),
@@ -512,15 +529,28 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         await query.edit_message_text(text='Deine Daten werden Verschlüsselt gespeichert!', reply_markup=reply_markup)
 
     elif query.data == 'status':
-        status_liste = status(update.effective_user.id)
+        user = update.effective_user.id
+        status_liste = status(user)
+        nachrichten = nachrichten_getter(user)
+        benutzer = get_username(user)
+        if not benutzer:
+            benutzer = "nicht vorhanden"
+        userpass = get_userpass(user)
+        if not userpass or len(userpass) < 3:
+            userpass = "nicht vorhanden"
+        else:
+            userpass = "vorhanden"
         await query.edit_message_text(text=f'Statusmeldung:\n'
                                            f'Username:   ({status_liste[0]})\n'
-                                           f'Zugangsdaten:   ({status_liste[6]})\n'
+                                           f'Zugangsdatenstatus:   ({status_liste[6]})\n'
+                                           f'Benutzername Selma:  ({benutzer})\n'
+                                           f'Passwort Selma:   ({userpass})\n'
                                            f'Anzahl der Prüfungen:   ({status_liste[1]})\n'
                                            f'Neue Ergebnisse:   ({status_liste[2]})\n'
                                            f'Automatische Benachrichtigungen:   ({status_liste[3]})\n'
                                            f'Zugangsberechtigung zum Bot:   ({status_liste[4]})\n'
-                                           f'Fehlanmeldungen:   ({status_liste[5]})\n', )
+                                           f'Fehlanmeldungen:   ({status_liste[5]})\n'
+                                           f'Nachrichten an den Bot:   ({nachrichten})\n')
 
     elif query.data == 'user_anzeigen':
         # second submenu
