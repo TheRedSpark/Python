@@ -3,9 +3,10 @@ import logging
 import time
 
 import mysql.connector  # 8.0.28
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup  # 20.0a1
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove, \
+    ReplyKeyboardMarkup  # 20.0a1
 from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler, MessageHandler, \
-    filters  # 20.0a1
+    filters, ConversationHandler  # 20.0a1
 
 import crypro_neu as cry  # own
 import webgetting as selma  # own
@@ -19,7 +20,7 @@ live = False
 loschtimer = 7
 stundenabstand_push = 1
 day = 0
-
+SETUP, SETUP_BENUTZER, SETUP_PASSWORT, SETUP_PUSH, SETUP_END = range(5)
 update_message = f'Der Bot updatet auf {version}\n' \
                  f'Feature: Im Menu kann nun eine Statusmeldung abgerufen werden\n' \
                  f'Minor Bug fixes'
@@ -199,10 +200,10 @@ def noti_toggle(speichern, update):
     my_cursor = mydb.cursor()
     if speichern:
         my_cursor.execute(
-            f"UPDATE `Selma`.`Users` SET `Push_Toggle` = '1' WHERE (`User_Id` = {update.effective_user.id});")
+            f"UPDATE `Selma`.`Users` SET `Push_Toggle` = '1' WHERE (`User_Id` = {update});")
     else:
         my_cursor.execute(
-            f"UPDATE `Selma`.`Users` SET `Push_Toggle` = '0' WHERE (`User_Id` = {update.effective_user.id});")
+            f"UPDATE `Selma`.`Users` SET `Push_Toggle` = '0' WHERE (`User_Id` = {update});")
     mydb.commit()
     my_cursor.close()
 
@@ -577,12 +578,12 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     elif query.data == 'noti_on':
         # first submenu
-        noti_toggle(True, update)
+        noti_toggle(True, update.effective_user.id)
         await query.edit_message_text(text='Nun wirst du aktiv benachrichtigt')
 
     elif query.data == 'noti_off':
         # first submenu
-        noti_toggle(False, update)
+        noti_toggle(False, update.effective_user.id)
         await query.edit_message_text(text='Nun wirst du nicht mehr belästigt')
 
     elif query.data == 'exam_save':
@@ -805,6 +806,71 @@ async def send(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                                  text=f'User {update.effective_user.id} hat versucht /send auszuführen')
 
 
+async def setup(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    await update.message.reply_text(
+        "Willkommen zum Setup du kannst jederzeit mit /cancel abbrechen\n"
+        "Gib als erstes deinen Selma-Benutzernamen an"
+    )
+    return SETUP_BENUTZER
+
+
+async def setup_benutzer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    benutzer_setzer(update.effective_user.id, update.message.text.strip())
+    await update.message.reply_text(
+        "Bitte gib nun deine Passwort für Selma an."
+    )
+    return SETUP_PASSWORT
+
+
+async def setup_passwort(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    passwort_setzer(update.effective_user.id, update.message.text.strip())
+    reply_keyboard = [["Ja", "Nein"]]
+
+    await update.message.reply_text(
+        "Möchtest du automatische Benachrichtigung aktivieren?",
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True, input_field_placeholder="Ja oder Nein"
+        ),
+    )
+    return SETUP_PUSH
+
+
+async def setup_push(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    text_b = ""
+    desition = update.message.text
+    user = int(update.effective_user.id)
+    if desition == "Ja":
+        noti_toggle(True, user)
+        text_b = "sind aktiviert."
+    elif desition == "Nein":
+        noti_toggle(False, user)
+        text_b = "sind deaktiviert."
+    else:
+        print("Fehlschlag")
+
+    await update.message.reply_text(
+        f'Push Benachachrichtigungen per Telegram {text_b}', reply_markup=ReplyKeyboardRemove()
+    )
+    return ConversationHandler.END
+
+
+async def setup_end(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    await update.message.reply_text(
+        "Willkommen zum Setup du kannst jederzeit mit /cancel abbrechen\n"
+        "Gib als erstes deinen Selma-Benutzernamen an",
+    )
+    return ConversationHandler.END
+
+
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Cancels and ends the conversation."""
+    await update.message.reply_text(
+        "You Cancel the Setup", reply_markup=ReplyKeyboardRemove()
+    )
+
+    return ConversationHandler.END
+
+
 def main() -> None:
     # Creating a telegram bot.
     application = Application.builder().token(v.telegram_selma_api(live)).build()
@@ -821,6 +887,21 @@ def main() -> None:
     application.add_handler(CommandHandler("exam", exam))
     application.add_handler(CommandHandler("push", send_push))
     application.add_handler(CommandHandler("send", send))
+
+    conv_handler_setup = ConversationHandler(
+        entry_points=[CommandHandler("setup", setup)],
+        states={
+            SETUP: [MessageHandler(filters.TEXT & ~filters.COMMAND, setup)],
+            SETUP_BENUTZER: [MessageHandler(filters.TEXT & ~filters.COMMAND, setup_benutzer)],
+            SETUP_PASSWORT: [MessageHandler(filters.TEXT & ~filters.COMMAND, setup_passwort)],
+            SETUP_PUSH: [MessageHandler(filters.TEXT & ~filters.COMMAND, setup_push)],
+            SETUP_END: [MessageHandler(filters.TEXT & ~filters.COMMAND, setup_end)],
+        },
+        fallbacks=[CommandHandler("cancel", cancel)],
+    )
+
+    application.add_handler(conv_handler_setup)
+
     application.add_handler(CallbackQueryHandler(menu_actions))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))
     job_queue = application.job_queue
