@@ -13,7 +13,7 @@ import webgetting as selma  # own
 from package import variables as v
 
 # Defining the variables that are used in the program.
-version = "V2.6"  # Live
+version = "V 3.0"  # Live
 ort = "home"
 database = "Selma"
 live = False
@@ -22,8 +22,12 @@ stundenabstand_push = 1
 day = 0
 SETUP, SETUP_BENUTZER, SETUP_PASSWORT, SETUP_PUSH, SETUP_END = range(5)
 update_message = f'Der Bot updatet auf {version}\n' \
-                 f'Feature: Im Menu kann nun eine Statusmeldung abgerufen werden\n' \
-                 f'Minor Bug fixes'
+                 f'Feature: Die Statusmeldung umfasst nun mehr Informationen.' \
+                 f'Feature: Nun ist ein Setup möglich ohne Separate Befehle.' \
+                 f'Dies ermöglicht nun ein reibungsloses Einrichten vom Bot.\n' \
+                 f'Bug fixe:Passwörter und Benutzer werden nicht mehr Leerzeichenabhänig gespeichert. ' \
+                 f'werden.\n' \
+                 f'Bug fix: /menu wurde für die Handyansicht überarbeitet.'
 
 # Setting up the logging module to log info messages.
 if selma.on_server:
@@ -450,7 +454,6 @@ async def send_push(context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    print(update.effective_user.id)
     userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
                 update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
                 update.effective_user.last_name, update.effective_user.language_code)
@@ -462,10 +465,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await context.bot.send_message(update.effective_user.id,
                                    text=f'Benutze /help um Hilfe mit den Befehlen und der Funktionsweise des Bots zu '
                                         'erhalten. \n'
-                                        'Benutze /menu um den Bot für dich einzurichten oder um deine Daten zu löschen\n'
-                                        'Benutze /update um zu Überprüfen ob neue Prüfungsergebnisse vorliegen\n'
-                                        'Benutze /exam um deine Prüfungsergebnisse abzurufen\n'
-                                        'Benutze /msg <Nachricht> um die Nachricht an die Developer zu schicken\n')
+                                        'Benutze /setup um den Bot für dich einzurichten.\n'
+                                        'Unter /menu findest du einige nützliche Funktionen.\n'
+                                        'Benutze /update um zu Überprüfen ob neue Prüfungsergebnisse vorliegen.\n'
+                                        'Benutze /exam um deine Prüfungsergebnisse abzurufen.\n'
+                                        'Benutze /msg <Nachricht> um die Nachricht an die Developer zu schicken.\n'
+                                        'Auf Anfrage kann ich dir den Quellcode der aktuellen Version zukommen '
+                                        'lassen. ;-)\n')
 
     if not zugelassen(update.effective_user.id):
         await context.bot.send_message(update.effective_user.id,
@@ -479,7 +485,7 @@ async def update_exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                 update.effective_user.last_name, update.effective_user.language_code)
     if not zugelassen(update.effective_user.id):
         await context.bot.send_message(update.effective_user.id,
-                                       text=f'Du bist leider nicht für die Nutzung des Bots berechtigt, du kannst ihn dennoch gerne mit /menu aufsetzen, das steigert deine Möglichkeiten.'
+                                       text=f'Du bist leider nicht für die Nutzung des Bots berechtigt, du kannst ihn dennoch gerne mit /menu oder /setup aufsetzen, das steigert deine Möglichkeiten.'
                                             f'Du wirst benachrichtigt, wenn etwas von den begrenzten Kapazitäten frei wird ;-)')
     else:
         await context.bot.send_message(update.effective_user.id,
@@ -488,7 +494,7 @@ async def update_exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         if exam_data is False:
             # print(exam_data)
             await context.bot.send_message(update.effective_user.id,
-                                           text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu um diese zu "
+                                           text="Deine Zugangsdaten sind Fehlerhaft bitte benutze /menu oder /setup um diese zu "
                                                 "aktualisieren")
         elif exam_data == 0:
             await context.bot.send_message(update.effective_user.id,
@@ -505,13 +511,11 @@ async def update_exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 async def set_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Sends a message with three inline buttons attached."""
     keyboard = [
-        [InlineKeyboardButton("Status abrufen", callback_data="status")],
-        [InlineKeyboardButton("Benutzernamen Selma", callback_data="user")],
-        [InlineKeyboardButton("Passwort Selma", callback_data="passw")],
-        # [InlineKeyboardButton("Email", callback_data="email")],
-        [InlineKeyboardButton("Notification", callback_data="noti")],
+        [InlineKeyboardButton("Status abrufen", callback_data="status"),
+         InlineKeyboardButton("Notification", callback_data="noti"), ],
+        [InlineKeyboardButton("Benutzernamen Selma", callback_data="user"),
+         InlineKeyboardButton("Passwort Selma", callback_data="passw"), ],
         [InlineKeyboardButton("Daten löschen", callback_data="datadel")],
-        # [InlineKeyboardButton("Ergebnisspeicherung", callback_data="exam_save")],
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -542,6 +546,7 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         else:
             userpass = "vorhanden"
         await query.edit_message_text(text=f'Statusmeldung:\n'
+                                           f'Telegram User ID{update.effective_user.id}\n'
                                            f'Username:   ({status_liste[0]})\n'
                                            f'Zugangsdatenstatus:   ({status_liste[6]})\n'
                                            f'Benutzername Selma:  ({benutzer})\n'
@@ -808,8 +813,9 @@ async def send(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def setup(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.message.reply_text(
-        "Willkommen zum Setup du kannst jederzeit mit /cancel abbrechen\n"
-        "Gib als erstes deinen Selma-Benutzernamen an"
+        "Willkommen zum Setup!\n"
+        "Du kannst jederzeit mit /cancel abbrechen.\n"
+        "Gib als erstes deinen Selma-Benutzernamen an."
     )
     return SETUP_BENUTZER
 
@@ -817,7 +823,7 @@ async def setup(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def setup_benutzer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     benutzer_setzer(update.effective_user.id, update.message.text.strip())
     await update.message.reply_text(
-        "Bitte gib nun deine Passwort für Selma an."
+        "Bitte gib nun dein Passwort für Selma an."
     )
     return SETUP_PASSWORT
 
@@ -863,9 +869,9 @@ async def setup_end(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Cancels and ends the conversation."""
     await update.message.reply_text(
-        "You Cancel the Setup", reply_markup=ReplyKeyboardRemove()
+        "Du hast das Setup abgebrochen!"
+        "Bis zum nächsten mal ;-)", reply_markup=ReplyKeyboardRemove()
     )
 
     return ConversationHandler.END
