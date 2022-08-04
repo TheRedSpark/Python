@@ -546,7 +546,7 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         else:
             userpass = "vorhanden"
         await query.edit_message_text(text=f'Statusmeldung:\n'
-                                           f'Telegram User ID{update.effective_user.id}\n'
+                                           f'Telegram User ID:  ({update.effective_user.id})\n'
                                            f'Username:   ({status_liste[0]})\n'
                                            f'Zugangsdatenstatus:   ({status_liste[6]})\n'
                                            f'Benutzername Selma:  ({benutzer})\n'
@@ -784,6 +784,9 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 
 async def send(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                update.effective_user.last_name, update.effective_user.language_code)
     results_clen = []
     if update.effective_user.id == v.telegram_user_id:
         mydb = mysql.connector.connect(
@@ -812,6 +815,9 @@ async def send(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def setup(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                update.effective_user.last_name, update.effective_user.language_code)
     await update.message.reply_text(
         "Willkommen zum Setup!\n"
         "Du kannst jederzeit mit /cancel abbrechen.\n"
@@ -821,6 +827,7 @@ async def setup(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 async def setup_benutzer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+
     benutzer_setzer(update.effective_user.id, update.message.text.strip())
     await update.message.reply_text(
         "Bitte gib nun dein Passwort für Selma an."
@@ -869,6 +876,9 @@ async def setup_end(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                update.effective_message.text_markdown, update.effective_message.id, update.effective_user.first_name,
+                update.effective_user.last_name, update.effective_user.language_code)
     await update.message.reply_text(
         "Du hast das Setup abgebrochen!"
         "Bis zum nächsten mal ;-)", reply_markup=ReplyKeyboardRemove()
