@@ -77,6 +77,7 @@ def userlogging(user_id, username, message_chat_id, message_txt, message_id, fir
             time_sql, user_id, username, message_chat_id, message_txt, message_id, first_name, last_name, land_code)
         my_cursor.execute(sql_maske, data_n)
         mydb.commit()
+        my_cursor.close()
 
     else:
 
@@ -98,7 +99,6 @@ def user_create(user_id, username):
         auth_plugin='mysql_native_password')
 
     my_cursor = mydb.cursor()
-    time_sql = time.strftime("%Y-%m-%d %H:%M:%S")
     my_cursor.execute(f"SELECT Username_Selma,Password_Selma FROM `Selma`.`Users` WHERE User_Id = ({user_id}) ")
     result = my_cursor.fetchone()
     if result is None:
