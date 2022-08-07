@@ -11,7 +11,6 @@ stunde = 100
 zeit_idle = 30
 
 
-
 def upload(data, ident, time_sql):
     mydb = mysql.connector.connect(
         host=v.host(ort),
@@ -30,6 +29,7 @@ def upload(data, ident, time_sql):
     my_cursor.execute(sql_maske, data_n)
     mydb.commit()
     mydb.close()
+
 
 def fetching():
     i = 0
@@ -54,6 +54,7 @@ def fetching():
             a = a + 1
         a = 0
 
+
 while True:
     zeit = time.strftime("%Y-%m-%d %H:%M:%S")
     trigger = time.gmtime()
@@ -63,7 +64,7 @@ while True:
         fetching()
         continue
     else:
-        #print(f'Daten bereits für den heutigen Tag den {day} eingetragen!')
+        # print(f'Daten bereits für den heutigen Tag den {day} eingetragen!')
         pass
 
     time.sleep(zeit_idle)
