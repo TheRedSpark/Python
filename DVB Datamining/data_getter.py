@@ -7,8 +7,8 @@ from package import variables as v
 import time
 from datetime import timedelta
 
-stop = 'Zellescher Weg'
-time_offset = 0  # how many minutes in the future, 0 for now
+stop = 'Helmholzstraße'
+time_offset = 20  # how many minutes in the future, 0 for now
 num_results = 1
 city = 'Dresden'
 ort = "home"
