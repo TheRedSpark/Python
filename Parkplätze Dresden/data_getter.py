@@ -20,7 +20,6 @@ def upload(data, ident, time_sql):
         auth_plugin='mysql_native_password')
 
     my_cursor = mydb.cursor()
-    print(data)
     if len(data) <= 5:
         data.append(-1)
     sql_maske = "INSERT INTO `Main`.`Park` (`Zeit`,`Ident_Park`,`Place`,`Anzahl`,`Frei`) VALUES (%s, %s, %s, %s, %s);"
@@ -46,10 +45,8 @@ def fetching():
             simple_rows = rows[a].text.split("\n")
             place = [feld for feld in simple_rows if feld != '']
             if a == 0:
-                print(place[0])
                 index = place[0]
             else:
-                # print(place)
                 upload(place, index, time_sql)
             a = a + 1
         a = 0
@@ -58,7 +55,6 @@ def fetching():
 while True:
     zeit = time.strftime("%Y-%m-%d %H:%M:%S")
     trigger = time.gmtime()
-    # print(f'{trigger.tm_hour}:{trigger.tm_min} Uhr')
     if trigger.tm_hour != stunde:
         stunde = trigger.tm_hour
         fetching()
