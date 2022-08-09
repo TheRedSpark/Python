@@ -63,15 +63,22 @@ for x in myroot[0]:
     data = [f'20{date[2]}-{date[1]}-{date[0]} {time[1]}:00', data[1]]
     GRAD_l.append(data)
 
-for x in myroot[1]:
-    data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
-    time = data[0].split(" ")
-    date = time[0].split(".")
-    data = [f'20{date[2]}-{date[1]}-{date[0]} {time[1]}:00', data[1]]
-    GRADC_l.append(data)
+# for x in myroot[1]:
+#     data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
+#     time = data[0].split(" ")
+#     date = time[0].split(".")
+#     data = [f'20{date[2]}-{date[1]}-{date[0]} {time[1]}:00', data[1]]
+#     GRADC_l.append(data)
 
-print(GRAD_l)
-print(GRADC_l)
-
+# print(GRAD_l)
+# print(GRADC_l)
+fehlschlag = []
 for data in GRAD_l:
-    data_uploader(data[0],data[1])
+    try:
+        data_uploader(data[0], data[1])
+        print(f'Fertig für {data[0]}')
+    except:
+        print(f'Fehlschlag für {data[0]}')
+        fehlschlag.append(data)
+
+print(fehlschlag)
