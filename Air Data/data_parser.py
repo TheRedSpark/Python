@@ -78,6 +78,7 @@ for data in GRAD_l:
         data_uploader(data[0], data[1])
         print(f'Fertig für {data[0]}')
     except:
+        data_uploader(data[0], -1)
         print(f'Fehlschlag für {data[0]}')
         fehlschlag.append(data)
 
