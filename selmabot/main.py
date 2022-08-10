@@ -41,22 +41,21 @@ Interne Funktionen für die Botverwaltung
 
 
 def zugelassen(user_id):
-    mydb = mysql.connector.connect(
-        host=v.host(ort),
-        user=v.user(ort),
-        passwd=v.passwd(ort),
-        database=v.database(database),
-        auth_plugin='mysql_native_password')
+    with mysql.connector.connect(
+            host=v.host(ort),
+            user=v.user(ort),
+            passwd=v.passwd(ort),
+            database=v.database(database),
+            auth_plugin='mysql_native_password') as mydb:
 
-    my_cursor = mydb.cursor()
-    my_cursor.execute(f"SELECT Zugelassen FROM `Selma`.`Users` WHERE User_Id = ({user_id}) ")
-    zug = my_cursor.fetchone()
-    my_cursor.close()
-    zug = int(str(zug).replace("(", "").replace(",)", ""))
-    if zug == 1:
-        return True
-    else:
-        return False
+        my_cursor = mydb.cursor()
+        my_cursor.execute(f"SELECT Zugelassen FROM `Selma`.`Users` WHERE User_Id = ({user_id}) ")
+        zug = my_cursor.fetchone()
+        zug = int(str(zug).replace("(", "").replace(",)", ""))
+        if zug == 1:
+            return True
+        else:
+            return False
 
 
 def userlogging(user_id, username, message_chat_id, message_txt, message_id, first_name, last_name, land_code):
@@ -284,7 +283,7 @@ def email_setzer(userid, email):
         my_cursor = mydb.cursor()
         my_cursor.execute(f"UPDATE `Selma`.`Users` SET `Email` = '{email}' WHERE (`User_Id` = {userid});")
         mydb.commit()
-        my_cursor.close()
+        mydb.close()
         return True
     except:
         return False
@@ -827,7 +826,6 @@ async def setup(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 async def setup_benutzer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-
     benutzer_setzer(update.effective_user.id, update.message.text.strip())
     await update.message.reply_text(
         "Bitte gib nun dein Passwort für Selma an."
