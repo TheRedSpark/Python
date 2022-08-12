@@ -32,32 +32,32 @@ mydb = mysql.connector.connect(
 my_cursor = mydb.cursor()
 
 
-def data_uploader_alt(zeit, BEN, DRUCK, FEUCHT, NO, NO2, O3, PM10_As, PM10_BaP, PM10_Cd, PM10_eCT, PM10_HVS, PM10_Ni,
-                      PM10_oCT, PM10_Pb,
-                      PM10_TEOM, PM25, RUSS_PM1, SO2, STRAHL, TEMP, WINDGE, WINDRI):
-    mydb = mysql.connector.connect(
-        host=v.host(ort),
-        user=v.user(ort),
-        passwd=v.passwd(ort),
-        database=v.database(database),
-        auth_plugin='mysql_native_password')
-
-    my_cursor = mydb.cursor()
-    sql_stuff = "INSERT INTO `Air`.`Dresden-Nord` (`Zeit`,`Benzol`,`Luftdruck`,`relative_Feuchte`,`Stickstoffmonoxid`," \
-                "`Stickstoffdioxid`,`Ozon`,`Arsen_im_Feinstaub_PM10`,`Benzo(a)pyren_im_Feinstaub_PM10`," \
-                "`Cadmium im_Feinstaub_PM10`,`elementarer_Kohlenstoff_im_Feinstaub_PM10`," \
-                "`Feinstaub_PM10_gravimetrisch_bestimmt`,`Nickel_im_Feinstaub_PM10`," \
-                "`organischer_Kohlenstoff_im_Feinstaub_PM10`,`Blei_im_Feinstaub_PM10`," \
-                "`Feinstaub_PM10_mit_kontinuierlichem_Messverfahren_bestimmt`," \
-                "`Feinstaub_PM2.5_gravimetrisch_bestimmt`,`Russ`,`Schwefeldioxid`,`Globalstrahlung`,`Temperatur`," \
-                "`Windgeschwindigkeit`,`Windrichtung`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s," \
-                " %s, %s, %s, %s, %s, %s, %s);"
-    record1 = (
-        zeit, BEN, DRUCK, FEUCHT, NO, NO2, O3, PM10_As, PM10_BaP, PM10_Cd, PM10_eCT, PM10_HVS, PM10_Ni, PM10_oCT,
-        PM10_Pb,
-        PM10_TEOM, PM25, RUSS_PM1, SO2, STRAHL, TEMP, WINDGE, WINDRI)
-    my_cursor.execute(sql_stuff, record1)
-    mydb.commit()
+# def data_uploader_alt(zeit, BEN, DRUCK, FEUCHT, NO, NO2, O3, PM10_As, PM10_BaP, PM10_Cd, PM10_eCT, PM10_HVS, PM10_Ni,
+#                       PM10_oCT, PM10_Pb,
+#                       PM10_TEOM, PM25, RUSS_PM1, SO2, STRAHL, TEMP, WINDGE, WINDRI):
+#     mydb = mysql.connector.connect(
+#         host=v.host(ort),
+#         user=v.user(ort),
+#         passwd=v.passwd(ort),
+#         database=v.database(database),
+#         auth_plugin='mysql_native_password')
+#
+#     my_cursor = mydb.cursor()
+#     sql_stuff = "INSERT INTO `Air`.`Dresden-Nord` (`Zeit`,`Benzol`,`Luftdruck`,`relative_Feuchte`,`Stickstoffmonoxid`," \
+#                 "`Stickstoffdioxid`,`Ozon`,`Arsen_im_Feinstaub_PM10`,`Benzo(a)pyren_im_Feinstaub_PM10`," \
+#                 "`Cadmium im_Feinstaub_PM10`,`elementarer_Kohlenstoff_im_Feinstaub_PM10`," \
+#                 "`Feinstaub_PM10_gravimetrisch_bestimmt`,`Nickel_im_Feinstaub_PM10`," \
+#                 "`organischer_Kohlenstoff_im_Feinstaub_PM10`,`Blei_im_Feinstaub_PM10`," \
+#                 "`Feinstaub_PM10_mit_kontinuierlichem_Messverfahren_bestimmt`," \
+#                 "`Feinstaub_PM2.5_gravimetrisch_bestimmt`,`Russ`,`Schwefeldioxid`,`Globalstrahlung`,`Temperatur`," \
+#                 "`Windgeschwindigkeit`,`Windrichtung`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s," \
+#                 " %s, %s, %s, %s, %s, %s, %s);"
+#     record1 = (
+#         zeit, BEN, DRUCK, FEUCHT, NO, NO2, O3, PM10_As, PM10_BaP, PM10_Cd, PM10_eCT, PM10_HVS, PM10_Ni, PM10_oCT,
+#         PM10_Pb,
+#         PM10_TEOM, PM25, RUSS_PM1, SO2, STRAHL, TEMP, WINDGE, WINDRI)
+#     my_cursor.execute(sql_stuff, record1)
+#     mydb.commit()
 
 
 def data_uploader(time, windricchtung):
@@ -201,7 +201,7 @@ print(myroot[0].attrib)
 # print(GRADC_l)
 # fehlschlag = []
 #
-start = time.strftime("%Y-%m-%d %H:%M:%S.%s")
+start = time.strftime("%Y-%m-%d %H:%M:%S")
 for data in Windrichtung_l:
     if not data[1] == "NaN":
         data_uploader(data[0], data[1])
@@ -210,8 +210,8 @@ for data in Windrichtung_l:
         # print("Ausnahme")
         data_uploader(data[0], -1)
     # print(f'Fehlschlag für {data[0]}')
-ende = time.strftime("%Y-%m-%d %H:%M:%S.%s")
-print(f'Das Delta ist : {(ende - start)}')
+ende = time.strftime("%Y-%m-%d %H:%M:%S")
+#print(f'Das Delta ist : {(ende - start)}')
 # print("Übergabe")
 # time.sleep(10)
 
