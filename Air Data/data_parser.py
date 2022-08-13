@@ -32,7 +32,7 @@ RUSSPM10_l = []
 RUSS_PM1_l = []
 TOL_l = []
 XYL_l = []
-
+start = time.strftime("%Y-%m-%d %H:%M:%S")
 mydb = mysql.connector.connect(
     host=v.host(ort),
     user=v.user(ort),
@@ -74,8 +74,8 @@ def data_updater(time, data, type):
         pass
 
 
-# mytree = ET.parse('Dresden-Nord.xml')
-mytree = ET.parse('test_dd.xml')
+mytree = ET.parse('Dresden-Nord.xml')
+#mytree = ET.parse('test_dd.xml')
 myroot = mytree.getroot()
 for x in myroot[0]:  # Windrichtung
     data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
@@ -597,3 +597,9 @@ print(f'Ende RUSS_PM1: {time.strftime("%Y-%m-%d %H:%M:%S")}\n')
 # print(f'Ende XLY: {time.strftime("%Y-%m-%d %H:%M:%S")}\n')
 
 mydb.close()
+ende = time.strftime("%Y-%m-%d %H:%M:%S")
+
+print()
+print()
+print(start)
+print(ende)
