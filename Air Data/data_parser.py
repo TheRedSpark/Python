@@ -1,3 +1,5 @@
+import sys
+
 import mysql.connector
 from package import variables as v
 import xml.etree.ElementTree as ET
@@ -30,6 +32,8 @@ mydb = mysql.connector.connect(
     auth_plugin='mysql_native_password')
 
 my_cursor = mydb.cursor()
+
+my_cursor.execute(f"TRUNCATE `Air`.`Dresden-Nord`;")
 
 
 # def data_uploader_alt(zeit, BEN, DRUCK, FEUCHT, NO, NO2, O3, PM10_As, PM10_BaP, PM10_Cd, PM10_eCT, PM10_HVS, PM10_Ni,
@@ -66,22 +70,29 @@ def data_uploader(time, windricchtung):
     my_cursor.execute(sql_stuff, record1)
 
 
-def prim_getter(time):
-    print(f'Das ist zeit {time}')
-    my_cursor.execute(f"SELECT id FROM `Air`.`Dresden-Nord` WHERE (`Zeit` = `{str(time)}`); ")
+def prim_getter(time, type):
+    # print(f'Das ist zeit {time}')
+    my_cursor.execute(f"SELECT id FROM `Air`.`Dresden-Nord` WHERE (`Zeit` = '{time}'); ")
     id = my_cursor.fetchone()
-    print(id)
+    id = int(str(id).replace("(", "").replace(",)", ""))
     return id
 
 
+
 def data_updater(time, data, type):
-    print(time)
-    id_t = prim_getter(time)
-    my_cursor.execute(f"UPDATE `Air`.`Dresden-Nord` SET `{type}` = {data} WHERE (`id` = `{id_t}`);")
+    # print(time)
+    try:
+        id_t = prim_getter(time, time_xml)
+        my_cursor.execute(f"UPDATE `Air`.`Dresden-Nord` SET `{type}` = {data} WHERE (`id` = {id_t});")
+        if id_t % 500 == 0:
+            print(f'Für {type} bei id:{id_t}')
+    except ValueError:
+        pass
 
 
-mytree = ET.parse('Dresden-Nord.xml')
-# mytree = ET.parse('test_dd.xml')
+
+# mytree = ET.parse('Dresden-Nord.xml')
+mytree = ET.parse('test_dd.xml')
 myroot = mytree.getroot()
 for x in myroot[0]:  # Windrichtung
     data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
@@ -195,13 +206,15 @@ for x in myroot[15]:  # O3
     data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
     O3_l.append(data)
 
-print(myroot[0].attrib)
+# print(myroot[0].attrib)
 
 # print(GRAD_l)
 # print(GRADC_l)
 # fehlschlag = []
 #
+print("Start Windrichtung")
 start = time.strftime("%Y-%m-%d %H:%M:%S")
+print(start)
 for data in Windrichtung_l:
     if not data[1] == "NaN":
         data_uploader(data[0], data[1])
@@ -211,19 +224,44 @@ for data in Windrichtung_l:
         data_uploader(data[0], -1)
     # print(f'Fehlschlag für {data[0]}')
 ende = time.strftime("%Y-%m-%d %H:%M:%S")
-#print(f'Das Delta ist : {(ende - start)}')
-# print("Übergabe")
+print(ende)
+# print(f'Das Delta ist : {(ende - start)}')
+mydb.commit()
+print("Übergabe Temperatur")
 # time.sleep(10)
+start = time.strftime("%Y-%m-%d %H:%M:%S")
+print(start)
+for data in Temperatur_l:
+    if not data[1] == "NaN":
+        data_updater(data[0], data[1], "Temperatur")
+        # print(f'Fertig für {data[0]}')
+    else:
+        data_updater(data[0], -1, "Temperatur")
+        # print(f'Fehlschlag für {data[0]}')
 
-# for data in Temperatur_l:
-#     if not data[1] == "NaN":
-#         data_updater(data[0], data[1], "Temperatur")
-#         print(f'Fertig für {data[0]}')
-#     else:
-#         data_updater(data[0], -1, "Temperatur")
-#         print(f'Fehlschlag für {data[0]}')
-
+ende = time.strftime("%Y-%m-%d %H:%M:%S")
+print(ende)
 
 mydb.commit()
+print("Übergabe Strahlung")
+for data in Strahlung_l:
+    if not data[1] == "NaN":
+        data_updater(data[0], data[1], "Globalstrahlung")
+        # print(f'Fertig für {data[0]}')
+    else:
+        data_updater(data[0], -1, "Globalstrahlung")
+        # print(f'Fehlschlag für {data[0]}')
 
+mydb.commit()
+print("Übergabe Druck")
+for data in Druck_l:
+    if not data[1] == "NaN":
+        print(f'Versuch für {data[0]}')
+        data_updater(data[0], data[1], "Luftdruck")
+        print(f'Fertig für {data[0]}')
+    else:
+        data_updater(data[0], -1, "Luftdruck")
+        print(f'Fehlschlag für {data[0]}')
+
+    mydb.commit()
 mydb.close()
