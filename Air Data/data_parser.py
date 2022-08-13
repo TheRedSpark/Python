@@ -23,6 +23,7 @@ BEN_l = []
 NO_l = []
 NO2_l = []
 O3_l = []
+PM10_TEOM_l = []
 
 mydb = mysql.connector.connect(
     host=v.host(ort),
@@ -78,17 +79,15 @@ def prim_getter(time, type):
     return id
 
 
-
 def data_updater(time, data, type):
     # print(time)
     try:
         id_t = prim_getter(time, time_xml)
         my_cursor.execute(f"UPDATE `Air`.`Dresden-Nord` SET `{type}` = {data} WHERE (`id` = {id_t});")
-        if id_t % 500 == 0:
+        if id_t % 2000 == 0:
             print(f'Für {type} bei id:{id_t}')
     except ValueError:
         pass
-
 
 
 # mytree = ET.parse('Dresden-Nord.xml')
@@ -100,6 +99,7 @@ for x in myroot[0]:  # Windrichtung
     date = time_xml[0].split(".")
     data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
     Windrichtung_l.append(data)
+print(f'{myroot[0].attrib} 0')
 
 for x in myroot[1]:  # Temperatur
     data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
@@ -107,6 +107,7 @@ for x in myroot[1]:  # Temperatur
     date = time_xml[0].split(".")
     data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
     Temperatur_l.append(data)
+print(f'{myroot[1].attrib} 1')
 
 for x in myroot[2]:  # Feuchtigkeit
     data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
@@ -114,6 +115,7 @@ for x in myroot[2]:  # Feuchtigkeit
     date = time_xml[0].split(".")
     data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
     Feuchtigkeit_l.append(data)
+print(f'{myroot[2].attrib} 2')
 
 for x in myroot[3]:  # Strahlung
     data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
@@ -121,6 +123,7 @@ for x in myroot[3]:  # Strahlung
     date = time_xml[0].split(".")
     data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
     Strahlung_l.append(data)
+print(f'{myroot[3].attrib} 3')
 
 for x in myroot[4]:  # Druck
     data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
@@ -128,6 +131,7 @@ for x in myroot[4]:  # Druck
     date = time_xml[0].split(".")
     data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
     Druck_l.append(data)
+print(f'{myroot[4].attrib} 4')
 
 for x in myroot[5]:  # Windgeschwindigkeit
     data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
@@ -135,6 +139,7 @@ for x in myroot[5]:  # Windgeschwindigkeit
     date = time_xml[0].split(".")
     data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
     Windgeschwindigkeit_l.append(data)
+print(f'{myroot[5].attrib} 5')
 
 for x in myroot[6]:  # PM10_As
     data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
@@ -142,69 +147,79 @@ for x in myroot[6]:  # PM10_As
     date = time_xml[0].split(".")
     data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
     PM10_As_l.append(data)
+print(f'{myroot[6].attrib} 6')
 
-for x in myroot[7]:  # Druck
-    data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
-    time_xml = data[0].split(" ")
-    date = time_xml[0].split(".")
-    data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
-    Druck_l.append(data)
-
-for x in myroot[8]:  # PM10_BaP
+for x in myroot[7]:  # PM10_BaP
     data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
     time_xml = data[0].split(" ")
     date = time_xml[0].split(".")
     data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
     PM10_BaP_l.append(data)
+print(f'{myroot[7].attrib} 7')
 
-for x in myroot[9]:  # PM10_Cd
+for x in myroot[8]:  # PM10_Cd
     data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
     time_xml = data[0].split(" ")
     date = time_xml[0].split(".")
     data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
     PM10_Cd_l.append(data)
+print(f'{myroot[8].attrib} 8')
 
-for x in myroot[10]:  # PM10_Ni
+for x in myroot[9]:  # PM10_Ni
     data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
     time_xml = data[0].split(" ")
     date = time_xml[0].split(".")
     data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
     PM10_Ni_l.append(data)
+print(f'{myroot[9].attrib} 9')
 
-for x in myroot[11]:  # PM10_Pb
+for x in myroot[10]:  # PM10_Pb
     data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
     time_xml = data[0].split(" ")
     date = time_xml[0].split(".")
     data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
     PM10_Pb_l.append(data)
+print(f'{myroot[10].attrib} 10')
 
-for x in myroot[12]:  # BEN
+for x in myroot[11]:  # BEN
     data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
     time_xml = data[0].split(" ")
     date = time_xml[0].split(".")
     data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
     BEN_l.append(data)
+print(f'{myroot[11].attrib} 11')
 
-for x in myroot[13]:  # NO
+for x in myroot[12]:  # NO
     data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
     time_xml = data[0].split(" ")
     date = time_xml[0].split(".")
     data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
     NO_l.append(data)
+print(f'{myroot[12].attrib} 12')
 
-for x in myroot[14]:  # NO2
+for x in myroot[13]:  # NO2
     data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
     time_xml = data[0].split(" ")
     date = time_xml[0].split(".")
     data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
     NO2_l.append(data)
+print(f'{myroot[13].attrib} 13')
 
-for x in myroot[15]:  # O3
+for x in myroot[14]:  # O3
     data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
     time_xml = data[0].split(" ")
     date = time_xml[0].split(".")
     data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
     O3_l.append(data)
+print(f'{myroot[14].attrib} 14')
+
+for x in myroot[15]:  # PM10_TEOM
+    data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
+    time_xml = data[0].split(" ")
+    date = time_xml[0].split(".")
+    data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
+    PM10_TEOM_l.append(data)
+print(f'{myroot[15].attrib} 15')
 
 # print(myroot[0].attrib)
 
@@ -212,9 +227,7 @@ for x in myroot[15]:  # O3
 # print(GRADC_l)
 # fehlschlag = []
 #
-print("Start Windrichtung")
-start = time.strftime("%Y-%m-%d %H:%M:%S")
-print(start)
+print(f'Start Windrichtung: {time.strftime("%Y-%m-%d %H:%M:%S")}')
 for data in Windrichtung_l:
     if not data[1] == "NaN":
         data_uploader(data[0], data[1])
@@ -223,14 +236,11 @@ for data in Windrichtung_l:
         # print("Ausnahme")
         data_uploader(data[0], -1)
     # print(f'Fehlschlag für {data[0]}')
-ende = time.strftime("%Y-%m-%d %H:%M:%S")
-print(ende)
-# print(f'Das Delta ist : {(ende - start)}')
+print(f'Ende Windrichtung: {time.strftime("%Y-%m-%d %H:%M:%S")}')
 mydb.commit()
-print("Übergabe Temperatur")
+print()
 # time.sleep(10)
-start = time.strftime("%Y-%m-%d %H:%M:%S")
-print(start)
+print(f'Start Temperatur: {time.strftime("%Y-%m-%d %H:%M:%S")}')
 for data in Temperatur_l:
     if not data[1] == "NaN":
         data_updater(data[0], data[1], "Temperatur")
@@ -239,11 +249,10 @@ for data in Temperatur_l:
         data_updater(data[0], -1, "Temperatur")
         # print(f'Fehlschlag für {data[0]}')
 
-ende = time.strftime("%Y-%m-%d %H:%M:%S")
-print(ende)
-
 mydb.commit()
-print("Übergabe Strahlung")
+print(f'Ende Temperatur: {time.strftime("%Y-%m-%d %H:%M:%S")}')
+print()
+print(f'Start Globalstrahlung: {time.strftime("%Y-%m-%d %H:%M:%S")}')
 for data in Strahlung_l:
     if not data[1] == "NaN":
         data_updater(data[0], data[1], "Globalstrahlung")
@@ -253,15 +262,18 @@ for data in Strahlung_l:
         # print(f'Fehlschlag für {data[0]}')
 
 mydb.commit()
-print("Übergabe Druck")
+print(f'Ende Globalstrahlung: {time.strftime("%Y-%m-%d %H:%M:%S")}')
+print()
+print(f'Start Luftdruck: {time.strftime("%Y-%m-%d %H:%M:%S")}')
 for data in Druck_l:
     if not data[1] == "NaN":
-        print(f'Versuch für {data[0]}')
+        # print(f'Versuch für {data[0]}')
         data_updater(data[0], data[1], "Luftdruck")
-        print(f'Fertig für {data[0]}')
+        # print(f'Fertig für {data[0]}')
     else:
         data_updater(data[0], -1, "Luftdruck")
-        print(f'Fehlschlag für {data[0]}')
+        # print(f'Fehlschlag für {data[0]}')
 
-    mydb.commit()
+print(f'Ende Luftdruck: {time.strftime("%Y-%m-%d %H:%M:%S")}')
+mydb.commit()
 mydb.close()
