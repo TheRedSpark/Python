@@ -7,7 +7,7 @@ import time
 
 ort = 'home'
 database = 'Air'
-
+test_l = []
 Windrichtung_l = []
 Temperatur_l = []
 Feuchtigkeit_l = []
@@ -94,7 +94,7 @@ def data_updater(time, data, type):
         pass
 
 
-# mytree = ET.parse('Dresden-Nord.xml')
+#mytree = ET.parse('Dresden-Nord.xml')
 mytree = ET.parse('test_dd.xml')
 myroot = mytree.getroot()
 for x in myroot[0]:  # Windrichtung
@@ -225,6 +225,26 @@ for x in myroot[15]:  # PM10_TEOM
     PM10_TEOM_l.append(data)
 print(f'{myroot[15].attrib} 15')
 
+for x in myroot[15]:  # PM10_TEOM
+    data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
+    time_xml = data[0].split(" ")
+    date = time_xml[0].split(".")
+    data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
+    test_l.append(data)
+print(f'{myroot[15].attrib} 15')
+
+
+
+
+
+
+
+
+
+
+
+
+time.sleep(40)
 print(f'Start Windrichtung: {time.strftime("%Y-%m-%d %H:%M:%S")}')
 for data in Windrichtung_l:
     if not data[1] == "NaN":
@@ -347,5 +367,96 @@ for data in PM10_Ni_l:
 
 mydb.commit()
 print(f'Ende PM10_Ni: {time.strftime("%Y-%m-%d %H:%M:%S")}\n')
+
+
+print(f'Start PM10_Pb: {time.strftime("%Y-%m-%d %H:%M:%S")}')
+for data in PM10_Pb_l:
+    if not data[1] == "NaN":
+        # print(f'Versuch für {data[0]}')
+        data_updater(data[0].replace(":30:00",":00:00"), data[1], "Blei_im_Feinstaub_PM10")
+        # print(f'Fertig für {data[0]}')
+    else:
+        data_updater(data[0].replace(":30:00",":00:00"), -1, "Blei_im_Feinstaub_PM10")
+        #print(f'Fehlschlag für {data[0]}')
+
+
+mydb.commit()
+print(f'Ende PM10_Pb: {time.strftime("%Y-%m-%d %H:%M:%S")}\n')
+
+print(f'Start BEN: {time.strftime("%Y-%m-%d %H:%M:%S")}')
+for data in BEN_l:
+    if not data[1] == "NaN":
+        # print(f'Versuch für {data[0]}')
+        data_updater(data[0], data[1], "Benzol")
+        # print(f'Fertig für {data[0]}')
+    else:
+        data_updater(data[0], -1, "Benzol")
+        #print(f'Fehlschlag für {data[0]}')
+
+
+mydb.commit()
+print(f'Ende BEN: {time.strftime("%Y-%m-%d %H:%M:%S")}\n')
+
+print(f'Start NO: {time.strftime("%Y-%m-%d %H:%M:%S")}')
+for data in NO_l:
+    if not data[1] == "NaN":
+        # print(f'Versuch für {data[0]}')
+        data_updater(data[0], data[1], "Stickstoffmonoxid")
+        # print(f'Fertig für {data[0]}')
+    else:
+        data_updater(data[0], -1, "Stickstoffmonoxid")
+        #print(f'Fehlschlag für {data[0]}')
+
+
+mydb.commit()
+print(f'Ende NO: {time.strftime("%Y-%m-%d %H:%M:%S")}\n')
+
+print(f'Start NO2: {time.strftime("%Y-%m-%d %H:%M:%S")}')
+for data in NO2_l:
+    if not data[1] == "NaN":
+        # print(f'Versuch für {data[0]}')
+        data_updater(data[0], data[1], "Stickstoffdioxid")
+        # print(f'Fertig für {data[0]}')
+    else:
+        data_updater(data[0], -1, "Stickstoffdioxid")
+        #print(f'Fehlschlag für {data[0]}')
+
+
+mydb.commit()
+print(f'Ende NO2: {time.strftime("%Y-%m-%d %H:%M:%S")}\n')
+
+print(f'Start O3: {time.strftime("%Y-%m-%d %H:%M:%S")}')
+for data in O3_l:
+    if not data[1] == "NaN":
+        # print(f'Versuch für {data[0]}')
+        data_updater(data[0], data[1], "Ozon")
+        # print(f'Fertig für {data[0]}')
+    else:
+        data_updater(data[0], -1, "Ozon")
+        #print(f'Fehlschlag für {data[0]}')
+
+
+mydb.commit()
+print(f'Ende O3: {time.strftime("%Y-%m-%d %H:%M:%S")}\n')
+#print(O3_l)
+
+print(f'Start PM10_TEOM: {time.strftime("%Y-%m-%d %H:%M:%S")}')
+for data in PM10_TEOM_l:
+    if not data[1] == "NaN":
+        # print(f'Versuch für {data[0]}')
+        data_updater(data[0].replace(":30:00",":00:00"), data[1], "Feinstaub_PM10_mit_kontinuierlichem_Messverfahren_bestimmt")
+        # print(f'Fertig für {data[0]}')
+    else:
+        data_updater(data[0].replace(":30:00",":00:00"), -1, "Feinstaub_PM10_mit_kontinuierlichem_Messverfahren_bestimmt")
+        #print(f'Fehlschlag für {data[0]}')
+
+
+mydb.commit()
+print(f'Ende PM10_TEOM: {time.strftime("%Y-%m-%d %H:%M:%S")}\n')
+
+#print(PM10_TEOM_l)
+
+
+
 
 mydb.close()
