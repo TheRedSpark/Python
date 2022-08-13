@@ -89,6 +89,10 @@ def data_updater(time, data, type):
     except ValueError:
         pass
 
+    except SyntaxError:
+        print("Syntax error")
+        pass
+
 
 # mytree = ET.parse('Dresden-Nord.xml')
 mytree = ET.parse('test_dd.xml')
@@ -221,12 +225,6 @@ for x in myroot[15]:  # PM10_TEOM
     PM10_TEOM_l.append(data)
 print(f'{myroot[15].attrib} 15')
 
-# print(myroot[0].attrib)
-
-# print(GRAD_l)
-# print(GRADC_l)
-# fehlschlag = []
-#
 print(f'Start Windrichtung: {time.strftime("%Y-%m-%d %H:%M:%S")}')
 for data in Windrichtung_l:
     if not data[1] == "NaN":
@@ -239,7 +237,7 @@ for data in Windrichtung_l:
 print(f'Ende Windrichtung: {time.strftime("%Y-%m-%d %H:%M:%S")}')
 mydb.commit()
 print()
-# time.sleep(10)
+
 print(f'Start Temperatur: {time.strftime("%Y-%m-%d %H:%M:%S")}')
 for data in Temperatur_l:
     if not data[1] == "NaN":
@@ -252,6 +250,7 @@ for data in Temperatur_l:
 mydb.commit()
 print(f'Ende Temperatur: {time.strftime("%Y-%m-%d %H:%M:%S")}')
 print()
+
 print(f'Start Globalstrahlung: {time.strftime("%Y-%m-%d %H:%M:%S")}')
 for data in Strahlung_l:
     if not data[1] == "NaN":
@@ -264,6 +263,7 @@ for data in Strahlung_l:
 mydb.commit()
 print(f'Ende Globalstrahlung: {time.strftime("%Y-%m-%d %H:%M:%S")}')
 print()
+
 print(f'Start Luftdruck: {time.strftime("%Y-%m-%d %H:%M:%S")}')
 for data in Druck_l:
     if not data[1] == "NaN":
@@ -274,6 +274,78 @@ for data in Druck_l:
         data_updater(data[0], -1, "Luftdruck")
         # print(f'Fehlschlag für {data[0]}')
 
-print(f'Ende Luftdruck: {time.strftime("%Y-%m-%d %H:%M:%S")}')
 mydb.commit()
+print(f'Ende Luftdruck: {time.strftime("%Y-%m-%d %H:%M:%S")}\n')
+
+print(f'Start Windgeschwindigkeit: {time.strftime("%Y-%m-%d %H:%M:%S")}')
+for data in Windgeschwindigkeit_l:
+    if not data[1] == "NaN":
+        # print(f'Versuch für {data[0]}')
+        data_updater(data[0], data[1], "Windgeschwindigkeit")
+        # print(f'Fertig für {data[0]}')
+    else:
+        data_updater(data[0], -1, "Windgeschwindigkeit")
+        # print(f'Fehlschlag für {data[0]}')
+
+mydb.commit()
+#print(Windgeschwindigkeit_l)
+print(f'Ende Windgeschwindigkeit: {time.strftime("%Y-%m-%d %H:%M:%S")}\n')
+
+print(f'Start PM10_As: {time.strftime("%Y-%m-%d %H:%M:%S")}')
+for data in PM10_As_l:
+    if not data[1] == "NaN":
+        # print(f'Versuch für {data[0]}')
+        data_updater(data[0].replace(":30:00",":00:00"), data[1], "Arsen_im_Feinstaub_PM10")
+        # print(f'Fertig für {data[0]}')
+    else:
+        data_updater(data[0].replace(":30:00",":00:00"), -1, "Arsen_im_Feinstaub_PM10")
+        #print(f'Fehlschlag für {data[0]}')
+
+
+mydb.commit()
+print(f'Ende PM10_As: {time.strftime("%Y-%m-%d %H:%M:%S")}\n')
+
+print(f'Start PM10_BaP: {time.strftime("%Y-%m-%d %H:%M:%S")}')
+for data in PM10_BaP_l:
+    if not data[1] == "NaN":
+        # print(f'Versuch für {data[0]}')
+        data_updater(data[0].replace(":30:00",":00:00"), data[1], "Benzo(a)pyren_im_Feinstaub_PM10")
+        # print(f'Fertig für {data[0]}')
+    else:
+        data_updater(data[0].replace(":30:00",":00:00"), -1, "Benzo(a)pyren_im_Feinstaub_PM10")
+        #print(f'Fehlschlag für {data[0]}')
+
+
+mydb.commit()
+print(f'Ende PM10_BaP: {time.strftime("%Y-%m-%d %H:%M:%S")}\n')
+
+
+print(f'Start PM10_Cd: {time.strftime("%Y-%m-%d %H:%M:%S")}')
+for data in PM10_Cd_l:
+    if not data[1] == "NaN":
+        # print(f'Versuch für {data[0]}')
+        data_updater(data[0].replace(":30:00",":00:00"), data[1], "Cadmium im_Feinstaub_PM10")
+        # print(f'Fertig für {data[0]}')
+    else:
+        data_updater(data[0].replace(":30:00",":00:00"), -1, "Cadmium im_Feinstaub_PM10")
+        #print(f'Fehlschlag für {data[0]}')
+
+
+mydb.commit()
+print(f'Ende PM10_Cd: {time.strftime("%Y-%m-%d %H:%M:%S")}\n')
+
+print(f'Start PM10_Ni: {time.strftime("%Y-%m-%d %H:%M:%S")}')
+for data in PM10_Ni_l:
+    if not data[1] == "NaN":
+        # print(f'Versuch für {data[0]}')
+        data_updater(data[0].replace(":30:00",":00:00"), data[1], "Nickel_im_Feinstaub_PM10")
+        # print(f'Fertig für {data[0]}')
+    else:
+        data_updater(data[0].replace(":30:00",":00:00"), -1, "Nickel_im_Feinstaub_PM10")
+        #print(f'Fehlschlag für {data[0]}')
+
+
+mydb.commit()
+print(f'Ende PM10_Ni: {time.strftime("%Y-%m-%d %H:%M:%S")}\n')
+
 mydb.close()
