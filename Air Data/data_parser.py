@@ -4,7 +4,10 @@ import mysql.connector
 from package import variables as v
 import xml.etree.ElementTree as ET
 import time
+from pyinstrument import Profiler
 
+profiler = Profiler()
+profiler.start()
 ort = 'home'
 database = 'Air'
 test_l = []
@@ -603,3 +606,7 @@ print()
 print()
 print(start)
 print(ende)
+
+profiler.stop()
+
+profiler.print()
