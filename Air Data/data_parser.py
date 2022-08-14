@@ -65,10 +65,10 @@ def prim_getter(time, type):
 def data_updater(time, data, type):
     # print(time)
     try:
-        id_t = prim_getter(time, time_xml)
-        my_cursor.execute(f"UPDATE `Air`.`Dresden-Nord` SET `{type}` = {data} WHERE (`id` = {id_t});")
-        if id_t % 2000 == 0:
-            print(f'Für {type} bei id:{id_t}')
+        #id_t = prim_getter(time, time_xml)
+        my_cursor.execute(f"UPDATE `Air`.`Dresden-Nord` SET `{type}` = {data} WHERE (`Zeit` = '{time}');")
+        # if id_t % 2000 == 0:
+        #     print(f'Für {type} bei id:{id_t}')
     except ValueError:
         pass
 
