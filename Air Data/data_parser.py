@@ -13,32 +13,15 @@ ort = 'home'
 database = 'Air'
 init_data = []
 test_l = []
-Windrichtung_l = []
-Temperatur_l = []
-Feuchtigkeit_l = []
-Strahlung_l = []
-Druck_l = []
-Windgeschwindigkeit_l = []
-PM10_As_l = []
-PM10_BaP_l = []
-PM10_Cd_l = []
-PM10_Ni_l = []
-PM10_Pb_l = []
-BEN_l = []
-NO_l = []
-NO2_l = []
-O3_l = []
-PM10_TEOM_l = []
-PM10_HVS_l = []
-PM10_eCT_l = []
-PM10_oCT_l = []
-PM2_5_l = []
-RUSSPM10_l = []
-RUSS_PM1_l = []
-TOL_l = []
-XYL_l = []
+liste_datensatze = ['Annaberg-Buchholz.xml', 'Bautzen.xml', 'Borna.xml', 'Carlsfeld.xml',
+                    'Chemnitz-Hans-Link-Straße.xml', 'Collmberg.xml', 'Dresden-Bergmanstraße.xml', 'Dresden-Nord.xml',
+                    'Dresden-Winckelmann.xml', 'Fichtelberg.xml', 'Freiberg.xml', 'Glauchau.xml', 'Goerlitz.xml',
+                    'Klingentahl.xml', 'Leiptzig-Mitte.xml', 'Leiptzig-West.xml',
+                    'Liebschutzberg.xml', 'Niesky.xml', 'Plauen-Sued.xml', 'Radebeul-Wahnsdorf.xml', 'Schkeuditz.xml',
+                    'Zinnwald.xml', 'Zittau-Ost.xml']
+liste_datensatze.sort()
+# liste_datensatze = ['test_dd.xml']
 data_temp = []
-start = time.strftime("%Y-%m-%d %H:%M:%S")
 mydb = mysql.connector.connect(
     host=v.host(ort),
     user=v.user(ort),
@@ -48,42 +31,44 @@ mydb = mysql.connector.connect(
 
 my_cursor = mydb.cursor()
 
-my_cursor.execute(f"TRUNCATE `Air`.`Dresden-Nord`;")
+try:
+    my_cursor.execute(f"DROP `Air`.`*`;")
+except:
+    pass
 
 
-def data_uploader(time, windricchtung):
-    sql_stuff = "INSERT INTO `Air`.`Dresden-Nord` (`Zeit`,`WINDRI`) VALUES (%s, %s);" #todo: FIX type
+def table_create(ort):
+    my_cursor.execute(f"CREATE TABLE `Air`.`{ort}` (`Zeit` DATETIME UNIQUE NOT NULL,`WINDRI` FLOAT NULL,"
+                      f"`TEMP` FLOAT NULL,`FEUCHT` FLOAT NULL,`STRAHL` FLOAT NULL,`DRUCK` FLOAT NULL,"
+                      f"`WINDGE` FLOAT NULL,`PM10_As` FLOAT NULL,`PM10_BaP` FLOAT NULL,`PM10_Cd` FLOAT NULL,"
+                      f"`PM10_Ni` FLOAT NULL,`PM10_Pb` FLOAT NULL,`BEN` FLOAT NULL,`NO` FLOAT NULL,`NO2` FLOAT NULL,"
+                      f"`O3` FLOAT NULL,`SO2` FLOAT NULL,`PM10_TEOM` FLOAT NULL,`PM10_HVS` FLOAT NULL,`PM10_eCT` FLOAT NULL,"
+                      f"`PM10_oCT` FLOAT NULL,`R_Menge` FLOAT NULL,`PM2.5` FLOAT NULL,`RUSSPM10` FLOAT NULL,`RUSS_PM1` FLOAT NULL,"
+                      f"`TOL` FLOAT NULL,`XYL` FLOAT NULL,PRIMARY KEY (`Zeit`),"
+                      f"UNIQUE INDEX `Zeit_UNIQUE` (`Zeit` ASC) VISIBLE);")
+
+
+def data_uploader(time, windricchtung, list, air_table):
+    sql_stuff = (f"INSERT INTO `Air`.`{air_table}` (`Zeit`,`{list}`) VALUES (%s, %s);")
     record1 = (time, windricchtung)
-    my_cursor.execute(sql_stuff, record1)
+    while True:
+        try:
+            my_cursor.execute(sql_stuff, record1)
+            break
+        except:
+            print(f'{time=},{windricchtung=},{list=},{air_table=}')
+            table_create(air_table)
+            continue
 
 
-def prim_getter(time, type):
-    # print(f'Das ist zeit {time}')
-    my_cursor.execute(f"SELECT id FROM `Air`.`Dresden-Nord` WHERE (`Zeit` = '{time}'); ")
-    id = my_cursor.fetchone()
-    id = int(str(id).replace("(", "").replace(",)", ""))
-    return id
-
-
-def data_updater_single(time, data, type):
-    try:
-        my_cursor.execute(f"UPDATE `Air`.`Dresden-Nord` SET `{type}` = {data} WHERE (`Zeit` = '{time}');")
-    except ValueError:
-        pass
-
-    except SyntaxError:
-        print("Syntax error")
-        pass
-
-
-def data_updater_many(data, type):
+def data_updater_many(data, type, air_table):
     for x in data:
         if x[0] == "NaN":
             x[0] = -1
         x[1] = x[1].replace(":30:00", ":00:00")
 
     try:
-        sql_stuff = (f"UPDATE `Air`.`Dresden-Nord` SET `{type}` = %s WHERE (`Zeit` = %s);")
+        sql_stuff = (f"UPDATE `Air`.`{air_table}` SET `{type}` = %s WHERE (`Zeit` = %s);")
         my_cursor.executemany(sql_stuff, data)
     except ValueError:
         pass
@@ -93,48 +78,49 @@ def data_updater_many(data, type):
         pass
 
 
-mytree = ET.parse('Dresden-Nord.xml')
-#mytree = ET.parse('test_dd.xml')
+def worker(dadei):
+    mytree = ET.parse(dadei)
+    myroot = mytree.getroot()
 
-
-myroot = mytree.getroot()
-
-for x in myroot[0]:  # Windrichtung
-    data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
-    time_xml = data[0].split(" ")
-    date = time_xml[0].split(".")
-    data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
-    init_data.append(data)
-
-for data in init_data:
-    if not data[1] == "NaN":
-        data_uploader(data[0], data[1])
-    else:
-        data_uploader(data[0], -1)
-mydb.commit()
-print("init")
-
-for a in range(0, 24):
-    list_nnn = myroot[a].attrib.get('name').split(" ")
-    print(list_nnn)
-    for x in myroot[a]:  # Temperatur
+    for x in myroot[0]:
         data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
         time_xml = data[0].split(" ")
         date = time_xml[0].split(".")
-        data = [data[1], f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00']
-        data_temp.append(data)
-    data_updater_many(data_temp, list_nnn[1])
+        data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
+        init_data.append(data)
+
+    for data in init_data:
+        if not data[1] == "NaN":
+            data_uploader(data[0], data[1], myroot[0].attrib.get('name').split(" ")[1],
+                          myroot[0].attrib.get('name').split(" ")[0])
+        else:
+            data_uploader(data[0], -1, myroot[0].attrib.get('name').split(" ")[1],
+                          myroot[0].attrib.get('name').split(" ")[0])
     mydb.commit()
-    data_temp.clear()
+
+    for a in range(0, 24):
+        try:
+            list_nnn = myroot[a].attrib.get('name').split(" ")
+        except:
+            break
+        print(list_nnn)
+        for x in myroot[a]:
+            data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(
+                ",")
+            time_xml = data[0].split(" ")
+            date = time_xml[0].split(".")
+            data = [data[1], f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00']
+            data_temp.append(data)
+        data_updater_many(data_temp, list_nnn[1], list_nnn[0])
+        mydb.commit()
+        data_temp.clear()
+    init_data.clear()
+
+
+for place in liste_datensatze:
+    worker(place)
 
 mydb.close()
-ende = time.strftime("%Y-%m-%d %H:%M:%S")
-
-print()
-print()
-print(start)
-print(ende)
-
 session = profiler.stop()
-profile_renderer = ConsoleRenderer(unicode=True, color=True, show_all=True)
+profile_renderer = ConsoleRenderer(unicode=True, color=True, show_all=False)
 print(profile_renderer.render(session))
