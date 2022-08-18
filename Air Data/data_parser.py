@@ -12,7 +12,6 @@ profiler = Profiler(interval=0.001)
 
 ort = 'home'
 database = 'Air'
-init_data = []
 test_l = []
 exitFlag = 0
 liste_datensatze = ['Annaberg-Buchholz.xml', 'Bautzen.xml', 'Borna.xml', 'Carlsfeld.xml',
@@ -36,6 +35,7 @@ try:
         my_cursor.execute(f'DROP Table `Air`.`Dresden-Nord`')
 except:
     pass
+
 
 def table_create(ort_l):
     with mysql.connector.connect(
@@ -75,6 +75,29 @@ def data_uploader(time, windricchtung, list, air_table):
             table_create(air_table)
             continue
 
+def data_inserter_many(data, type, air_table):
+    for x in data:
+        if x[0] == "NaN":
+            x[0] = -1
+        x[1] = x[1].replace(":30:00", ":00:00")
+
+    try:
+        with mysql.connector.connect(
+                host=v.host(ort),
+                user=v.user(ort),
+                passwd=v.passwd(ort),
+                database=v.database(database),
+                auth_plugin='mysql_native_password') as mydb:
+
+            my_cursor = mydb.cursor()
+            sql_stuff = (f"UPDATE `Air`.`{air_table}` SET `{type}` = %s WHERE (`Zeit` = %s);")
+            my_cursor.executemany(sql_stuff, data)
+            mydb.commit()
+            break
+    except ValueError:
+        print(f'{time=},{windricchtung=},{list=},{air_table=}')
+        table_create(air_table)
+        continue
 
 def data_updater_many(data, type, air_table):
     for x in data:
@@ -106,21 +129,15 @@ def thread_worker(thread_name, ort_data):
     mytree = ET.parse(ort_data)
     myroot = mytree.getroot()
 
-    for x in myroot[0]:
-        data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(",")
-        time_xml = data[0].split(" ")
-        date = time_xml[0].split(".")
-        data = [f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00', data[1]]
-        init_data.append(data)
-
-    for data in init_data:
-        if not data[1] == "NaN":
-            data_uploader(data[0], data[1], myroot[0].attrib.get('name').split(" ")[1],
-                          myroot[0].attrib.get('name').split(" ")[0])
-        else:
-            data_uploader(data[0], -1, myroot[0].attrib.get('name').split(" ")[1],
-                          myroot[0].attrib.get('name').split(" ")[0])
-
+    list_nnn = myroot[0].attrib.get('name').split(" ")
+    data = str(myroot[0].attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(
+        ",")
+    time_xml = data[0].split(" ")
+    date = time_xml[0].split(".")
+    data = [data[1], f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00']
+    data_temp.append(data)
+    data_inserter_many(data_temp, list_nnn[1], list_nnn[0])
+    data_temp.clear()
     for a in range(0, 24):
         try:
             list_nnn = myroot[a].attrib.get('name').split(" ")
@@ -136,7 +153,6 @@ def thread_worker(thread_name, ort_data):
             data_temp.append(data)
         data_updater_many(data_temp, list_nnn[1], list_nnn[0])
         data_temp.clear()
-    init_data.clear()
 
 
 class myThread(threading.Thread):
@@ -162,14 +178,13 @@ thread1 = myThread(1, "Thread-1", 1, liste_datensatze.pop())
 thread2 = myThread(2, "Thread-2", 2, liste_datensatze.pop())
 thread3 = myThread(3, "Thread-3", 4, liste_datensatze.pop())
 thread4 = myThread(4, "Thread-4", 4, liste_datensatze.pop())
-thread_test = myThread(5,"Testthread",5,"test_dd.xml")
+#thread_test = myThread(5, "Testthread", 5, "test_dd.xml")
+thread_test = myThread(5, "Testthread", 5, "Dresden-Nord.xml")
 # Start new Threads
-#thread1.start()
-#thread2.start()
-#thread3.start()
-#thread4.start()
+# thread1.start()
+# thread2.start()
+# thread3.start()
+# thread4.start()
 thread_test.start()
 
 # thread_worker("1", "Radebeul-Wahnsdorf.xml")
-
-
