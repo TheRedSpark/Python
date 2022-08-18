@@ -9,7 +9,7 @@ from pyinstrument.renderers import ConsoleRenderer
 import threading
 
 profiler = Profiler(interval=0.001)
-profiler.start()
+
 ort = 'home'
 database = 'Air'
 init_data = []
@@ -25,7 +25,17 @@ liste_datensatze = ['Radebeul-Wahnsdorf.xml', 'Schkeuditz.xml', 'Zinnwald.xml', 
 liste_datensatze.sort()
 # liste_datensatze = ['test_dd.xml']
 data_temp = []
-
+try:
+    with mysql.connector.connect(
+            host=v.host(ort),
+            user=v.user(ort),
+            passwd=v.passwd(ort),
+            database=v.database(database),
+            auth_plugin='mysql_native_password') as mydb:
+        my_cursor = mydb.cursor()
+        my_cursor.execute(f'DROP Table `Air`.`Dresden-Nord`')
+except:
+    pass
 
 def table_create(ort_l):
     with mysql.connector.connect(
@@ -54,7 +64,6 @@ def data_uploader(time, windricchtung, list, air_table):
                     passwd=v.passwd(ort),
                     database=v.database(database),
                     auth_plugin='mysql_native_password') as mydb:
-
                 my_cursor = mydb.cursor()
                 sql_stuff = (f"INSERT INTO `Air`.`{air_table}` (`Zeit`,`{list}`) VALUES (%s, %s);")
                 record1 = (time, windricchtung)
@@ -93,8 +102,8 @@ def data_updater_many(data, type, air_table):
         pass
 
 
-def thread_worker(thread_name):
-    mytree = ET.parse(liste_datensatze.pop())
+def thread_worker(thread_name, ort_data):
+    mytree = ET.parse(ort_data)
     myroot = mytree.getroot()
 
     for x in myroot[0]:
@@ -131,30 +140,36 @@ def thread_worker(thread_name):
 
 
 class myThread(threading.Thread):
-    def __init__(self, threadID, name, counter):
+    def __init__(self, threadID, name, counter, data_ort):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.name = name
         self.counter = counter
+        self.data_ort = data_ort
 
     def run(self):
+        profiler.start()
         print("Starting " + self.name)
-        thread_worker(self.name)
+        thread_worker(self.name, self.data_ort)
         print("Exiting " + self.name)
+        session = profiler.stop()
+        profile_renderer = ConsoleRenderer(unicode=True, color=True, show_all=False)
+        print(profile_renderer.render(session))
 
 
 # Create new threads
-thread1 = myThread(1, "Thread-1", 1)
-thread2 = myThread(2, "Thread-2", 2)
-thread3 = myThread(3, "Thread-3", 4)
-thread4 = myThread(4, "Thread-4", 4)
+thread1 = myThread(1, "Thread-1", 1, liste_datensatze.pop())
+thread2 = myThread(2, "Thread-2", 2, liste_datensatze.pop())
+thread3 = myThread(3, "Thread-3", 4, liste_datensatze.pop())
+thread4 = myThread(4, "Thread-4", 4, liste_datensatze.pop())
+thread_test = myThread(5,"Testthread",5,"test_dd.xml")
 # Start new Threads
-thread1.start()
-thread2.start()
-thread3.start()
-thread4.start()
-#thread_worker("1", "Radebeul-Wahnsdorf.xml")
+#thread1.start()
+#thread2.start()
+#thread3.start()
+#thread4.start()
+thread_test.start()
 
-session = profiler.stop()
-profile_renderer = ConsoleRenderer(unicode=True, color=True, show_all=False)
-print(profile_renderer.render(session))
+# thread_worker("1", "Radebeul-Wahnsdorf.xml")
+
+
