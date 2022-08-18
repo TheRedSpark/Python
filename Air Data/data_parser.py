@@ -80,6 +80,9 @@ def data_inserter_many(data, type, air_table):
         if x[0] == "NaN":
             x[0] = -1
         x[1] = x[1].replace(":30:00", ":00:00")
+    print(data[0])
+    print(type)
+    print(air_table)
     while True:
         try:
             with mysql.connector.connect(
@@ -90,7 +93,7 @@ def data_inserter_many(data, type, air_table):
                     auth_plugin='mysql_native_password') as mydb:
 
                 my_cursor = mydb.cursor()
-                sql_stuff = (f"INSERT INTO `Air`.`{air_table}` (`Zeit`,`{list}`) VALUES (%s, %s);")
+                sql_stuff = (f"INSERT INTO `Air`.`{air_table}` (`WINDRI`,`Zeit`) VALUES (%s, %s);")
                 my_cursor.executemany(sql_stuff, data)
                 mydb.commit()
                 break
@@ -131,15 +134,14 @@ def thread_worker(thread_name, ort_data):
 
     list_nnn = myroot[0].attrib.get('name').split(" ")
 
-    print(list_nnn)
-    print(myroot[0].attrib)
-    data = str(myroot[0].attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(
-        ",")
-    print(data)
-    time_xml = data[0].split(" ")
-    date = time_xml[0].split(".")
-    data = [data[1], f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00']
-    data_temp.append(data)
+    #print(list_nnn)
+    for x in myroot[0]:
+        data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(
+            ",")
+        time_xml = data[0].split(" ")
+        date = time_xml[0].split(".")
+        data = [data[1], f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00']
+        data_temp.append(data)
     data_inserter_many(data_temp, list_nnn[1], list_nnn[0])
     data_temp.clear()
 
@@ -183,8 +185,8 @@ thread1 = myThread(1, "Thread-1", 1, liste_datensatze.pop())
 thread2 = myThread(2, "Thread-2", 2, liste_datensatze.pop())
 thread3 = myThread(3, "Thread-3", 4, liste_datensatze.pop())
 thread4 = myThread(4, "Thread-4", 4, liste_datensatze.pop())
-thread_test = myThread(5, "Test-Thread", 5, "test_dd.xml")
-#thread_test = myThread(5, "Test-Thread", 5, "Dresden-Nord.xml")
+#thread_test = myThread(5, "Test-Thread", 5, "test_dd.xml")
+thread_test = myThread(5, "Test-Thread", 5, "Dresden-Nord.xml")
 # Start new Threads
 # thread1.start()
 # thread2.start()
