@@ -11,6 +11,8 @@ from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQuer
 import crypro_neu as cry  # own
 import webgetting as selma  # own
 from package import variables as v
+import threading
+import autosearch
 
 # Defining the variables that are used in the program.
 version = "V 3.0"  # Live
@@ -926,7 +928,23 @@ def main() -> None:
     application.run_polling(1)
 
 
-print("Main Started")
+class myThread(threading.Thread):
+    def __init__(self, data):
+        threading.Thread.__init__(self)
+        self.data = data
 
-if __name__ == "__main__":
-    main()
+    def run(self):
+        if self.data == 1:
+            print("Starting Selma")
+            main()
+            print("Exiting Selma")
+        else:
+            print("Starting Autosearch")
+            autosearch.main()
+            print("Exiting Autosearch")
+
+
+thread1 = myThread(1)
+thread2 = myThread(2)
+thread1.start()
+thread2.start()

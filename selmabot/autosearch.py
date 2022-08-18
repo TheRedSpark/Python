@@ -66,51 +66,50 @@ def push(updates, user):
     mydb.commit()
     my_cursor.close()
 
+def main():
+    while True:
+        zeit = time.strftime("%Y-%m-%d %H:%M:%S")
+        trigger = time.gmtime()
+        if trigger.tm_hour + 2 != stunde:
+            stunde = trigger.tm_hour + 2
+            if 7 < stunde < 18:
+                print(trigger)
+                mydb = mysql.connector.connect(
+                    host=v.host(ort),
+                    user=v.user(ort),
+                    passwd=v.passwd(ort),
+                    database=v.database(database),
+                    auth_plugin='mysql_native_password')
 
-print("Autosearch started")
-while True:
-    zeit = time.strftime("%Y-%m-%d %H:%M:%S")
-    trigger = time.gmtime()
-    if trigger.tm_hour + 2 != stunde:
-        stunde = trigger.tm_hour + 2
-        if 7 < stunde < 18:
-            print(trigger)
-            mydb = mysql.connector.connect(
-                host=v.host(ort),
-                user=v.user(ort),
-                passwd=v.passwd(ort),
-                database=v.database(database),
-                auth_plugin='mysql_native_password')
-
-            my_cursor = mydb.cursor()
-            my_cursor.execute(
-                f"SELECT User_Id FROM `Selma`.`Users` WHERE Zugelassen = 1 and Push_Toggle = 1 and Error_Anmeldung <= 20")
-            results_raw = my_cursor.fetchall()
-            my_cursor.close()
-            for raw in results_raw:
-                clen = int(str(raw).replace("(", "").replace(",)", "").strip())
-                results_clean.append(clen)
-            print(results_clean)
-            for person in results_clean:
-                print(person)
-                data = webgetting.exam_updater(person)
-                print(data)
-                if data is False:
-                    print("Fehler beim Zugang")
-                    error_counter(True, person)
-                    continue
-                elif data == 0:
-                    print("keine Updates")
-                    error_counter(False, person)
-                    push(False, person)
-                elif data == 1:
-                    print("Updates")
-                    error_counter(False, person)
-                    push(True, person)
-                else:
-                    print("grober Fehler")
-        else:
-            pass
-        results_raw = []
-        results_clean = []
-    time.sleep(10)
+                my_cursor = mydb.cursor()
+                my_cursor.execute(
+                    f"SELECT User_Id FROM `Selma`.`Users` WHERE Zugelassen = 1 and Push_Toggle = 1 and Error_Anmeldung <= 20")
+                results_raw = my_cursor.fetchall()
+                my_cursor.close()
+                for raw in results_raw:
+                    clen = int(str(raw).replace("(", "").replace(",)", "").strip())
+                    results_clean.append(clen)
+                print(results_clean)
+                for person in results_clean:
+                    print(person)
+                    data = webgetting.exam_updater(person)
+                    print(data)
+                    if data is False:
+                        print("Fehler beim Zugang")
+                        error_counter(True, person)
+                        continue
+                    elif data == 0:
+                        print("keine Updates")
+                        error_counter(False, person)
+                        push(False, person)
+                    elif data == 1:
+                        print("Updates")
+                        error_counter(False, person)
+                        push(True, person)
+                    else:
+                        print("grober Fehler")
+            else:
+                pass
+            results_raw = []
+            results_clean = []
+        time.sleep(10)
