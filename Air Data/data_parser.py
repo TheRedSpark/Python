@@ -20,7 +20,7 @@ liste_datensatze = ['Annaberg-Buchholz.xml', 'Bautzen.xml', 'Borna.xml', 'Carlsf
                     'Klingentahl.xml', 'Leiptzig-Mitte.xml', 'Leiptzig-West.xml',
                     'Liebschutzberg.xml', 'Niesky.xml', 'Plauen-Sued.xml', 'Radebeul-Wahnsdorf.xml', 'Schkeuditz.xml',
                     'Zinnwald.xml', 'Zittau-Ost.xml']
-liste_datensatze = ['Radebeul-Wahnsdorf.xml', 'Schkeuditz.xml', 'Zinnwald.xml', 'Zittau-Ost.xml']
+# liste_datensatze = ['Radebeul-Wahnsdorf.xml', 'Schkeuditz.xml', 'Zinnwald.xml', 'Zittau-Ost.xml']
 liste_datensatze.sort()
 # liste_datensatze = ['test_dd.xml']
 data_temp = []
@@ -81,7 +81,8 @@ def data_inserter_many(data, type, air_table, thread_name):
             continue
 
 
-def data_updater_many(data, type, air_table):
+def data_updater_many(thread_name,data, type, air_table):
+    #print(f'start {thread_name}')
     for x in data:
         if x[0] == "NaN":
             x[0] = -1
@@ -105,6 +106,24 @@ def data_updater_many(data, type, air_table):
     except SyntaxError:
         print("Syntax error")
         pass
+
+
+class myThread(threading.Thread):
+    def __init__(self, data, datenart, air_table):
+        threading.Thread.__init__(self)
+        self.air_table = air_table
+        self.datenart = datenart
+        self.data = data
+        self.name = datenart
+
+    def run(self):
+        #profiler.start()
+        print("Starting " + self.name)
+        data_updater_many(self.name,self.data, self.datenart, self.air_table)
+        print("Exiting " + self.name)
+        #session = profiler.stop()
+        #profile_renderer = ConsoleRenderer(unicode=True, color=True, show_all=False)
+        #print(profile_renderer.render(session))
 
 
 def thread_worker(thread_name, ort_data):
@@ -139,12 +158,12 @@ def thread_worker(thread_name, ort_data):
                 my_cursor.executemany(sql_stuff, data_temp)
                 mydb.commit()
                 break
-        except:
+        except :
             print(f'{thread_name}: Erstellt Table für {list_nnn[0]}')
             table_create(list_nnn[0])
             continue
 
-    #data_inserter_many(data_temp, list_nnn[1], list_nnn[0], thread_name)
+    # data_inserter_many(data_temp, list_nnn[1], list_nnn[0], thread_name)
     data_temp.clear()
 
     for a in range(0, 24):
@@ -152,7 +171,7 @@ def thread_worker(thread_name, ort_data):
             list_nnn = myroot[a].attrib.get('name').split(" ")
         except:
             break
-        print(f'{thread_name}: Macht für Table {list_nnn[0]} die Daten {list_nnn[1]}')
+        #print(f'{thread_name}: Macht für Table {list_nnn[0]} die Daten {list_nnn[1]}')
         for x in myroot[a]:
             data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(
                 ",")
@@ -160,41 +179,28 @@ def thread_worker(thread_name, ort_data):
             date = time_xml[0].split(".")
             data = [data[1], f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00']
             data_temp.append(data)
-        data_updater_many(data_temp, list_nnn[1], list_nnn[0])
+        thread1 = myThread(data_temp, list_nnn[1], list_nnn[0])
+        thread1.start()
+        thread1.join()
+        print(data_temp[0])
+        #data_updater_many(data_temp, list_nnn[1], list_nnn[0])
         data_temp.clear()
 
-
-class myThread(threading.Thread):
-    def __init__(self, threadID, name, data_ort):
-        threading.Thread.__init__(self)
-        self.threadID = threadID
-        self.name = name
-        self.data_ort = data_ort
-
-    def run(self):
-        profiler.start()
-        print("Starting " + self.name)
-        thread_worker(self.name, self.data_ort)
-        print("Exiting " + self.name)
-        session = profiler.stop()
-        profile_renderer = ConsoleRenderer(unicode=True, color=True, show_all=False)
-        print(profile_renderer.render(session))
-
-
-threadLock = threading.Lock()
+thread_worker("Test_Temp","Zittau-Ost.xml")
+# threadLock = threading.Lock()
 # Create new threads
-thread1 = myThread(1, "Thread-1", "Radebeul-Wahnsdorf.xml")
-thread2 = myThread(2, "Thread-2", "Schkeuditz.xml")
-thread3 = myThread(3, "Thread-3", "Zinnwald.xml")
-thread4 = myThread(4, "Thread-4", "Zittau-Ost.xml")
+# thread1 = myThread(1, "Thread-1", "Radebeul-Wahnsdorf.xml")
+# thread2 = myThread(2, "Thread-2", "Schkeuditz.xml")
+# thread3 = myThread(3, "Thread-3", "Zinnwald.xml")
+# thread4 = myThread(4, "Thread-4", "Zittau-Ost.xml")
 # thread_test = myThread(5, "Test-Thread", 5, "test_dd.xml")
 # thread_test = myThread(5, "Test-Thread", 5, "Dresden-Nord.xml")
 # Start new Threads
-thread1.start()
-thread1.join()
+# thread1.start()
+# thread1.join()
 # time.sleep(30)
-thread2.start()
-thread2.join()
+# thread2.start()
+# thread2.join()
 # thread3.start()
 # thread4.start()
 # thread_test.start()
