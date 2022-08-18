@@ -32,7 +32,8 @@ try:
             database=v.database(database),
             auth_plugin='mysql_native_password') as mydb:
         my_cursor = mydb.cursor()
-        my_cursor.execute(f'DROP Table `Air`.`Dresden-Nord`')
+        my_cursor.execute(f'DROP DATABASE `Air`;')
+        my_cursor.execute(f'CREATE SCHEMA `Air` ;')
 except:
     pass
 
@@ -55,34 +56,11 @@ def table_create(ort_l):
                           f"UNIQUE INDEX `Zeit_UNIQUE` (`Zeit` ASC) VISIBLE);")
 
 
-def data_uploader(time, windricchtung, list, air_table):
-    while True:
-        try:
-            with mysql.connector.connect(
-                    host=v.host(ort),
-                    user=v.user(ort),
-                    passwd=v.passwd(ort),
-                    database=v.database(database),
-                    auth_plugin='mysql_native_password') as mydb:
-                my_cursor = mydb.cursor()
-                sql_stuff = (f"INSERT INTO `Air`.`{air_table}` (`Zeit`,`{list}`) VALUES (%s, %s);")
-                record1 = (time, windricchtung)
-                my_cursor.execute(sql_stuff, record1)
-                mydb.commit()
-            break
-        except:
-            print(f'{time=},{windricchtung=},{list=},{air_table=}')
-            table_create(air_table)
-            continue
-
-def data_inserter_many(data, type, air_table):
+def data_inserter_many(data, type, air_table, thread_name):
     for x in data:
         if x[0] == "NaN":
             x[0] = -1
         x[1] = x[1].replace(":30:00", ":00:00")
-    print(data[0])
-    print(type)
-    print(air_table)
     while True:
         try:
             with mysql.connector.connect(
@@ -97,10 +75,11 @@ def data_inserter_many(data, type, air_table):
                 my_cursor.executemany(sql_stuff, data)
                 mydb.commit()
                 break
-        except :
-            print(f'{time=},{air_table=},{list=},{air_table=}')
+        except:
+            print(f'{thread_name}: Erstellt Table für {air_table}')
             table_create(air_table)
             continue
+
 
 def data_updater_many(data, type, air_table):
     for x in data:
@@ -134,7 +113,6 @@ def thread_worker(thread_name, ort_data):
 
     list_nnn = myroot[0].attrib.get('name').split(" ")
 
-    #print(list_nnn)
     for x in myroot[0]:
         data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(
             ",")
@@ -142,7 +120,31 @@ def thread_worker(thread_name, ort_data):
         date = time_xml[0].split(".")
         data = [data[1], f'20{date[2]}-{date[1]}-{date[0]} {time_xml[1]}:00']
         data_temp.append(data)
-    data_inserter_many(data_temp, list_nnn[1], list_nnn[0])
+
+    for x in data_temp:
+        if x[0] == "NaN":
+            x[0] = -1
+        x[1] = x[1].replace(":30:00", ":00:00")
+    while True:
+        try:
+            with mysql.connector.connect(
+                    host=v.host(ort),
+                    user=v.user(ort),
+                    passwd=v.passwd(ort),
+                    database=v.database(database),
+                    auth_plugin='mysql_native_password') as mydb:
+
+                my_cursor = mydb.cursor()
+                sql_stuff = (f"INSERT INTO `Air`.`{list_nnn[0]}` (`WINDRI`,`Zeit`) VALUES (%s, %s);")
+                my_cursor.executemany(sql_stuff, data_temp)
+                mydb.commit()
+                break
+        except:
+            print(f'{thread_name}: Erstellt Table für {list_nnn[0]}')
+            table_create(list_nnn[0])
+            continue
+
+    #data_inserter_many(data_temp, list_nnn[1], list_nnn[0], thread_name)
     data_temp.clear()
 
     for a in range(0, 24):
@@ -150,7 +152,7 @@ def thread_worker(thread_name, ort_data):
             list_nnn = myroot[a].attrib.get('name').split(" ")
         except:
             break
-        print(f'{thread_name}: macht {list_nnn}')
+        print(f'{thread_name}: Macht für Table {list_nnn[0]} die Daten {list_nnn[1]}')
         for x in myroot[a]:
             data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(
                 ",")
@@ -163,11 +165,10 @@ def thread_worker(thread_name, ort_data):
 
 
 class myThread(threading.Thread):
-    def __init__(self, threadID, name, counter, data_ort):
+    def __init__(self, threadID, name, data_ort):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.name = name
-        self.counter = counter
         self.data_ort = data_ort
 
     def run(self):
@@ -180,18 +181,22 @@ class myThread(threading.Thread):
         print(profile_renderer.render(session))
 
 
+threadLock = threading.Lock()
 # Create new threads
-thread1 = myThread(1, "Thread-1", 1, liste_datensatze.pop())
-thread2 = myThread(2, "Thread-2", 2, liste_datensatze.pop())
-thread3 = myThread(3, "Thread-3", 4, liste_datensatze.pop())
-thread4 = myThread(4, "Thread-4", 4, liste_datensatze.pop())
-#thread_test = myThread(5, "Test-Thread", 5, "test_dd.xml")
-thread_test = myThread(5, "Test-Thread", 5, "Dresden-Nord.xml")
+thread1 = myThread(1, "Thread-1", "Radebeul-Wahnsdorf.xml")
+thread2 = myThread(2, "Thread-2", "Schkeuditz.xml")
+thread3 = myThread(3, "Thread-3", "Zinnwald.xml")
+thread4 = myThread(4, "Thread-4", "Zittau-Ost.xml")
+# thread_test = myThread(5, "Test-Thread", 5, "test_dd.xml")
+# thread_test = myThread(5, "Test-Thread", 5, "Dresden-Nord.xml")
 # Start new Threads
-# thread1.start()
-# thread2.start()
+thread1.start()
+thread1.join()
+# time.sleep(30)
+thread2.start()
+thread2.join()
 # thread3.start()
 # thread4.start()
-thread_test.start()
+# thread_test.start()
 
 # thread_worker("1", "Radebeul-Wahnsdorf.xml")
