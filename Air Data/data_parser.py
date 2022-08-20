@@ -81,8 +81,8 @@ def data_inserter_many(data, type, air_table, thread_name):
             continue
 
 
-def data_updater_many(thread_name,data, type, air_table):
-    #print(f'start {thread_name}')
+def data_updater_many(thread_name, data, type, air_table):
+    # print(f'start {thread_name}')
     for x in data:
         if x[0] == "NaN":
             x[0] = -1
@@ -117,13 +117,13 @@ class myThread(threading.Thread):
         self.name = datenart
 
     def run(self):
-        #profiler.start()
+        # profiler.start()
         print("Starting " + self.name)
-        data_updater_many(self.name,self.data, self.datenart, self.air_table)
+        data_updater_many(self.name, self.data, self.datenart, self.air_table)
         print("Exiting " + self.name)
-        #session = profiler.stop()
-        #profile_renderer = ConsoleRenderer(unicode=True, color=True, show_all=False)
-        #print(profile_renderer.render(session))
+        # session = profiler.stop()
+        # profile_renderer = ConsoleRenderer(unicode=True, color=True, show_all=False)
+        # print(profile_renderer.render(session))
 
 
 def thread_worker(thread_name, ort_data):
@@ -158,7 +158,7 @@ def thread_worker(thread_name, ort_data):
                 my_cursor.executemany(sql_stuff, data_temp)
                 mydb.commit()
                 break
-        except :
+        except:
             print(f'{thread_name}: Erstellt Table für {list_nnn[0]}')
             table_create(list_nnn[0])
             continue
@@ -171,7 +171,7 @@ def thread_worker(thread_name, ort_data):
             list_nnn = myroot[a].attrib.get('name').split(" ")
         except:
             break
-        #print(f'{thread_name}: Macht für Table {list_nnn[0]} die Daten {list_nnn[1]}')
+        # print(f'{thread_name}: Macht für Table {list_nnn[0]} die Daten {list_nnn[1]}')
         for x in myroot[a]:
             data = str(x.attrib).replace("'", "").replace("{datum: ", "").replace(" wert: ", "").replace("}", "").split(
                 ",")
@@ -182,11 +182,13 @@ def thread_worker(thread_name, ort_data):
         thread1 = myThread(data_temp, list_nnn[1], list_nnn[0])
         thread1.start()
         thread1.join()
-        print(data_temp[0])
-        #data_updater_many(data_temp, list_nnn[1], list_nnn[0])
+        # print(data_temp[0])
+        # data_updater_many(data_temp, list_nnn[1], list_nnn[0])
         data_temp.clear()
 
-thread_worker("Test_Temp","Zittau-Ost.xml")
+
+for x in liste_datensatze:
+    thread_worker("Test_Temp", x)
 # threadLock = threading.Lock()
 # Create new threads
 # thread1 = myThread(1, "Thread-1", "Radebeul-Wahnsdorf.xml")
