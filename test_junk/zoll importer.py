@@ -20,8 +20,8 @@ def upload(fach_id, fach_name, frage, antwort_a, antwort_b, antwort_c, antwort_d
         mydb.commit()
 
 
-fach_id = 1
-fach_name = 'Fachspezifische Aufgaben zum Zoll'
+fach_id = 3
+fach_name = 'Politik und Gesellschaft'
 while True:
     frage = input("Welche Frage? ")
     antwort_a = input("Antwort A ")
@@ -36,8 +36,8 @@ while True:
           f'Antwort C:{antwort_c}\n'
           f'Antwort D:{antwort_d}\n'
           f'Richtige Antwort: {antwort_r}')
-
-    if input("War das richtig?").strip().lower() == "y" or "j":
-        upload(fach_id, fach_name, frage, antwort_a, antwort_b, antwort_c, antwort_d, antwort_r)
-    else:
-        continue
+    upload(fach_id, fach_name, frage, antwort_a, antwort_b, antwort_c, antwort_d, antwort_r)
+    # if input("War das richtig?").strip().lower() == "y" or "j":
+    #     upload(fach_id, fach_name, frage, antwort_a, antwort_b, antwort_c, antwort_d, antwort_r)
+    # else:
+    #     continue
