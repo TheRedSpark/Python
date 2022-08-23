@@ -11,8 +11,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQuer
 import crypro_neu as cry  # own
 import webgetting as selma  # own
 from package import variables as v
-import threading
-import autosearch
+
 
 # Defining the variables that are used in the program.
 version = "V 3.1"  # Live
