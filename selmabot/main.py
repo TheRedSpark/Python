@@ -12,7 +12,6 @@ import crypro_neu as cry  # own
 import webgetting as selma  # own
 from package import variables as v
 
-
 # Defining the variables that are used in the program.
 version = "V 3.1"  # Live
 ort = "home"
