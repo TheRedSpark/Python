@@ -210,7 +210,7 @@ def anzahl_prufungen_updater(prufungen_neu, user_id):
             f"UPDATE `Selma`.`Users` SET `Results_Num` = '{prufungen_neu}' WHERE (`User_Id` = {user_id});")
         mydb.commit()
         my_cursor.close()
-    elif prufungen_alt < prufungen_neu:
+    elif prufungen_alt != prufungen_neu:
         mydb = mysql.connector.connect(
             host=v.host(ort),
             user=v.user(ort),

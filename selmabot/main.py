@@ -15,7 +15,7 @@ import threading
 import autosearch
 
 # Defining the variables that are used in the program.
-version = "V 3.0"  # Live
+version = "V 3.1"  # Live
 ort = "home"
 database = "Selma"
 live = False
@@ -23,13 +23,7 @@ loschtimer = 7
 stundenabstand_push = 1
 day = 0
 SETUP, SETUP_BENUTZER, SETUP_PASSWORT, SETUP_PUSH, SETUP_END = range(5)
-update_message = f'Der Bot updatet auf {version}\n' \
-                 f'Feature: Die Statusmeldung umfasst nun mehr Informationen.' \
-                 f'Feature: Nun ist ein Setup möglich ohne Separate Befehle.' \
-                 f'Dies ermöglicht nun ein reibungsloses Einrichten vom Bot.\n' \
-                 f'Bug fixe:Passwörter und Benutzer werden nicht mehr Leerzeichenabhänig gespeichert. ' \
-                 f'werden.\n' \
-                 f'Bug fix: /menu wurde für die Handyansicht überarbeitet.'
+update_message = f'Bug fix: /reset Fehler behoben und alle Push Benachrichtigungen gelöscht.'
 
 # Setting up the logging module to log info messages.
 if selma.on_server:
@@ -303,7 +297,7 @@ def resetter(userid):
     my_cursor.execute(
         f"UPDATE `Selma`.`Users` SET `Results_Update` = '0' WHERE (`User_Id` = {userid});")
     my_cursor.execute(
-        f"UPDATE `Selma`.`Users` SET `Push` = '0' WHERE (`User_Id` = {userid});")
+        f"UPDATE `Selma`.`Users` SET `Push` = 0 WHERE (`User_Id` = {userid});")
     my_cursor.execute(
         f"UPDATE `Selma`.`Users` SET `Error_Anmeldung` = '0' WHERE (`User_Id` = {userid});")
     mydb.commit()
@@ -928,23 +922,5 @@ def main() -> None:
     application.run_polling(1)
 
 
-class myThread(threading.Thread):
-    def __init__(self, data):
-        threading.Thread.__init__(self)
-        self.data = data
-
-    def run(self):
-        if self.data == 1:
-            print("Starting Selma")
-            main()
-            print("Exiting Selma")
-        else:
-            print("Starting Autosearch")
-            autosearch.main()
-            print("Exiting Autosearch")
-
-
-thread1 = myThread(1)
-thread2 = myThread(2)
-thread1.start()
-thread2.start()
+if __name__ == '__main__':
+    main()
