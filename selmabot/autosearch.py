@@ -83,7 +83,7 @@ while True:
 
             my_cursor = mydb.cursor()
             my_cursor.execute(
-                f"SELECT User_Id FROM `Selma`.`Users` WHERE Zugelassen = 1 and Push_Toggle = 1 and Error_Anmeldung <= 20")
+                f"SELECT User_Id FROM `Selma`.`Users` WHERE Zugelassen = 1 and Push_Toggle = 1 and Error_Anmeldung <= 24")
             results_raw = my_cursor.fetchall()
             my_cursor.close()
             for raw in results_raw:
