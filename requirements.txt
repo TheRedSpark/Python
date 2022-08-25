@@ -3,7 +3,8 @@ matplotlib==3.5.2
 mysql-connector-python==8.0.30
 numpy==1.22.3
 pandas==1.4.2
-pyowm==2.10.0
+pyowm==2.10.0t
+
 requests==2.5.0
 pygame==2.1.2
 instabot==0.117.0

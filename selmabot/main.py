@@ -527,6 +527,10 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         await query.edit_message_text(text='Deine Daten werden Verschlüsselt gespeichert!', reply_markup=reply_markup)
 
     elif query.data == 'status':
+        userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                    "Status", update.effective_message.id,
+                    update.effective_user.first_name,
+                    update.effective_user.last_name, update.effective_user.language_code)
         user = update.effective_user.id
         status_liste = status(user)
         nachrichten = nachrichten_getter(user)
