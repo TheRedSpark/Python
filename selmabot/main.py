@@ -13,7 +13,7 @@ import webgetting as selma  # own
 from package import variables as v
 
 # Defining the variables that are used in the program.
-version = "V 3.1"  # Live
+version = "V 3.2"  # Live
 ort = "home"
 database = "Selma"
 live = False
