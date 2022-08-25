@@ -402,9 +402,45 @@ def status(user):
     return [username, anzahl_prufungen, neue_ergebnisse, push_benach, zuge, error_anmel, zuga]
 
 
+def logs_getter() -> list:
+    with mysql.connector.connect(
+            host=v.host(ort),
+            user=v.user(ort),
+            passwd=v.passwd(ort),
+            database=v.database(database),
+            auth_plugin='mysql_native_password') as mydb:
+        my_cursor = mydb.cursor()
+        my_cursor.execute(
+            f"SELECT `Time`,User_Id,Username,`Message_Text`,First_Name FROM Selma.Messages order by Time desc limit 5;")
+        logs = my_cursor.fetchall()
+    return logs
+
+
 """""""""
 Bot Funktionen
 """
+
+
+async def logs(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.effective_user.id == v.telegram_user_id:
+        logs = logs_getter()
+        print(logs)
+        for log in reversed(logs):
+            await context.bot.send_message(v.telegram_user_id,
+                                           text=f'Zeit: {log[0]}\n'
+                                                f"Id: {log[1]}\n"
+                                                f"User: {log[2]}\n"
+                                                f"Message: {log[3]}\n"
+                                                f"First: {log[4]}\n")
+    else:
+        userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
+                    update.effective_message.text_markdown, update.effective_message.id,
+                    update.effective_user.first_name,
+                    update.effective_user.last_name, update.effective_user.language_code)
+        await context.bot.send_message(v.telegram_user_id,
+                                       text="Jemand hat versucht /logs zu benutzen")
+        await context.bot.send_message(update.effective_user.id,
+                                       text="Du hst keine Berechtigung für diesen Befehl und dieser Vorfall wird reportet.")
 
 
 async def send_push(context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -528,7 +564,7 @@ async def menu_actions(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     elif query.data == 'status':
         userlogging(update.effective_user.id, update.effective_user.username, update.effective_message.chat_id,
-                    "Status", update.effective_message.id,
+                    "/status", update.effective_message.id,
                     update.effective_user.first_name,
                     update.effective_user.last_name, update.effective_user.language_code)
         user = update.effective_user.id
@@ -889,6 +925,7 @@ def main() -> None:
 
     # Adding the handlers for the commands.
     application.add_handler(CommandHandler(["start", "help"], start))
+    application.add_handler(CommandHandler(["log", "logs"], logs))
     application.add_handler(CommandHandler("msg", msg))
     application.add_handler(CommandHandler("menu", set_menu))
     application.add_handler(CommandHandler("setpassw", setpassw))
