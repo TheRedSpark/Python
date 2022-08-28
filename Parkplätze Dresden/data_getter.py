@@ -60,7 +60,6 @@ while True:
         fetching()
         continue
     else:
-        # print(f'Daten bereits für den heutigen Tag den {day} eingetragen!')
         pass
 
     time.sleep(zeit_idle)
