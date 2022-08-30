@@ -89,7 +89,6 @@ while True:
             for raw in results_raw:
                 clen = int(str(raw).replace("(", "").replace(",)", "").strip())
                 results_clean.append(clen)
-            print(results_clean)
             for person in results_clean:
                 print(person)
                 data = webgetting.exam_updater(person)
