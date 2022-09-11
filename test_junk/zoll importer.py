@@ -20,8 +20,8 @@ def upload(fach_id, fach_name, frage, antwort_a, antwort_b, antwort_c, antwort_d
         mydb.commit()
 
 
-fach_id = 3
-fach_name = 'Politik und Gesellschaft'
+fach_id = 6
+fach_name = 'Interkulturelles Wissen'
 while True:
     frage = input("Welche Frage? ")
     antwort_a = input("Antwort A ")
