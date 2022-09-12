@@ -31,38 +31,3 @@ def main_funktion():
     .
     .
 ```
-
-#Deutsch
-
-Ich bin ein Student aus Dresden und möchte hier meinen 
-Lernfortschritt im Umgang mit Python dokumentieren. Du kannst gerne etwas stöbern vielleicht konnte ich dir bei eine deiner eigenen Projekte helfen.
-Wenn du Fragen hast, kannst du gerne ein neues Problem aufmachen. Ich werde mein Bestes geben, um dir zu helfen.
-
-LG und viel Spaß
-
-Einstieg
----------------
-
-- Für alle meine Projekte nutze Ich: PyCharm Community Edition
-- Der **Downloadlink** hierfür:https://www.jetbrains.com/de-de/pycharm/download
-- Meiner Erfahrung nach einer der besten IDE für Python
-
-Projekte
----------------
-- Eine Auswahl meiner Projekte wirst du oben in den einzelnen Ordnern zu finden.
-- Ein guter Indikator für ein fertiges/funktionierendes Projekt sind viele Kommentare oder wenn in der 
-ersten Zeile ein # "live" steht 
-```shell
-
-# Stand 15.05.2022 live
-import mysql.connector  # V8.0.28
-import sys
-from bs4 import BeautifulSoup # V4.10.0
-import requests # V2.27.1
-
-def main_funktion():
-    if statment = True:
-    .
-    .
-    .
-```
