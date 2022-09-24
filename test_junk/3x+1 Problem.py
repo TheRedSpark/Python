@@ -1,16 +1,16 @@
 anzahl_zahlen = int(input("Bis zu Welcher Zahl?"))
-x = range(anzahl_zahlen)
-
+x = range(1, anzahl_zahlen)
+print(x)
 for zahl in x:
-    steps = 0
-    print(zahl)
+    steps = []
+    steps.append(zahl)
     while True:
         if zahl == 1:
             break
         if zahl % 2 == 0:
             zahl = zahl / 2
-            steps = steps + 1
+            steps.append(zahl)
         else:
             zahl = zahl * 3 + 1
-            steps = steps + 1
-    print(f"Die Anzahl der Schritte {steps} für {zahl}")
+            steps.append(zahl)
+    print(f"{len(steps)} Schritte für {steps[0]} mit der Liste{steps}")
