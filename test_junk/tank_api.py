@@ -4,15 +4,20 @@ import json
 import mysql.connector
 import time
 from pyinstrument import Profiler
-
-profiler = Profiler()
-profiler.start()
-res = requests.get(
-    'https://creativecommons.tankerkoenig.de/json/list.php?lat=52.521&lng=13.438&rad=25&sort=dist&type=all&apikey=' + v.tanke_api)
-data = json.loads(res.content.decode())
 ort = "home"
 database = "Tankdaten"
 list = []
+profiler = Profiler()
+profiler.start()
+lat = '52.506'
+lng = '13.284'
+# cords = [('52.506','13.284'), #berlin
+#          ('51.076','13.632') #dresden
+#          ('48.779','9.107')] #stuttgart
+
+
+
+
 
 
 def data_uploader(datalist):
@@ -29,6 +34,11 @@ def data_uploader(datalist):
         mydb.commit()
 
 
+
+berlin_res = requests.get(f'https://creativecommons.tankerkoenig.de/json/list.php?lat={lat}&lng={lng}8&rad=25&sort=dist&type=all&apikey=' + v.tanke_api)
+data = json.loads(berlin_res.content.decode())
+
+
 for tanke in data["stations"]:
     zeit = time.strftime("%Y-%m-%d %H:%M:%S")
     list.append((zeit, tanke["brand"], tanke["diesel"], tanke["e10"], tanke["e5"], tanke["id"], tanke["isOpen"],
@@ -38,4 +48,4 @@ data_uploader(list)
 
 profiler.stop()
 
-profiler.print(color=True, show_all=False)
+profiler.print(color=True, show_all=True)
