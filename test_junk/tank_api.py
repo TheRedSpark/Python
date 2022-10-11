@@ -10,8 +10,9 @@ from pyinstrument import Profiler
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-isprofiling = True
-abstand = 12
+isprofiling = False
+intervall = 18
+errorcounter = 0
 time_sql = time.strftime("%Y-%m-%d %H:%M:%S")
 ort = "home"
 database = "Tankdaten"
@@ -57,8 +58,9 @@ cords = [
     ('54.375', '9.085', "Friedrichstadt", "Schleswig")
 ]
 
+
 def email():
-    mail_body = f"Die IP Blockade ist reingekommen um:{time_sql} durch einen Abstand von:{abstand}"
+    mail_body = f"Die IP Blockade ist reingekommen um:{time_sql} durch einen Abstand von:{20}"
     mimemsg = MIMEMultipart()
     mimemsg['From'] = mail_from
     mimemsg['To'] = mail_to
@@ -70,6 +72,8 @@ def email():
     connection.send_message(mimemsg)
     connection.quit()
     print('Email ist raus')
+
+
 def data_uploader(datalist):
     with mysql.connector.connect(
             host=v.host(ort),
@@ -84,34 +88,45 @@ def data_uploader(datalist):
         mydb.commit()
 
 
-errorcounter = 0
-for rad in cords:
-    while True:
-        try:
-            print(f"Jetzt {rad[2]}")
-            res = requests.get(
-                f'https://creativecommons.tankerkoenig.de/json/list.php?lat={rad[0]}&lng={rad[1]}&rad=25&sort=dist&type=all&apikey=' + v.tanke_api)
-            data = json.loads(res.content.decode())
-            # print(data["stations"])
-            for tanke in data["stations"]:
-                zeit = time.strftime("%Y-%m-%d %H:%M:%S")
-                list.append(
-                    (zeit, tanke["brand"], tanke["diesel"], tanke["e10"], tanke["e5"], tanke["id"], tanke["isOpen"],
-                     tanke["lat"], tanke["lng"], tanke["name"], tanke["postCode"], rad[2], rad[3]))
-            data_uploader(list)
-            list.clear()
-            print(f"Erfolg für {rad[2]}")
-            errorcounter = 0
-            break
-        except:
-            errorcounter += 1
-            if errorcounter == 4:
-                email()
-                sys.exit(1)
-            print(f"Fehler für {rad[2]}")
-            time.sleep(5)
-            continue
+def fetching(liste_vonkooo) -> None:
+    global errorcounter
+    for rad in liste_vonkooo:
+        while True:
+            try:
+                print(f"Jetzt {rad[2]}")
+                res = requests.get(
+                    f'https://creativecommons.tankerkoenig.de/json/list.php?lat={rad[0]}&lng={rad[1]}&rad=25&sort=dist&type=all&apikey=' + v.tanke_api)
+                data = json.loads(res.content.decode())
+                # print(data["stations"])
+                for tanke in data["stations"]:
+                    zeit = time.strftime("%Y-%m-%d %H:%M:%S")
+                    list.append(
+                        (zeit, tanke["brand"], tanke["diesel"], tanke["e10"], tanke["e5"], tanke["id"], tanke["isOpen"],
+                         tanke["lat"], tanke["lng"], tanke["name"], tanke["postCode"], rad[2], rad[3]))
+                data_uploader(list)
+                list.clear()
+                print(f"Erfolg für {rad[2]}")
+                errorcounter = 0
+                break
+            except:
+                errorcounter += 1
+                if errorcounter == 4:
+                    # email()
+                    print("du wurdest gebannt")
+                    sys.exit(1)
+                print(f"Fehler für {rad[2]}")
+                # time.sleep(5)
+                continue
 
-if isprofiling:
-    profiler.stop()
-    profiler.print(color=True, show_all=False)
+
+while True:
+    trigger = time.gmtime()
+    if trigger.tm_hour % intervall == 0:
+        fetching(cords)
+        time.sleep(3600)
+        if isprofiling:
+            profiler.stop()
+            profiler.print(color=True, show_all=False)
+    else:
+        print("Es ist nicht an der Zeit")
+        time.sleep(60)
