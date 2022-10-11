@@ -7,15 +7,15 @@ from bs4 import BeautifulSoup  # V4.10.0
 import requests  # V2.27.1
 import time
 import mysql.connector  # V8.0.28
-from package import zugang as anbin
+from package import variables as v
 
 ort = 'home'
 database = 'numbeo'
 mydb = mysql.connector.connect(
-    host=anbin.host(ort),
-    user=anbin.user(ort),
-    passwd=anbin.passwd(ort),
-    database=anbin.database(database),
+    host=v.host(ort),
+    user=v.user(ort),
+    passwd=v.passwd(ort),
+    database=v.database(database),
     auth_plugin='mysql_native_password')
 
 my_cursor = mydb.cursor()
