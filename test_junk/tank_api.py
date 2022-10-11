@@ -13,16 +13,16 @@ profiler.start()
 lat = '52.506'
 lng = '13.284'
 cords = [
-         # ('52.506', '13.284', "Berlin", "Berlin"),
-         # ('53.120', '8.596', "Bremen", "Bremen"),
-         # ('53.558', '9.787', "Hamburg", "Hamburg"),
-         # ('51.076', '13.632', "Dresden", "Sachsen"),
-         # ('51.184', '14.373', "Bautzen", "Sachsen"),
-         # ('50.985', '10.945', "Erfurt", "Türingen"),
-         # ('51.224', '10.324', "Mühlhausen", "Türingen"),
-         # ('48.155', '11.471', "München", "Bayern"),
-         # ('48.719', '10.733', "Donauwörth", "Bayern"),
-         # ('48.779', '9.107', "Stuttgart", "BadenW"),
+         ('52.506', '13.284', "Berlin", "Berlin"),
+         ('53.120', '8.596', "Bremen", "Bremen"),
+         ('53.558', '9.787', "Hamburg", "Hamburg"),
+         ('51.076', '13.632', "Dresden", "Sachsen"),
+         ('51.184', '14.373', "Bautzen", "Sachsen"),
+         ('50.985', '10.945', "Erfurt", "Türingen"),
+         ('51.224', '10.324', "Mühlhausen", "Türingen"),
+         ('48.155', '11.471', "München", "Bayern"),
+         ('48.719', '10.733', "Donauwörth", "Bayern"),
+         ('48.779', '9.107', "Stuttgart", "BadenW"),
          ('48.270', '8.787', "Balingen", "BadenW"),
          ('50.135', '8.802', "Hanau", "Hessen"),
          ('50.486', '9.011', "Schotten", "Hessen"),
@@ -65,7 +65,7 @@ for rad in cords:
             berlin_res = requests.get(
                 f'https://creativecommons.tankerkoenig.de/json/list.php?lat={rad[0]}&lng={rad[1]}&rad=25&sort=dist&type=all&apikey=' + v.tanke_api)
             data = json.loads(berlin_res.content.decode())
-            print(data["stations"])
+           # print(data["stations"])
             for tanke in data["stations"]:
                 zeit = time.strftime("%Y-%m-%d %H:%M:%S")
                 list.append((zeit, tanke["brand"], tanke["diesel"], tanke["e10"], tanke["e5"], tanke["id"], tanke["isOpen"],
