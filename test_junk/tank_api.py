@@ -11,14 +11,14 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 isprofiling = False
-intervall = 18
+intervall = 2
 errorcounter = 0
 time_sql = time.strftime("%Y-%m-%d %H:%M:%S")
 ort = "home"
 database = "Tankdaten"
 list = []
-username = v.username
-password = v.password
+username = v.mail_username
+password = v.mail_password
 mail_from = v.mail_from
 mail_to = v.mail_to
 mail_subject = "IP Blockade ist drinne"
