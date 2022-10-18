@@ -17,5 +17,4 @@ rsa==4.8
 cryptocode==0.1
 future==0.18.2
 pyinstrument==4.2.0
-dash==2.0.0
 bokeh==2.4.3
