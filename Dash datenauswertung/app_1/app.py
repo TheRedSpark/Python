@@ -18,7 +18,7 @@ def data_getter():
             auth_plugin='mysql_native_password') as mydb:
         my_cursor = mydb.cursor()
         my_cursor.execute(
-            f'SELECT zeit,diesel,e10,e5 FROM `Tankdaten`.`Data` WHERE id ="e3ab6579-0b05-492e-8e74-c46e47923e71" ')
+            f'SELECT zeit,avg(diesel),avg(e10),avg(e5) FROM `Tankdaten`.`Data` group by zeit ')
         df = pd.DataFrame(my_cursor.fetchall(), columns=['zeit', 'diesel', 'e10', 'e5'])
         # print(df)
         # print(type(df))
@@ -39,12 +39,10 @@ app = dash.Dash(__name__)
 app.layout = html.Div(
     children=[
         html.H1(
-            children="Tankstellen Anal",
+            children="Tankstellen Analyse",
         ),
         html.P(
-            children="Analyze the behavior of avocado prices"
-                     " and the number of avocados sold in the US"
-                     " between 2015 and 2018",
+            children="Zeigt die Mittelwertdaten der Tankpreiße von ganz Deutschland",
         ),
         dcc.Graph(
             figure={
