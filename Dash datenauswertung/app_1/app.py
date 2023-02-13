@@ -18,7 +18,7 @@ def data_getter():
             auth_plugin='mysql_native_password') as mydb:
         my_cursor = mydb.cursor()
         my_cursor.execute(
-            f'SELECT zeit,avg(diesel),avg(e10),avg(e5) FROM `Tankdaten`.`Data` group by zeit ')
+            f'SELECT zeit,avg(diesel),avg(e10),avg(e5) FROM `Tankdaten`.`Data` group by zeit order by zeit desc ;')
         df = pd.DataFrame(my_cursor.fetchall(), columns=['zeit', 'diesel', 'e10', 'e5'])
         # print(df)
         # print(type(df))
