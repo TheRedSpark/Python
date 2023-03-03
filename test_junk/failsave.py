@@ -1,8 +1,6 @@
 import sys
 import time
-
 import requests
-
 from package import variables as v
 
 domain = v.failsave_domain
