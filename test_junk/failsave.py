@@ -15,7 +15,7 @@ def failsave() -> bool:
         if response.status_code == 200:
             return True
         else:
-            print(response.status_code)
+            print(f'Der unbekannte Statuscode lautet: {response.status_code}')
             return False
     except ConnectionError:
         print("Server Offliene ConnectionError")
