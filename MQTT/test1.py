@@ -45,9 +45,7 @@ while True:
     if user_input == 'disconnect':
         break
     elif user_input == 'message':
-        data_message = '{ "name":"John", ' \
-                       '"age":30, ' \
-                       '"city":"New York"}'
+        data_message = '{ "name":"John", "age":30,"city":"New York"}'
         print(type(data_message))
 
         client.publish("comtest/008", str(data_message))
