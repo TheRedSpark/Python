@@ -1,14 +1,14 @@
-
-
 def f1(func):
-    def wrapper():
+    def wrapper(*args, **kwargs):
         print("Start")
-        func()
-        print("End")
+        return func(*args, **kwargs)
+
     return wrapper
 
-@f1
-def f2():
-    print("hello")
 
-f2()
+@f1
+def f2(a):
+    print(a)
+
+
+f2(2)
