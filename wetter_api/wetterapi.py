@@ -11,14 +11,14 @@ x = 1
 schutzsleep = 60
 zeit_idle = 10
 wind_speed = 1
-intervall = 5
+intervall = 1
 rain = ""
 username = v.username
 password = v.password
 mail_from = v.mail_from
 mail_to = v.mail_to
-#mail_subject_rain = v.mail_subject_rain
-#mail_subject_wind = v.mail_subject_wind
+# mail_subject_rain = v.mail_subject_rain
+# mail_subject_wind = v.mail_subject_wind
 
 ort = 'home'
 database = 'Wetter'
@@ -49,9 +49,13 @@ def fetching():
         rainatl = weather.get_rain()  # Rain volume
         rainalt2 = str(rainatl)
         rain = rainalt2.replace("{", "").replace("'1h': ", "").replace("}", "")
+        if len(rain) == 0:
+            rain = "0"
         snowalt = weather.get_snow()  # Snow volume
         snowalt2 = str(snowalt)
         snow = snowalt2.replace("{", "").replace("'1h': ", "").replace("}", "")
+        if len(snow)==0:
+            snow = "0"
         wind_speedalt = 3.6 * weather.get_wind()['speed']  # Wind direction and speed
         wind_speed = wind_speedalt.__round__(2)
         wind = weather.get_wind()['deg']
