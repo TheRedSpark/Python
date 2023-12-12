@@ -245,7 +245,7 @@ class TestAlkoholPut(unittest.TestCase):
         response = requests.put(f"{host}/v1/alkohol", headers={"token": f"{v.token_techcluster_unit_tests}-unauth",
                                                                "Content-Type": "application/json"},
                                 data='{"menge":1,"sorte":"Test","bemerkung":"Unittesti"}')
-        self.assertEquals(response.status_code, 403)
+        self.assertEquals(response.status_code, 401)
 
     def test_no_data_prov(self):
         response = requests.put(f"{host}/v1/alkohol", headers={"token": f"{v.token_techcluster_unit_tests}"})
@@ -396,6 +396,78 @@ class TestKineticaGet(unittest.TestCase):
                                      '"muzzle_velocity":3,"air_pressure":40.6,"temperature":11.6,"firing_angle":-1,'
                                      '"mass_of_the_bullet":15.4,"diameter_of_the_bullet":3.0}')
         self.assertEquals(response.status_code, 409)
+
+
+
+class TestCleverPassGenerate(unittest.TestCase):
+
+    def test_success(self):
+        response = requests.get(f"{host}/v1/cleverpasswort/generate",
+                                headers={"token": f"{v.token_techcluster_unit_tests}",
+                                         "Content-Type": "application/json"},
+                                data='{"length":10,"numbers":true,"lowercase_letters":true,'
+                                     '"uppercase_letters":true,"symbols":true,"spaces":true,'
+                                     '"exclude_similar_characters":true,"strict":true}')
+        self.assertEquals(response.status_code, 200)
+
+    def test_wrong_url_version(self):
+        response = requests.get(f"{host}/v2/cleverpasswort/generate",
+                                headers={"token": f"{v.token_techcluster_unit_tests}",
+                                         "Content-Type": "application/json"},
+                                data='{"length":10,"numbers":true,"lowercase_letters":true,'
+                                     '"uppercase_letters":true,"symbols":true,"spaces":true,'
+                                     '"exclude_similar_characters":true,"strict":true}')
+        self.assertEquals(response.status_code, 401)
+
+    def test_wrong_user(self):
+        response = requests.get(f"{host}/v1/cleverpasswort/generate",
+                                headers={"token": f"{v.token_techcluster_unit_tests}-unauth",
+                                         "Content-Type": "application/json"},
+                                data='{"length":10,"numbers":true,"lowercase_letters":true,'
+                                     '"uppercase_letters":true,"symbols":true,"spaces":true,'
+                                     '"exclude_similar_characters":true,"strict":true}')
+        self.assertEquals(response.status_code, 403)
+
+    def test_wrong_data(self):
+        response = requests.get(f"{host}/v1/cleverpasswort/generate",
+                                headers={"token": f"{v.token_techcluster_unit_tests}",
+                                         "Content-Type": "application/json"},
+                                data='{"length":10,"numbers":true,"lowercase_letters":true,'
+                                     '"uppercase_letters":true,"symbols":true,"spaces":true,'
+                                     '"exclude_similar_characters":true,"strict":222}')
+        self.assertEquals(response.status_code, 401)
+
+
+
+class TestCleverPassAnalyze(unittest.TestCase):
+
+    def test_success(self):
+        response = requests.get(f"{host}/v1/cleverpasswort/analyse",
+                                headers={"token": f"{v.token_techcluster_unit_tests}",
+                                         "Content-Type": "application/json"},
+                                data='{"passwort":"dfgsdfg253z6!!"}')
+        self.assertEquals(response.status_code, 200)
+
+    def test_wrong_url_version(self):
+        response = requests.get(f"{host}/v2/cleverpasswort/analyse",
+                                headers={"token": f"{v.token_techcluster_unit_tests}",
+                                         "Content-Type": "application/json"},
+                                data='{"passwort":"dfgsdfg253z6!!"}')
+        self.assertEquals(response.status_code, 401)
+
+    def test_wrong_user(self):
+        response = requests.get(f"{host}/v1/cleverpasswort/analyse",
+                                headers={"token": f"{v.token_techcluster_unit_tests}-unauth",
+                                         "Content-Type": "application/json"},
+                                data='{"passwort":"dfgsdfg253z6!!"}')
+        self.assertEquals(response.status_code, 403)
+
+    def test_wrong_data(self):
+        response = requests.get(f"{host}/v1/cleverpasswort/analyse",
+                                headers={"token": f"{v.token_techcluster_unit_tests}",
+                                         "Content-Type": "application/json"},
+                                data='{"passwort":dfgsdfg253z6!!}')
+        self.assertEquals(response.status_code, 401)
 
 
 if __name__ == '__main__':
