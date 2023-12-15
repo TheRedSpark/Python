@@ -470,5 +470,40 @@ class TestCleverPassAnalyze(unittest.TestCase):
         self.assertEquals(response.status_code, 401)
 
 
+class TestDRM(unittest.TestCase):
+
+    def test_success(self):
+        response = requests.get(f"{host}/v1/drm/test",
+                                headers={"token": f"{v.token_techcluster_unit_tests}",
+                                         "Content-Type": "application/json"})
+        self.assertEquals(response.status_code, 200)
+
+    def test_service_deak(self):
+        response = requests.get(f"{host}/v1/drm/test_off",
+                                headers={"token": f"{v.token_techcluster_unit_tests}",
+                                         "Content-Type": "application/json"})
+        self.assertEquals(response.status_code, 418)
+
+    def test_wrong_user(self):
+        response = requests.get(f"{host}/v1/drm/test",
+                                headers={"token": f"{v.token_techcluster_unit_tests}-unauth",
+                                         "Content-Type": "application/json"})
+        self.assertEquals(response.status_code, 403)
+
+    def test_wrong_url(self):
+        response = requests.get(f"{host}/v1/drm/test/test2",
+                                headers={"token": f"{v.token_techcluster_unit_tests}",
+                                         "Content-Type": "application/json"},
+                                data='{"passwort":dfgsdfg253z6!!}')
+        self.assertEquals(response.status_code, 401)
+
+    def test_service_non_exist(self):
+        response = requests.get(f"{host}/v1/drm/tes",
+                                headers={"token": f"{v.token_techcluster_unit_tests}",
+                                         "Content-Type": "application/json"},
+                                data='{"passwort":dfgsdfg253z6!!}')
+        self.assertEquals(response.status_code, 400)
+
+
 if __name__ == '__main__':
     unittest.main()
