@@ -17,8 +17,6 @@ time_sql = time.strftime("%Y-%m-%d %H:%M:%S")
 ort = "home"
 database = "Tankdaten"
 list = []
-username = v.mail_username
-password = v.mail_password
 mail_from = v.mail_from
 mail_to = v.mail_to
 mail_subject = "IP Blockade ist drinne"
@@ -58,20 +56,6 @@ cords = [
     ('54.375', '9.085', "Friedrichstadt", "Schleswig")
 ]
 
-
-def email():
-    mail_body = f"Die IP Blockade ist reingekommen um:{time_sql} durch einen Abstand von:{20}"
-    mimemsg = MIMEMultipart()
-    mimemsg['From'] = mail_from
-    mimemsg['To'] = mail_to
-    mimemsg['Subject'] = mail_subject
-    mimemsg.attach(MIMEText(mail_body, 'plain'))
-    connection = smtplib.SMTP(host='mail.gmx.net', port=587)
-    connection.starttls()
-    connection.login(username, password)
-    connection.send_message(mimemsg)
-    connection.quit()
-    print('Email ist raus')
 
 
 def data_uploader(datalist):
@@ -119,14 +103,18 @@ def fetching(liste_vonkooo) -> None:
                 continue
 
 
-while True:
-    trigger = time.gmtime()
-    if trigger.tm_hour % intervall == 0:
-        fetching(cords)
-        time.sleep(3600)
-        if isprofiling:
-            profiler.stop()
-            profiler.print(color=True, show_all=False)
-    else:
-        print("Es ist nicht an der Zeit")
-        time.sleep(60)
+if v.authenticator(v.tank_api_name) != 200:
+    sys.exit("Software konnte nicht verifiziert werden")
+else:
+    while True:
+        trigger = time.gmtime()
+        if trigger.tm_hour % intervall == 0:
+            fetching(cords)
+            time.sleep(3600)
+            v.success_ping(v.tank_api_name)
+            if isprofiling:
+                profiler.stop()
+                profiler.print(color=True, show_all=False)
+        else:
+            print("Es ist nicht an der Zeit")
+            time.sleep(60)
